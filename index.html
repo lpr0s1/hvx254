@@ -251,6 +251,41 @@
 
         window.onload = init;
     </script>
+    <script>
+        const cities = ["Paris", "Lyon", "Marseille", "Genève", "Bruxelles", "Montréal"];
+setInterval(() => {
+    const feed = document.getElementById('live-feed');
+    if(feed) {
+        const city = cities[Math.floor(Math.random() * cities.length)];
+        const entry = document.createElement('div');
+        entry.className = "flex items-center gap-3 animate-bounce";
+        entry.innerHTML = `<div class="w-2 h-2 rounded-full bg-green-500"></div>
+                           <p class="text-[10px] text-gray-400 font-mono">Nouvel accès débloqué à <span class="text-white">${city}</span></p>`;
+        feed.prepend(entry);
+        if(feed.children.length > 3) feed.lastElementChild.remove();
+    }
+}, 5000);
+
+    </script>
+    <section class="mt-12 px-6">
+    <div class="cyber-card p-6 border-pink-500/10">
+        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Activité en direct</h4>
+        <div class="space-y-3" id="live-feed">
+            <div class="flex items-center gap-3 animate-pulse">
+                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                <p class="text-[10px] text-gray-400 font-mono">Un utilisateur de <span class="text-white">Paris</span> vient de débloquer son rapport.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-pink-500/50"></div>
+                <p class="text-[10px] text-gray-400 font-mono">Scan en cours : @kylie*** (Los Angeles)</p>
+            </div>
+        </div>
+    </div>
+</section>
+    <br>
+<center>
+    <a href="https://hvxsrc.online/mentions-legales.md" style="color: pink">Mentions légales</a>
+</center>
 </body>
 </html>
 
