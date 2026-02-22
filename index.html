@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DoxMe AI | Qui vous surveille ?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
+        body { font-family: 'Space Grotesk', sans-serif; background-color: #050505; color: #fff; overflow-x: hidden; }
+        .cyber-card { background: rgba(15, 15, 20, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 0, 128, 0.2); border-radius: 28px; }
+        .neon-text { text-shadow: 0 0 10px rgba(255, 0, 128, 0.8), 0 0 20px rgba(255, 0, 128, 0.4); }
+        .neon-border { box-shadow: 0 0 15px rgba(255, 0, 128, 0.3); border: 1px solid rgba(255, 0, 128, 0.5); }
+        .glitch { animation: glitch 1s linear infinite; }
+        @keyframes glitch {
+            2%, 64% { transform: translate(2px,0) skew(0deg); }
+            4%, 60% { transform: translate(-2px,0) skew(0deg); }
+            62% { transform: translate(0,0) skew(5deg); }
+        }
+        .btn-pay { background: linear-gradient(90deg, #ff0080, #7928ca); transition: all 0.3s ease; }
+        .btn-pay:active { transform: scale(0.92); filter: brightness(1.2); }
+        .view { display: none; animation: slideIn 0.4s ease-out; }
+        .view.active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+    <script type="application/ld+json">
+{
+"@context": "https://schema.org/",
+"@type": "SoftwareApplication",
+"name": "DoxMe AI",
+"operatingSystem": "WEB",
+"applicationCategory": "SocialNetworkingApplication",
+"offers": {
+"@type": "Offer",
+"price": "9.99",
+"priceCurrency": "EUR"
+},
+"aggregateRating": {
+"@type": "AggregateRating",
+"ratingValue": "4.8",
+"ratingCount": "1254"
+},
+"description": "Découvrez qui consulte votre profil social en secret avec l'IA DoxMe. Analyse de réputation et prédicteur de ghosting en temps réel.",
+"author": {
+"@type": "Organization",
+"name": "DoxMe AI International"
+}
+}
+</script>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="p-6 flex justify-between items-center fixed top-0 w-full z-50 bg-black/50 backdrop-blur-lg">
+        <div class="font-black text-2xl tracking-tighter neon-text">DOXME<span class="text-white font-light">AI</span></div>
+        <div id="credit-tag" class="px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/30 text-[10px] font-bold text-pink-500 uppercase tracking-widest">
+            Scan Gratuit : <span id="credit-val">1</span>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="pt-24 pb-12 px-6">
+        
+        <!-- Search View -->
+        <section id="view-search" class="view active">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold mb-4">Qui vous <span class="text-pink-500">stalk</span> en secret ?</h1>
+                <p class="text-gray-400">Entrez un @username pour analyser l'empreinte sociale et les connexions cachées TikTok/Instagram détécter.</p>
+            </div>
+
+            <div class="cyber-card p-2 flex items-center mb-8 neon-border">
+                <span class="pl-4 text-pink-500 font-bold">@</span>
+                <input id="target-user" type="text" placeholder="username" class="bg-transparent border-none outline-none p-4 w-full font-bold text-lg">
+                <button onclick="startStalkAnalysis()" class="btn-pay p-4 rounded-2xl">
+                    <i class="fa-solid fa-bolt-lightning"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="cyber-card p-4 text-center">
+                    <div class="text-pink-500 text-xl font-bold mb-1">1.2M+</div>
+                    <div class="text-[10px] text-gray-500 uppercase">Profils Scannés</div>
+                </div>
+                <div class="cyber-card p-4 text-center">
+                    <div class="text-pink-500 text-xl font-bold mb-1">98%</div>
+                    <div class="text-[10px] text-gray-500 uppercase">Précision IA</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading View -->
+        <section id="view-loading" class="view">
+            <div class="flex flex-col items-center justify-center min-h-[50vh] text-center">
+                <div class="relative w-32 h-32 mb-8">
+                    <div class="absolute inset-0 border-4 border-pink-500/20 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-t-pink-500 rounded-full animate-spin"></div>
+                    <i class="fa-solid fa-fingerprint absolute inset-0 flex items-center justify-center text-4xl text-pink-500 animate-pulse"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2">Infiltration des serveurs...</h2>
+                <p id="loading-step" class="text-pink-500 font-mono text-xs">Analyse des métadonnées Instagram...</p>
+            </div>
+        </section>
+
+        <!-- Result View (Locked) -->
+        <section id="view-results" class="view">
+            <div class="cyber-card p-6 mb-6 overflow-hidden relative">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-2xl font-bold" id="res-initial">?</div>
+                    <div>
+                        <div class="text-xl font-bold" id="res-name">@user</div>
+                        <div class="text-xs text-gray-500">Social Reputation Index</div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl">
+                        <span class="text-sm">Score de Désirabilité</span>
+                        <span class="text-pink-500 font-bold">84%</span>
+                    </div>
+                    <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+                        <div class="text-xs text-gray-500 mb-2">Visiteurs de profil (24h)</div>
+                        <div class="flex -space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-gray-800 border-2 border-black blur-[2px]"></div>
+                            <div class="w-8 h-8 rounded-full bg-gray-700 border-2 border-black blur-[2px]"></div>
+                            <div class="w-8 h-8 rounded-full bg-gray-600 border-2 border-black blur-[2px]"></div>
+                            <div class="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center text-[10px] border-2 border-black">+12</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paywall Overlay -->
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
+                    <i class="fa-solid fa-eye-slash text-4xl mb-4 text-pink-500"></i>
+                    <h3 class="text-xl font-bold mb-2">3 Personnes vous épient</h3>
+                    <p class="text-sm text-gray-400 mb-6">Débloquez les identités et le tracker de ghosting.</p>
+                    <button onclick="openPaywall()" class="btn-pay px-8 py-3 rounded-xl font-bold text-sm shadow-lg shadow-pink-500/40">
+                        VOIR QUI C'EST (9,99€)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Paywall Sheet -->
+    <div id="paywall-sheet" class="fixed inset-0 z-[100] bg-black/90 hidden flex flex-col justify-end">
+        <div class="w-full bg-[#111] rounded-t-[40px] p-8 pb-12 translate-y-full transition-transform duration-500 shadow-[0_-10px_40px_rgba(255,0,128,0.2)]" id="paywall-content">
+            <div class="w-12 h-1.5 bg-gray-800 rounded-full mx-auto mb-8"></div>
+            <h2 class="text-3xl font-black mb-2 text-center">ACCÈS <span class="text-pink-500">TOTAL</span></h2>
+            <p class="text-gray-400 text-center mb-8">Ne restez plus dans le doute. C'est le moment de savoir.</p>
+            
+            <div class="space-y-4 mb-8">
+                <div class="flex items-center gap-4 text-sm"><i class="fa-solid fa-check text-pink-500"></i> Noms des Stalkers Instagram/TikTok</div>
+                <div class="flex items-center gap-4 text-sm"><i class="fa-solid fa-check text-pink-500"></i> Alerte "Ghosting" en temps réel</div>
+                <div class="flex items-center gap-4 text-sm"><i class="fa-solid fa-check text-pink-500"></i> Mode Invisible (Stalkez sans être vu)</div>
+            </div>
+
+            <button onclick="confirmPayment()" class="w-full py-5 btn-pay rounded-2xl font-black text-xl mb-4">
+                DÉBLOQUER POUR 9,99€
+            </button>
+            <button onclick="closePaywall()" class="w-full text-gray-500 text-sm py-2">Continuer d'être ignoré</button>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        let credits = 0;
+        const SALT = "doxme_2026_viral";
+
+        function init() {
+            const saved = localStorage.getItem('dm_c');
+            const hash = localStorage.getItem('dm_h');
+            if (saved && hash && btoa(saved + SALT) === hash) {
+                credits = parseInt(saved);
+            } else {
+                credits = DOX_CONFIG.FREE_LIMIT;
+                save();
+            }
+            updateUI();
+        }
+
+        function save() {
+            localStorage.setItem('dm_c', credits);
+            localStorage.setItem('dm_h', btoa(credits + SALT));
+        }
+
+        function updateUI() {
+            document.getElementById('credit-val').innerText = credits;
+        }
+
+        function startStalkAnalysis() {
+            const user = document.getElementById('target-user').value;
+            if(!user) return;
+
+            if(credits <= 0) {
+                openPaywall();
+                return;
+            }
+
+            switchView('view-loading');
+            
+            const steps = [
+                "Scan des serveurs CDN...",
+                "Récupération des logs de visite...",
+                "Analyse des interactions croisées...",
+                "Calcul du score de Ghosting..."
+            ];
+
+            let i = 0;
+            const interval = setInterval(() => {
+                document.getElementById('loading-step').innerText = steps[i];
+                i++;
+                if(i >= steps.length) {
+                    clearInterval(interval);
+                    credits--;
+                    save();
+                    updateUI();
+                    finishAnalysis(user);
+                }
+            }, 1000);
+        }
+
+        function finishAnalysis(user) {
+            document.getElementById('res-name').innerText = "@" + user;
+            document.getElementById('res-initial').innerText = user.charAt(0).toUpperCase();
+            switchView('view-results');
+        }
+
+        function switchView(id) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function openPaywall() {
+            const sheet = document.getElementById('paywall-sheet');
+            const content = document.getElementById('paywall-content');
+            sheet.classList.remove('hidden');
+            setTimeout(() => content.style.transform = "translateY(0)", 10);
+        }
+
+        function closePaywall() {
+            const content = document.getElementById('paywall-content');
+            content.style.transform = "translateY(100%)";
+            setTimeout(() => document.getElementById('paywall-sheet').classList.add('hidden'), 500);
+        }
+
+        function confirmPayment() {
+            window.location.href = DOX_CONFIG.PAYMENT_URL;
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
+

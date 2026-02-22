@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /config.js
+Disallow: /data/
+Disallow: /premium/
+Disallow: /pay/
+Disallow: /checkout/
+Disallow: /success/
+Disallow: /cancel/
+Allow: /
