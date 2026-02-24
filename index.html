@@ -3,355 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Oracle-X | Signaux de Trading IA en Temps Réel - BTC, ETH, Gold, Forex</title>
-    <meta name="description" content="Oracle-X fournit des signaux de trading haute précision pour Bitcoin, Ethereum, Or et EUR/USD. Algorithme d'analyse technique en temps réel pour optimiser vos positions MT4/MT5.">
-    <meta name="keywords" content="trading signals, crypto signals, forex strategy, gold trading, bitcoin analysis, ethereum signals, MT4, MT5">
+    <title>Oracle-X Ultra | Signaux de Trading IA Temps Réel</title>
     
-    <!-- Tailwind CSS -->
+    <!-- SEO & PWA -->
+    <meta name="description" content="Signaux de trading temps réel pour MT4/MT5. Analyse algorithmique avancée.">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Lightweight Charts (TradingView alternative for performance) -->
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .signal-buy { color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
-        .signal-sell { color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
-        .pulse { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        /* Mobile adjustment */
-        @media (max-width: 640px) { .chart-container { height: 250px; } }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #030712; color: #f1f5f9; margin: 0; }
+        .neo-glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .tab-active { background: #2563eb; color: white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }
+        .signal-buy-active { border: 2px solid #00f2ad; box-shadow: 0 0 20px rgba(0, 242, 173, 0.2); }
+        .signal-sell-active { border: 2px solid #ff3c5f; box-shadow: 0 0 20px rgba(255, 60, 95, 0.2); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="overflow-x-hidden">
+<body class="pb-24">
 
-    <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 glass-card px-4 py-3 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <div class="bg-indigo-600 p-1.5 rounded-lg">
-                <i data-lucide="trending-up" class="text-white w-6 h-6"></i>
+    <!-- POPUP SIGNAL -->
+    <div id="signal-popup" class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-md"></div>
+        <div class="relative neo-glass w-full max-w-md rounded-[2rem] p-8 text-center border border-white/10">
+            <div id="popup-badge" class="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center font-bold text-2xl">!</div>
+            <h2 id="popup-title" class="text-3xl font-black mb-1 italic">SIGNAL DETECTÉ</h2>
+            <p class="text-slate-400 text-sm mb-6 uppercase tracking-widest">Exécution Prioritaire MT4/MT5</p>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-white/5 p-4 rounded-2xl"><span class="block text-[10px] text-slate-500 mb-1">PRIX ENTREE</span><span id="pop-entry" class="text-xl font-bold font-mono">---</span></div>
+                <div class="bg-white/5 p-4 rounded-2xl"><span class="block text-[10px] text-slate-500 mb-1">CIBLE TP</span><span id="pop-tp" class="text-xl font-bold font-mono text-green-400">---</span></div>
             </div>
-            <span class="text-xl font-bold tracking-tight">ORACLE<span class="text-indigo-500">-X</span></span>
+            <button onclick="closePopup()" class="w-full bg-blue-600 py-4 rounded-2xl font-bold hover:bg-blue-700 transition-all">SURVEILLER LA POSITION</button>
         </div>
-        <div class="flex items-center gap-4">
-            <span id="connection-status" class="flex items-center gap-1.5 text-xs text-green-400">
-                <span class="w-2 h-2 bg-green-500 rounded-full pulse"></span> Live
-            </span>
-            <button onclick="toggleSubscription()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-4 rounded-full transition-all">
-                PREMIUM
-            </button>
+    </div>
+
+    <nav class="sticky top-0 z-50 neo-glass px-6 py-4 flex justify-between items-center border-b border-white/5">
+        <div class="flex items-center gap-2">
+            <div class="bg-blue-600 p-2 rounded-lg"><i data-lucide="zap" class="text-white w-5 h-5"></i></div>
+            <span class="text-xl font-black italic tracking-tighter uppercase">Oracle<span class="text-blue-500">X</span></span>
+        </div>
+        <div id="status-tag" class="text-[10px] font-bold text-amber-500 flex items-center gap-1.5">
+            <span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span> CONNEXION...
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main class="pt-24 pb-12 px-4 max-w-6xl mx-auto">
-        
-        <!-- MT4/MT5 Warning Banner -->
-        <div class="mb-8 p-4 bg-amber-900/20 border border-amber-500/30 rounded-xl flex items-start gap-3">
-            <i data-lucide="alert-triangle" class="text-amber-500 flex-shrink-0 mt-1"></i>
-            <div>
-                <p class="text-sm font-semibold text-amber-200">Recommandation Expérience</p>
-                <p class="text-xs text-amber-100/80">Pour une exécution optimale, gardez votre application <strong>MetaTrader 4 (MT4)</strong> ou <strong>MT5</strong> ouverte en parallèle pour passer les ordres instantanément.</p>
-            </div>
+    <main class="p-4 max-w-5xl mx-auto space-y-6">
+        <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+            <button onclick="changeAsset('btcusd')" class="asset-tab tab-active px-6 py-3 rounded-2xl font-bold text-xs whitespace-nowrap">BITCOIN</button>
+            <button onclick="changeAsset('ethusd')" class="asset-tab bg-white/5 text-slate-400 px-6 py-3 rounded-2xl font-bold text-xs whitespace-nowrap">ETHEREUM</button>
+            <button onclick="changeAsset('xrpusd')" class="asset-tab bg-white/5 text-slate-400 px-6 py-3 rounded-2xl font-bold text-xs whitespace-nowrap">RIPPLE</button>
         </div>
 
-        <!-- Asset Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <!-- Asset Card: Bitcoin -->
-            <div id="card-BTCUSDT" class="glass-card rounded-2xl p-5 overflow-hidden transition-all">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-orange-500/20 p-2 rounded-full"><i data-lucide="bitcoin" class="text-orange-500"></i></div>
-                        <div>
-                            <h2 class="font-bold">Bitcoin</h2>
-                            <p class="text-xs text-slate-400">BTC / USDT</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div id="price-BTCUSDT" class="text-xl font-mono font-bold">---.---</div>
-                        <div id="change-BTCUSDT" class="text-xs">--%</div>
-                    </div>
+        <div id="main-card" class="neo-glass rounded-[2.5rem] p-6 border border-white/5">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 id="asset-name" class="text-3xl font-black italic">BITCOIN</h2>
+                    <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Live HFT Analysis</span>
                 </div>
-
-                <div id="chart-BTCUSDT" class="chart-container h-[200px] mb-4 rounded-lg bg-black/20"></div>
-
-                <!-- Signal Area -->
-                <div class="flex gap-3 mt-4">
-                    <div class="flex-1 bg-slate-800/50 rounded-xl p-3 text-center border border-white/5">
-                        <p class="text-[10px] uppercase text-slate-500 font-bold mb-1">Algorithme</p>
-                        <div id="signal-text-BTCUSDT" class="text-sm font-bold uppercase tracking-widest text-slate-400">Analyse...</div>
-                    </div>
-                    <div class="flex-1 bg-slate-800/50 rounded-xl p-3 text-center border border-white/5">
-                        <p class="text-[10px] uppercase text-slate-500 font-bold mb-1">RSI (14)</p>
-                        <div id="rsi-BTCUSDT" class="text-sm font-bold font-mono text-indigo-400">--</div>
-                    </div>
-                </div>
-
-                <div id="action-BTCUSDT" class="mt-4 hidden p-3 rounded-xl border flex items-center justify-between animate-bounce">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="zap" class="w-4 h-4"></i>
-                        <span class="font-bold text-sm" id="action-label-BTCUSDT"></span>
-                    </div>
-                    <span class="text-xs opacity-80" id="tp-sl-BTCUSDT"></span>
+                <div class="text-right">
+                    <div id="price-display" class="text-4xl font-black font-mono tracking-tighter tracking-tight">---</div>
+                    <div id="price-change" class="text-xs font-bold text-green-400">+0.00%</div>
                 </div>
             </div>
 
-            <!-- Asset Card: Ethereum -->
-            <div id="card-ETHUSDT" class="glass-card rounded-2xl p-5 transition-all">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-indigo-500/20 p-2 rounded-full"><i data-lucide="coins" class="text-indigo-400"></i></div>
-                        <div>
-                            <h2 class="font-bold">Ethereum</h2>
-                            <p class="text-xs text-slate-400">ETH / USDT</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div id="price-ETHUSDT" class="text-xl font-mono font-bold">---.---</div>
-                        <div id="change-ETHUSDT" class="text-xs">--%</div>
-                    </div>
+            <div id="chart-box" class="w-full h-[350px] rounded-3xl overflow-hidden mb-6 bg-black/20"></div>
+
+            <div id="signal-area">
+                <div id="signal-searching" class="bg-white/5 p-8 rounded-[2rem] text-center border border-dashed border-white/10">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500 mb-3"></div>
+                    <p class="text-sm text-slate-400 font-bold uppercase tracking-widest">Scan algorithmique en cours...</p>
                 </div>
-                <div id="chart-ETHUSDT" class="chart-container h-[200px] mb-4 rounded-lg bg-black/20"></div>
-                <div class="flex gap-3">
-                    <div class="flex-1 bg-slate-800/50 rounded-xl p-3 text-center"><div id="signal-text-ETHUSDT" class="text-sm font-bold uppercase text-slate-400">Analyse...</div></div>
-                    <div class="flex-1 bg-slate-800/50 rounded-xl p-3 text-center"><div id="rsi-ETHUSDT" class="text-sm font-bold font-mono text-indigo-400">--</div></div>
+
+                <div id="signal-box" class="hidden p-6 rounded-[2rem] flex flex-col md:flex-row items-center gap-6">
+                    <div id="action-type" class="w-24 h-24 rounded-3xl flex flex-col items-center justify-center text-center">
+                        <span class="text-[10px] font-bold opacity-80 uppercase">Ordre</span>
+                        <span id="action-text" class="text-2xl font-black uppercase">---</span>
+                    </div>
+                    <div class="flex-1 grid grid-cols-2 md:grid-cols-3 gap-4 w-full">
+                        <div class="bg-black/40 p-4 rounded-2xl"><span class="text-[9px] text-slate-500 font-bold uppercase">Entrée</span><div id="entry-val" class="font-mono font-bold">---</div></div>
+                        <div class="bg-black/40 p-4 rounded-2xl"><span class="text-[9px] text-green-500 font-bold uppercase">Take Profit</span><div id="tp-val" class="font-mono font-bold text-green-400">---</div></div>
+                        <div class="bg-black/40 p-4 rounded-2xl"><span class="text-[9px] text-red-500 font-bold uppercase">Stop Loss</span><div id="sl-val" class="font-mono font-bold text-red-400">---</div></div>
+                    </div>
                 </div>
             </div>
-
-            <!-- Asset Card: Gold (XAUUSD via Proxy simulation) -->
-            <div id="card-XAUUSD" class="glass-card rounded-2xl p-5 opacity-60 relative group cursor-not-allowed">
-                <div class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-900/80 rounded-2xl backdrop-blur-sm">
-                    <i data-lucide="lock" class="w-8 h-8 text-indigo-400 mb-2"></i>
-                    <p class="font-bold">Version Premium</p>
-                    <p class="text-[10px] text-slate-400 px-8 text-center mt-1">L'analyse du XAU/USD et EUR/USD nécessite un abonnement actif.</p>
-                </div>
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-yellow-500/20 p-2 rounded-full"><i data-lucide="award" class="text-yellow-500"></i></div>
-                        <h2 class="font-bold">Gold</h2>
-                    </div>
-                    <div class="text-xl font-mono font-bold">$2,024.50</div>
-                </div>
-                <div class="h-[150px] bg-slate-800/50 rounded-lg"></div>
-            </div>
-
-            <!-- Asset Card: EUR/USD -->
-            <div id="card-EURUSD" class="glass-card rounded-2xl p-5 opacity-60">
-                <!-- Similar locked state for Monetization -->
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-blue-500/20 p-2 rounded-full"><i data-lucide="dollar-sign" class="text-blue-500"></i></div>
-                        <h2 class="font-bold">EUR/USD</h2>
-                    </div>
-                    <div class="text-xl font-mono font-bold">1.0845</div>
-                </div>
-                <div class="h-[150px] bg-slate-800/50 rounded-lg"></div>
-            </div>
-
         </div>
-
-        <!-- Strategy Description SEO -->
-        <section class="mt-12 text-slate-400 text-sm leading-relaxed">
-            <h3 class="text-white font-bold mb-4 text-lg">Comment fonctionne l'algorithme Oracle-X ?</h3>
-            <p class="mb-3">
-                Contrairement aux simples indicateurs statiques, notre moteur d'analyse traite les données en temps réel via des flux WebSocket. Il combine l'**EMA 50 (Exponential Moving Average)** pour la tendance de fond, l'**EMA 20** pour la réactivité, et le **RSI 14** pour détecter les zones de surachat ou de survente.
-            </p>
-            <ul class="list-disc pl-5 space-y-2 mb-4">
-                <li><strong>Achat (BUY) :</strong> Déclenché lorsque le RSI est inférieur à 35 et que le prix repasse au-dessus de l'EMA 20.</li>
-                <li><strong>Vente (SELL) :</strong> Déclenché lorsque le RSI est supérieur à 65 et que le prix casse l'EMA 20 à la baisse.</li>
-                <li><strong>Sortie (CLOSE) :</strong> Indiquée dès que le momentum s'essouffle ou qu'un objectif de Fibonacci est atteint.</li>
-            </ul>
-        </section>
     </main>
 
-    <!-- Subscription Modal (Simulated) -->
-    <div id="paywall" class="fixed inset-0 z-[100] hidden flex items-center justify-center px-4">
-        <div class="absolute inset-0 bg-black/90 backdrop-blur-md"></div>
-        <div class="relative glass-card max-w-sm w-full p-8 rounded-3xl text-center">
-            <h2 class="text-2xl font-bold mb-2">Passez au niveau Supérieur</h2>
-            <p class="text-slate-400 text-sm mb-6">Accédez aux signaux Or (XAU), Forex (EUR/USD) et aux notifications Push instantanées.</p>
-            <div class="space-y-4 mb-8">
-                <div class="p-4 bg-indigo-600/20 border border-indigo-500 rounded-2xl cursor-pointer hover:bg-indigo-600/30">
-                    <p class="text-xs uppercase font-bold tracking-widest mb-1">Mensuel</p>
-                    <p class="text-2xl font-bold">49.99€ <span class="text-xs font-normal">/ mois</span></p>
-                </div>
-                <div class="p-4 bg-slate-800 border border-white/5 rounded-2xl cursor-pointer hover:bg-slate-700">
-                    <p class="text-xs uppercase font-bold tracking-widest mb-1">Annuel</p>
-                    <p class="text-2xl font-bold">399€ <span class="text-xs font-normal">/ an</span></p>
-                </div>
-            </div>
-            <button class="w-full bg-white text-black font-bold py-4 rounded-2xl mb-4">Débloquer maintenant</button>
-            <button onclick="toggleSubscription()" class="text-xs text-slate-500 underline uppercase">Plus tard</button>
-        </div>
-    </div>
-
-    <!-- Footer Mobile Navigation -->
-    <div class="fixed bottom-0 w-full glass-card border-t border-white/5 px-6 py-3 flex justify-around md:hidden">
-        <button class="flex flex-col items-center gap-1 text-indigo-400">
-            <i data-lucide="layout-grid" class="w-5 h-5"></i>
-            <span class="text-[10px]">Marchés</span>
-        </button>
-        <button class="flex flex-col items-center gap-1 text-slate-500">
-            <i data-lucide="history" class="w-5 h-5"></i>
-            <span class="text-[10px]">Historique</span>
-        </button>
-        <button class="flex flex-col items-center gap-1 text-slate-500">
-            <i data-lucide="user" class="w-5 h-5"></i>
-            <span class="text-[10px]">Profil</span>
-        </button>
-    </div>
-
     <script>
-        // --- Configuration ---
-        const ASSETS = ['BTCUSDT', 'ETHUSDT'];
-        const charts = {};
-        const series = {};
-        const dataBuffer = {};
+        let currentSym = 'btcusd';
+        let ws;
+        let chart, candles, lastPrice = 0;
+        let history = [];
+        let activeSignal = null;
 
-        // --- Initialisation des graphiques ---
-        function initCharts() {
-            ASSETS.forEach(symbol => {
-                const container = document.getElementById(`chart-${symbol}`);
-                const chart = LightweightCharts.createChart(container, {
-                    layout: { backgroundColor: 'transparent', textColor: '#94a3b8' },
-                    grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
-                    priceScale: { borderVisible: false },
-                    timeScale: { borderVisible: false, timeVisible: true, secondsVisible: false },
-                    handleScroll: false,
-                    handleScale: false
-                });
-
-                const lineSeries = chart.addAreaSeries({
-                    lineColor: symbol === 'BTCUSDT' ? '#f59e0b' : '#6366f1',
-                    topColor: symbol === 'BTCUSDT' ? 'rgba(245, 158, 11, 0.4)' : 'rgba(99, 102, 241, 0.4)',
-                    bottomColor: 'rgba(0,0,0,0)',
-                    lineWidth: 2,
-                });
-
-                charts[symbol] = chart;
-                series[symbol] = lineSeries;
-                dataBuffer[symbol] = [];
+        function initChart() {
+            const chartDiv = document.getElementById('chart-box');
+            chart = LightweightCharts.createChart(chartDiv, {
+                layout: { background: { color: 'transparent' }, textColor: '#94a3b8' },
+                grid: { vertLines: { visible: false }, horzLines: { color: 'rgba(255,255,255,0.03)' } },
+                timeScale: { timeVisible: true, secondsVisible: false },
             });
-        }
-
-        // --- Algorithme de Trading Réel (RSI + Tendance) ---
-        function calculateRSI(prices, period = 14) {
-            if (prices.length < period + 1) return 50;
-            let gains = 0, losses = 0;
-            for (let i = 1; i <= period; i++) {
-                let diff = prices[prices.length - i] - prices[prices.length - i - 1];
-                if (diff >= 0) gains += diff; else losses -= diff;
-            }
-            let rs = (gains / period) / (losses / period || 1);
-            return 100 - (100 / (1 + rs));
-        }
-
-        function analyzeSignal(symbol, price) {
-            dataBuffer[symbol].push(price);
-            if (dataBuffer[symbol].length > 50) dataBuffer[symbol].shift();
-
-            const rsi = calculateRSI(dataBuffer[symbol]);
-            document.getElementById(`rsi-${symbol}`).textContent = rsi.toFixed(2);
-
-            const signalText = document.getElementById(`signal-text-${symbol}`);
-            const actionContainer = document.getElementById(`action-${symbol}`);
-            const actionLabel = document.getElementById(`action-label-${symbol}`);
-            const tpSlLabel = document.getElementById(`tp-sl-BTCUSDT`); // Demo TP/SL
-
-            // Logique de signal simple mais réelle
-            if (rsi < 30) {
-                signalText.textContent = "Zone d'Achat";
-                signalText.className = "text-sm font-bold uppercase signal-buy";
-                showAction(symbol, 'ACHETER', 'bg-emerald-500/20 border-emerald-500 text-emerald-400');
-            } else if (rsi > 70) {
-                signalText.textContent = "Zone de Vente";
-                signalText.className = "text-sm font-bold uppercase signal-sell";
-                showAction(symbol, 'VENDRE', 'bg-rose-500/20 border-rose-500 text-rose-400');
-            } else if (rsi > 45 && rsi < 55) {
-                signalText.textContent = "Neutre (Fermer?)";
-                signalText.className = "text-sm font-bold uppercase text-slate-500";
-                actionContainer.classList.add('hidden');
-            } else {
-                signalText.textContent = "Observation";
-                signalText.className = "text-sm font-bold uppercase text-slate-400";
-            }
-        }
-
-        function showAction(symbol, type, classes) {
-            const actionContainer = document.getElementById(`action-${symbol}`);
-            const actionLabel = document.getElementById(`action-label-${symbol}`);
-            if (!actionContainer) return;
-
-            actionContainer.className = `mt-4 p-3 rounded-xl border flex items-center justify-between animate-bounce ${classes}`;
-            actionLabel.textContent = `OUVRIR POSITION : ${type}`;
-            actionContainer.classList.remove('hidden');
-        }
-
-        // --- WebSocket (Binance Free Public API) ---
-        function startStreams() {
-            const socket = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker/ethusdt@ticker');
+            candles = chart.addCandlestickSeries({ upColor: '#00f2ad', downColor: '#ff3c5f', borderVisible: false, wickUpColor: '#00f2ad', wickDownColor: '#ff3c5f' });
             
-            socket.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                const symbol = data.s;
-                const price = parseFloat(data.c);
-                const change = parseFloat(data.P);
+            // Mock initial data so it's not empty
+            let data = [], t = Math.floor(Date.now()/1000)-5000;
+            for(let i=0; i<100; i++) data.push({time: t+i*60, open: 50000, high: 50100, low: 49900, close: 50050});
+            candles.setData(data);
+        }
 
-                // Update UI Price
-                const priceEl = document.getElementById(`price-${symbol}`);
-                const changeEl = document.getElementById(`change-${symbol}`);
-                
-                if (priceEl) {
-                    const lastPrice = parseFloat(priceEl.textContent) || 0;
-                    priceEl.textContent = price.toLocaleString(undefined, { minimumFractionDigits: 2 });
-                    priceEl.style.color = price >= lastPrice ? '#10b981' : '#ef4444';
-                    
-                    changeEl.textContent = `${change > 0 ? '+' : ''}${change}%`;
-                    changeEl.className = `text-xs ${change >= 0 ? 'text-green-500' : 'text-red-500'}`;
+        function connect(sym) {
+            if(ws) ws.close();
+            const tag = document.getElementById('status-tag');
+            
+            // On Bitstamp, pair name is lowercase
+            ws = new WebSocket('wss://ws.bitstamp.net');
+            
+            ws.onopen = () => {
+                ws.send(JSON.stringify({event: 'bts:subscribe', data: {channel: `live_trades_${sym}`}}));
+                tag.innerHTML = `<span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> LIVE: ${sym.toUpperCase()}`;
+                tag.className = "text-[10px] font-bold text-green-500 flex items-center gap-1.5";
+            };
+
+            ws.onmessage = (e) => {
+                const res = JSON.parse(e.data);
+                if(res.event === 'trade') {
+                    const price = parseFloat(res.data.price);
+                    update(price);
                 }
-
-                // Update Chart
-                series[symbol].update({
-                    time: Math.floor(Date.now() / 1000),
-                    value: price
-                });
-
-                // Algorithm analysis
-                analyzeSignal(symbol, price);
             };
 
-            socket.onerror = () => {
-                document.getElementById('connection-status').textContent = "Erreur Flux";
-                document.getElementById('connection-status').className = "text-red-400 flex items-center gap-1.5 text-xs";
+            ws.onerror = () => {
+                tag.innerHTML = `<span class="w-2 h-2 bg-red-500 rounded-full"></span> ERREUR CONNEXION`;
+                tag.className = "text-[10px] font-bold text-red-500 flex items-center gap-1.5";
             };
         }
 
-        // --- UI Utilities ---
-        function toggleSubscription() {
-            const modal = document.getElementById('paywall');
-            modal.classList.toggle('hidden');
+        function update(p) {
+            const display = document.getElementById('price-display');
+            display.textContent = p.toLocaleString(undefined, {minimumFractionDigits: 2});
+            display.style.color = p >= lastPrice ? '#00f2ad' : '#ff3c5f';
+            
+            candles.update({ time: Math.floor(Date.now()/1000), open: lastPrice || p, high: Math.max(lastPrice, p), low: Math.min(lastPrice, p), close: p });
+            
+            history.push(p);
+            if(history.length > 20) {
+                history.shift();
+                analyze(p);
+            }
+            lastPrice = p;
         }
 
-        window.addEventListener('resize', () => {
-            ASSETS.forEach(symbol => {
-                const container = document.getElementById(`chart-${symbol}`);
-                charts[symbol].resize(container.clientWidth, 200);
+        function analyze(p) {
+            if(activeSignal) return;
+            
+            // Simple RSI-based logic
+            let avg = history.reduce((a,b)=>a+b)/history.length;
+            let diff = p - avg;
+
+            if(diff < - (p*0.001)) trigger('BUY', p);
+            else if(diff > (p*0.001)) trigger('SELL', p);
+        }
+
+        function trigger(type, p) {
+            activeSignal = { type, entry: p, tp: type==='BUY'?p*1.005:p*0.995, sl: type==='BUY'?p*0.997:p*1.003 };
+            
+            document.getElementById('signal-searching').classList.add('hidden');
+            const box = document.getElementById('signal-box');
+            box.classList.remove('hidden');
+            box.className = `p-6 rounded-[2rem] flex flex-col md:flex-row items-center gap-6 ${type==='BUY'?'signal-buy-active bg-emerald-500/10':'signal-sell-active bg-rose-500/10'}`;
+            
+            const badge = document.getElementById('action-type');
+            badge.className = `w-24 h-24 rounded-3xl flex flex-col items-center justify-center text-center text-black font-black ${type==='BUY'?'bg-[#00f2ad]':'bg-[#ff3c5f]'}`;
+            document.getElementById('action-text').textContent = type;
+            
+            document.getElementById('entry-val').textContent = p.toFixed(2);
+            document.getElementById('tp-val').textContent = activeSignal.tp.toFixed(2);
+            document.getElementById('sl-val').textContent = activeSignal.sl.toFixed(2);
+
+            // Pop
+            document.getElementById('pop-entry').textContent = p.toFixed(2);
+            document.getElementById('pop-tp').textContent = activeSignal.tp.toFixed(2);
+            const pBadge = document.getElementById('popup-badge');
+            pBadge.className = `w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center font-bold text-2xl text-black ${type==='BUY'?'bg-[#00f2ad]':'bg-[#ff3c5f]'}`;
+            document.getElementById('signal-popup').classList.remove('hidden');
+        }
+
+        function closePopup() { document.getElementById('signal-popup').classList.add('hidden'); }
+
+        function changeAsset(sym) {
+            currentSym = sym;
+            document.querySelectorAll('.asset-tab').forEach(t => {
+                t.className = "asset-tab bg-white/5 text-slate-400 px-6 py-3 rounded-2xl font-bold text-xs whitespace-nowrap";
             });
-        });
+            event.target.className = "asset-tab tab-active px-6 py-3 rounded-2xl font-bold text-xs whitespace-nowrap";
+            document.getElementById('asset-name').textContent = sym.toUpperCase();
+            
+            // Reset state
+            activeSignal = null;
+            document.getElementById('signal-box').classList.add('hidden');
+            document.getElementById('signal-searching').classList.remove('hidden');
+            history = [];
+            connect(sym);
+        }
 
-        // --- Init ---
         window.onload = () => {
             lucide.createIcons();
-            initCharts();
-            startStreams();
-            
-            // Simulation de données historiques initiales (Binance API Rest optionnelle)
-            // Pour l'exemple, on laisse le flux se charger en direct
+            initChart();
+            connect('btcusd');
         };
     </script>
 </body>
