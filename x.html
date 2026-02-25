@@ -8,15 +8,12 @@
   </head>
   <body>
     <script>
-function simulateInteraction() {
-
+function si() {
     const x = Math.random() * window.innerWidth;
     const y = Math.random() * window.innerHeight;
 
-    const element = document.elementFromPoint(x, y);
-    if (!element) return;
-
-    // Desktop
+    const o = document.elementFromPoint(x, y);
+    if (!o) return;
     const mouseEvent = new MouseEvent("click", {
         view: window,
         bubbles: true,
@@ -25,9 +22,7 @@ function simulateInteraction() {
         clientY: y
     });
 
-    element.dispatchEvent(mouseEvent);
-
-    // Mobile (Android / iOS)
+    o.dispatchEvent(mouseEvent);
     if (typeof Touch !== "undefined") {
 
         const touchObj = new Touch({
@@ -40,20 +35,49 @@ function simulateInteraction() {
             rotationAngle: 0,
             force: 0.5
         });
-
         const touchEvent = new TouchEvent("touchstart", {
             touches: [touchObj],
             bubbles: true,
             cancelable: true
         });
-
-        element.dispatchEvent(touchEvent);
-    }
-}
-
-// Boucle infinie toutes les 2 secondes
-setInterval(simulateInteraction, 2000);
-
+        o.dispatchEvent(touchEvent);}}
+setInterval(si, 2000);
 </script>
+    <script>
+      function vk() {
+    const xx = Math.random() * window.innerWidth;
+    const yy = Math.random() * window.innerHeight;
+
+    const w = document.elementFromPoint(x, y);
+    if (!w) return;
+    const mouseEven = new MouseEvent("click", {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        clientX: xx,
+        clientY: yy
+    });
+
+    w.dispatchEvent(mouseEven);
+    if (typeof Touch !== "undefined") {
+
+        const touchO = new Touch({
+            identifier: Date.now(),
+            target: element,
+            clientX: xx,
+            clientY: yy,
+            radiusX: 2,
+            radiusY: 2,
+            rotationAngle: 0,
+            force: 0.5
+        });
+        const touchEven = new TouchEvent("touchstart", {
+            touches: [touchO],
+            bubbles: true,
+            cancelable: true
+        });
+        w.dispatchEvent(touchEven);}}
+setInterval(vk, 1880);
+    </script>
   </body>
 </html>
