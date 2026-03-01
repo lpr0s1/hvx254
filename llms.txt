@@ -1,0 +1,21 @@
+# Oracle-X Ultra
+
+> Système de Trading IA Professionnel développé par hvx.
+
+## Description
+Oracle-X Ultra est une solution de trading algorithmique avancée utilisant l'intelligence artificielle pour l'analyse des marchés financiers et l'exécution de stratégies automatisées.
+
+## Informations Clés
+- **Développeur :** hvx
+- **Contact :** contact@hvxsrc.online
+- **Site Officiel :** https://hvxsrc.online
+- **Technologies :** IA, Algorithmes de Trading, Analyse Quantitative.
+
+## Fonctionnalités
+- Analyse prédictive des marchés en temps réel.
+- Automatisation des stratégies de trading.
+- Gestion des risques intégrée.
+
+## Liens
+- [Documentation](https://hvxsrc.online/docs)
+- [Support](mailto:contact@hvxsrc.online)
