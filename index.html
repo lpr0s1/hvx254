@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Oracle-X Ultra | Système de Trading IA Professionnel</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap');
         
@@ -69,16 +67,12 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .nav-item-active { color: var(--primary) !important; }
-        
-        /* Custom scrollbar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
     
 <body class="pb-32">
-
-    <!-- MODAL CONNEXION API -->
     <div id="api-modal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 hidden">
         <div class="absolute inset-0 bg-black/90 backdrop-blur-xl" onclick="toggleApiModal()"></div>
         <div class="relative glass-panel w-full max-w-md p-8 border border-white/10">
@@ -113,8 +107,6 @@
             <p class="mt-4 text-[9px] text-slate-600 leading-tight">En connectant votre API, vous acceptez les risques liés au trading algorithmique. Les clés sont stockées localement dans votre navigateur.</p>
         </div>
     </div>
-
-    <!-- MODAL SIGNAL -->
     <div id="signal-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeModal()"></div>
         <div class="relative glass-panel w-full max-w-sm p-8 text-center border-t-4" id="modal-border">
@@ -142,8 +134,6 @@
             <button onclick="closeModal()" class="w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-blue-500 hover:text-white transition-all">SURVEILLER POSITION</button>
         </div>
     </div>
-
-    <!-- NAVBAR -->
     <nav class="sticky top-0 z-50 glass-panel m-4 px-6 py-4 flex justify-between items-center shadow-2xl">
         <div class="flex items-center gap-3">
             <div class="bg-primary p-2 rounded-xl shadow-lg shadow-blue-500/40">
@@ -163,10 +153,7 @@
     </nav>
 
     <main class="max-w-6xl mx-auto px-4 space-y-6">
-
-        <!-- VUES SECTIONNÉES (SPA Style) -->
         <div id="view-markets" class="view-content space-y-6">
-            <!-- SELECTEUR ASSETS -->
             <div class="flex gap-2 overflow-x-auto no-scrollbar py-2" id="asset-nav">
                 <button onclick="updateAsset('BTCUSDT')" class="asset-btn btn-active px-6 py-3 rounded-2xl text-xs font-black whitespace-nowrap">BITCOIN</button>
                 <button onclick="updateAsset('ETHUSDT')" class="asset-btn bg-slate-800/40 text-slate-500 px-6 py-3 rounded-2xl text-xs font-black whitespace-nowrap">ETHEREUM</button>
@@ -175,24 +162,19 @@
             </div>
 
             <div class="grid lg:grid-cols-3 gap-6">
-                <!-- CHART -->
                 <div class="lg:col-span-2 glass-panel p-2">
                     <div id="tv_chart_container"></div>
                 </div>
-
-                <!-- SIGNALS -->
                 <div class="space-y-6">
                     <div class="glass-panel p-6 flex flex-col h-full">
                         <div class="flex justify-between items-center mb-6">
                             <span class="text-xs font-black uppercase text-slate-500">Prix Direct</span>
                             <span id="auto-status-badge" class="bg-red-500/10 text-red-500 text-[10px] font-bold px-2 py-1 rounded">AUTO-TRADE OFF</span>
                         </div>
-                        
                         <div class="mb-8">
                             <div id="live-price" class="text-5xl font-black font-mono tracking-tighter text-white">0.00</div>
                             <div id="live-change" class="text-sm font-bold text-slate-500 mt-1">+0.00% (24h)</div>
                         </div>
-
                         <div id="algo-status" class="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-[2rem] p-6 text-center">
                             <div class="loader-ring mb-4"></div>
                             <h3 class="text-sm font-black uppercase tracking-widest mb-2">Analyse IA</h3>
@@ -218,7 +200,6 @@
                 </div>
             </div>
         </div>
-
         <div id="view-algo" class="view-content hidden space-y-6">
             <div class="glass-panel p-8 text-center max-w-2xl mx-auto">
                 <div class="bg-blue-500/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -243,8 +224,6 @@
                 <button onclick="toggleApiModal()" class="w-full bg-primary py-5 rounded-2xl font-black shadow-xl shadow-blue-500/20 hover:scale-[1.01] transition-all">CONFIGURER LA CONNEXION API</button>
             </div>
         </div>
-
-        <!-- STATS BAR -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="glass-panel p-5">
                 <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Volatilité</p>
@@ -265,8 +244,6 @@
         </div>
 
     </main>
-
-    <!-- FOOTER NAVIGATION FIXÉE -->
     <div class="fixed bottom-6 left-0 right-0 z-[60] px-6">
         <div class="glass-panel max-w-lg mx-auto p-4 flex justify-around items-center border border-white/10 shadow-2xl relative">
             <button onclick="switchView('markets')" id="nav-markets" class="nav-btn nav-item-active flex flex-col items-center gap-1 transition-all">
@@ -301,31 +278,23 @@
         let isSignalActive = false;
         let isAutoTradeEnabled = false;
 
-        // --- NAVIGATION ENGINE ---
         function switchView(viewId) {
-            // Hide all views
+        
             document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
-            // Show selected
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
             
-            // Update Nav UI
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('nav-item-active', 'text-slate-500'));
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.add('text-slate-500'));
             document.getElementById(`nav-${viewId}`).classList.add('nav-item-active');
             document.getElementById(`nav-${viewId}`).classList.remove('text-slate-500');
-
-            // Refresh chart if needed
             if(viewId === 'markets') initTradingView(currentSymbol);
         }
-
-        // --- API MODAL ---
         function toggleApiModal() {
             const modal = document.getElementById('api-modal');
             modal.classList.toggle('hidden');
         }
 
         function saveApiKeys() {
-            // Simulation de sauvegarde
             isAutoTradeEnabled = true;
             document.getElementById('auto-status-badge').textContent = "AUTO-TRADE ACTIVE";
             document.getElementById('auto-status-badge').classList.replace('bg-red-500/10', 'bg-green-500/10');
@@ -335,7 +304,7 @@
             document.getElementById('algo-mode-text').classList.replace('text-red-500', 'text-green-500');
             
             toggleApiModal();
-            showCustomToast("Clés API connectées avec succès !");
+            showCustomToast("");
         }
 
         function showCustomToast(msg) {
@@ -406,7 +375,6 @@
             document.getElementById('stat-rsi').textContent = rsi.toFixed(1);
             
             if (!isSignalActive && priceHistory.length >= 14) {
-                // Algorithme de pointe Oracle-X (Sensibilité augmentée pour la démo)
                 if (rsi < 35) triggerSignal('Achat (Long)', price);
                 else if (rsi > 65) triggerSignal('Vente (Short)', price);
             }
