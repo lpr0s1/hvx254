@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Type R Speedometer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        :root {
+            --honda-red: #cc0000;
+            --honda-dark: #0a0a0a;
+        }
+
+        body {
+            background-color: var(--honda-dark);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Désactivation du zoom et des interactions système */
+        html, body {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        .speed-text {
+            text-shadow: 0 0 20px rgba(204, 0, 0, 0.6);
+            font-weight: 900;
+            font-style: italic;
+        }
+
+        .led {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #222;
+            transition: all 0.1s ease-out;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .led.active-green { background: #00ff00; box-shadow: 0 0 15px #00ff00; }
+        .led.active-orange { background: #ffaa00; box-shadow: 0 0 15px #ffaa00; }
+        .led.active-red { background: #ff0000; box-shadow: 0 0 15px #ff0000; }
+        .led.active-blink { 
+            background: #ff0000; 
+            box-shadow: 0 0 25px #ff0000;
+            animation: blink 0.1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .gauge-container {
+            background: linear-gradient(180deg, #1a1a1a 0%, #000 100%);
+            border: 2px solid #333;
+            border-top: 4px solid var(--honda-red);
+        }
+
+        .unit {
+            color: var(--honda-red);
+            letter-spacing: 2px;
+        }
+
+        #status {
+            font-family: sans-serif;
+            font-size: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center h-screen w-screen p-4">
+
+    <!-- Indicateur de changement de rapport (Shift Lights) -->
+    <div class="flex space-x-2 mb-8" id="shift-lights">
+        <!-- Verts -->
+        <div class="led" data-threshold="20"></div>
+        <div class="led" data-threshold="40"></div>
+        <!-- Oranges -->
+        <div class="led" data-threshold="60"></div>
+        <div class="led" data-threshold="80"></div>
+        <div class="led" data-threshold="100"></div>
+        <div class="led" data-threshold="120"></div>
+        <!-- Rouges -->
+        <div class="led" data-threshold="140"></div>
+        <div class="led" data-threshold="160"></div>
+        <div class="led" data-threshold="180"></div>
+        <div class="led" data-threshold="200"></div>
+    </div>
+
+    <!-- Affichage Principal -->
+    <div class="gauge-container relative flex flex-col items-center justify-center rounded-3xl w-full max-w-sm aspect-video shadow-2xl overflow-hidden">
+        
+        <!-- Décoration fond -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none" 
+             style="background-image: radial-gradient(circle at center, #cc0000 0%, transparent 70%);"></div>
+
+        <div class="z-10 flex flex-col items-center">
+            <span id="speed" class="speed-text text-8xl md:text-9xl transition-all duration-75">0</span>
+            <span class="unit text-xl font-bold mt-2">KM/H</span>
+        </div>
+
+        <div class="absolute bottom-4 flex space-x-4 opacity-50 text-[10px]">
+            <span>ACCURACY: <span id="accuracy">0</span>m</span>
+            <span>ALT: <span id="altitude">0</span>m</span>
+        </div>
+    </div>
+
+    <!-- Overlay d'autorisation -->
+    <div id="permission-overlay" class="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center text-center p-8">
+        <div class="mb-6 text-red-600">
+            <svg class="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+        </div>
+        <h1 class="text-2xl font-bold mb-4 uppercase italic">Type R Telemetry</h1>
+        <p class="text-gray-400 mb-8 max-w-xs">Pour afficher votre vitesse en temps réel, nous avons besoin d'accéder à votre position GPS.</p>
+        <button id="start-btn" class="bg-red-700 hover:bg-red-600 text-white font-bold py-4 px-10 rounded-full transition-all active:scale-95 uppercase tracking-widest">
+            Démarrer le moteur
+        </button>
+    </div>
+
+    <div id="status" class="mt-6 uppercase tracking-widest">En attente du signal GPS...</div>
+
+    <script>
+        const speedEl = document.getElementById('speed');
+        const accuracyEl = document.getElementById('accuracy');
+        const altitudeEl = document.getElementById('altitude');
+        const statusEl = document.getElementById('status');
+        const overlay = document.getElementById('permission-overlay');
+        const startBtn = document.getElementById('start-btn');
+        const leds = document.querySelectorAll('.led');
+
+        let watchId = null;
+
+        // Fonction pour mettre à jour les LEDs (Shift Lights)
+        function updateShiftLights(speed) {
+            leds.forEach((led, index) => {
+                const threshold = parseInt(led.dataset.threshold);
+                led.classList.remove('active-green', 'active-orange', 'active-red', 'active-blink');
+
+                if (speed >= threshold) {
+                    if (index < 2) led.classList.add('active-green');
+                    else if (index < 6) led.classList.add('active-orange');
+                    else if (index < 9) led.classList.add('active-red');
+                    else led.classList.add('active-blink');
+                }
+            });
+        }
+
+        function handleSuccess(position) {
+            const { speed, accuracy, altitude } = position.coords;
+            
+            // Conversion m/s vers km/h (speed peut être null si immobile)
+            // On multiplie par 3.6 pour avoir les km/h
+            const kmh = speed ? Math.round(speed * 3.6) : 0;
+            
+            // Animation fluide du chiffre
+            speedEl.innerText = kmh;
+            accuracyEl.innerText = Math.round(accuracy);
+            altitudeEl.innerText = altitude ? Math.round(altitude) : 0;
+            
+            updateShiftLights(kmh);
+            
+            statusEl.innerText = "Signal GPS OK";
+            statusEl.classList.add('text-green-500');
+        }
+
+        function handleError(error) {
+            let msg = "Erreur GPS";
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    msg = "Accès refusé";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    msg = "Position non disponible";
+                    break;
+                case error.TIMEOUT:
+                    msg = "Délai d'attente dépassé";
+                    break;
+            }
+            statusEl.innerText = msg;
+            statusEl.classList.add('text-red-500');
+        }
+
+        function startTracking() {
+            if ("geolocation" in navigator) {
+                overlay.style.display = 'none';
+                
+                // Options pour la haute précision (consomme plus de batterie)
+                const options = {
+                    enableHighAccuracy: true,
+                    maximumAge: 0,
+                    timeout: 5000
+                };
+
+                watchId = navigator.geolocation.watchPosition(handleSuccess, handleError, options);
+            } else {
+                statusEl.innerText = "GPS non supporté sur ce navigateur";
+            }
+        }
+
+        // Empêcher le zoom arrière sur iOS lors du double tap
+        document.addEventListener('touchstart', function (event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        startBtn.addEventListener('click', startTracking);
+
+    </script>
+</body>
+</html>
+
