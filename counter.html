@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Type R Speedometer</title>
+    <title>Type R Speedometer - Alcantara Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
         :root {
-            --honda-red: #cc0000;
-            --honda-dark: #0a0a0a;
+            --honda-red: #e60000;
+            --alcantara-bg: #1a1a1b;
+            --alcantara-texture: rgba(255, 255, 255, 0.03);
         }
 
         body {
-            background-color: var(--honda-dark);
+            background-color: #050505;
             color: white;
             font-family: 'Orbitron', sans-serif;
             overflow: hidden;
@@ -24,29 +25,40 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Désactivation du zoom et des interactions système */
-        html, body {
-            position: fixed;
-            width: 100%;
-            height: 100%;
+        /* Texture Alcantara */
+        .alcantara {
+            background-color: var(--alcantara-bg);
+            background-image: 
+                radial-gradient(circle at 50% 50%, var(--alcantara-texture) 1%, transparent 1%),
+                radial-gradient(circle at 20% 80%, var(--alcantara-texture) 1%, transparent 1%);
+            background-size: 4px 4px;
+            position: relative;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+        }
+
+        /* Effet de couture rouge Type R */
+        .stitching {
+            border: 2px dashed rgba(230, 0, 0, 0.3);
+            border-radius: 1.5rem;
         }
 
         .speed-text {
-            text-shadow: 0 0 20px rgba(204, 0, 0, 0.6);
+            text-shadow: 0 0 30px rgba(230, 0, 0, 0.5);
             font-weight: 900;
             font-style: italic;
+            font-variant-numeric: tabular-nums; /* Empêche les chiffres de bouger horizontalement */
         }
 
         .led {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
+            width: 22px;
+            height: 8px;
+            border-radius: 2px;
             background: #222;
-            transition: all 0.1s ease-out;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+            transition: all 0.05s ease-out;
+            transform: skewX(-15deg);
         }
 
-        .led.active-green { background: #00ff00; box-shadow: 0 0 15px #00ff00; }
+        .led.active-green { background: #00ff44; box-shadow: 0 0 15px #00ff44; }
         .led.active-orange { background: #ffaa00; box-shadow: 0 0 15px #ffaa00; }
         .led.active-red { background: #ff0000; box-shadow: 0 0 15px #ff0000; }
         .led.active-blink { 
@@ -56,82 +68,88 @@
         }
 
         @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
-
-        .gauge-container {
-            background: linear-gradient(180deg, #1a1a1a 0%, #000 100%);
-            border: 2px solid #333;
-            border-top: 4px solid var(--honda-red);
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
         }
 
         .unit {
             color: var(--honda-red);
-            letter-spacing: 2px;
+            letter-spacing: 4px;
+            font-size: 0.75rem;
+            opacity: 0.8;
         }
 
-        #status {
-            font-family: sans-serif;
-            font-size: 10px;
-            color: #666;
+        /* Suppression du zoom iOS */
+        html, body {
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center h-screen w-screen p-4">
+<body class="flex flex-col items-center justify-center h-screen w-screen p-6">
 
-    <!-- Indicateur de changement de rapport (Shift Lights) -->
-    <div class="flex space-x-2 mb-8" id="shift-lights">
-        <!-- Verts -->
-        <div class="led" data-threshold="20"></div>
-        <div class="led" data-threshold="40"></div>
-        <!-- Oranges -->
+    <!-- Shift Lights Style Course -->
+    <div class="flex space-x-1.5 mb-10" id="shift-lights">
+        <!-- Sequence: Green (2), Orange (4), Red (4) -->
+        <div class="led" data-threshold="15"></div>
+        <div class="led" data-threshold="30"></div>
+        <div class="led" data-threshold="45"></div>
         <div class="led" data-threshold="60"></div>
-        <div class="led" data-threshold="80"></div>
-        <div class="led" data-threshold="100"></div>
-        <div class="led" data-threshold="120"></div>
-        <!-- Rouges -->
-        <div class="led" data-threshold="140"></div>
-        <div class="led" data-threshold="160"></div>
+        <div class="led" data-threshold="75"></div>
+        <div class="led" data-threshold="90"></div>
+        <div class="led" data-threshold="110"></div>
+        <div class="led" data-threshold="130"></div>
+        <div class="led" data-threshold="150"></div>
         <div class="led" data-threshold="180"></div>
-        <div class="led" data-threshold="200"></div>
     </div>
 
-    <!-- Affichage Principal -->
-    <div class="gauge-container relative flex flex-col items-center justify-center rounded-3xl w-full max-w-sm aspect-video shadow-2xl overflow-hidden">
-        
-        <!-- Décoration fond -->
-        <div class="absolute inset-0 opacity-10 pointer-events-none" 
-             style="background-image: radial-gradient(circle at center, #cc0000 0%, transparent 70%);"></div>
+    <!-- Boîtier Principal Alcantara -->
+    <div class="alcantara w-full max-w-md aspect-[4/3] rounded-[2rem] flex items-center justify-center p-1 shadow-[0_0_50px_rgba(0,0,0,1)]">
+        <div class="stitching w-full h-full flex flex-col items-center justify-center relative">
+            
+            <!-- Décoration Carbone/Ligne rouge -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-1 bg-red-600 rounded-b-full"></div>
 
-        <div class="z-10 flex flex-col items-center">
-            <span id="speed" class="speed-text text-8xl md:text-9xl transition-all duration-75">0</span>
-            <span class="unit text-xl font-bold mt-2">KM/H</span>
-        </div>
+            <div class="z-10 flex flex-col items-center">
+                <div class="flex items-baseline">
+                    <span id="speed" class="speed-text text-9xl md:text-[10rem]">0</span>
+                </div>
+                <span class="unit font-black uppercase">km/h</span>
+            </div>
 
-        <div class="absolute bottom-4 flex space-x-4 opacity-50 text-[10px]">
-            <span>ACCURACY: <span id="accuracy">0</span>m</span>
-            <span>ALT: <span id="altitude">0</span>m</span>
+            <!-- Infos GPS discrètes -->
+            <div class="absolute bottom-6 flex space-x-6 text-[10px] font-sans text-gray-500 uppercase tracking-widest">
+                <div class="flex flex-col items-center">
+                    <span class="text-gray-600">Precision</span>
+                    <span id="accuracy">--</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <span class="text-gray-600">Altitude</span>
+                    <span id="altitude">--</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Overlay d'autorisation -->
-    <div id="permission-overlay" class="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center text-center p-8">
-        <div class="mb-6 text-red-600">
-            <svg class="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
+    <!-- Permission Overlay -->
+    <div id="permission-overlay" class="fixed inset-0 bg-[#050505] z-50 flex flex-col items-center justify-center text-center p-8">
+        <div class="w-24 h-24 mb-8 relative">
+            <div class="absolute inset-0 border-4 border-red-600 rounded-full animate-ping opacity-25"></div>
+            <div class="absolute inset-0 border-2 border-red-600 rounded-full flex items-center justify-center">
+                <svg class="w-10 h-10 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
         </div>
-        <h1 class="text-2xl font-bold mb-4 uppercase italic">Type R Telemetry</h1>
-        <p class="text-gray-400 mb-8 max-w-xs">Pour afficher votre vitesse en temps réel, nous avons besoin d'accéder à votre position GPS.</p>
-        <button id="start-btn" class="bg-red-700 hover:bg-red-600 text-white font-bold py-4 px-10 rounded-full transition-all active:scale-95 uppercase tracking-widest">
-            Démarrer le moteur
+        <h1 class="text-2xl font-black italic mb-2 tracking-tighter">TYPE R TELEMETRY</h1>
+        <p class="text-gray-500 text-sm mb-10 font-sans tracking-wide">ACTIVATION DU CAPTEUR GPS HAUTE PRÉCISION</p>
+        <button id="start-btn" class="bg-red-600 hover:bg-red-500 text-white font-black py-5 px-12 rounded-xl transition-all active:scale-90 uppercase italic tracking-widest shadow-[0_10px_30px_rgba(230,0,0,0.3)]">
+            Start Engine
         </button>
     </div>
 
-    <div id="status" class="mt-6 uppercase tracking-widest">En attente du signal GPS...</div>
+    <div id="status" class="mt-8 text-[10px] text-gray-700 uppercase tracking-[0.3em]">System Ready</div>
 
     <script>
         const speedEl = document.getElementById('speed');
@@ -142,9 +160,31 @@
         const startBtn = document.getElementById('start-btn');
         const leds = document.querySelectorAll('.led');
 
-        let watchId = null;
+        let targetSpeed = 0;
+        let currentDisplaySpeed = 0;
+        let lastTimestamp = 0;
 
-        // Fonction pour mettre à jour les LEDs (Shift Lights)
+        // --- MOTEUR DE RENDU TEMPS RÉEL (60 FPS) ---
+        // Utilise l'interpolation linéaire pour lisser les sauts du GPS
+        function updateDisplay(timestamp) {
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const deltaTime = timestamp - lastTimestamp;
+
+            // Vitesse d'ajustement du compteur (plus le facteur est élevé, plus c'est réactif)
+            const lerpFactor = 0.1; 
+            currentDisplaySpeed += (targetSpeed - currentDisplaySpeed) * lerpFactor;
+
+            // Mise à jour du texte (on affiche l'entier pour la lisibilité)
+            const roundedSpeed = Math.round(currentDisplaySpeed);
+            speedEl.innerText = roundedSpeed;
+
+            // Mise à jour des LEDs basée sur la vitesse lissée
+            updateShiftLights(currentDisplaySpeed);
+
+            lastTimestamp = timestamp;
+            requestAnimationFrame(updateDisplay);
+        }
+
         function updateShiftLights(speed) {
             leds.forEach((led, index) => {
                 const threshold = parseInt(led.dataset.threshold);
@@ -162,68 +202,47 @@
         function handleSuccess(position) {
             const { speed, accuracy, altitude } = position.coords;
             
-            // Conversion m/s vers km/h (speed peut être null si immobile)
-            // On multiplie par 3.6 pour avoir les km/h
-            const kmh = speed ? Math.round(speed * 3.6) : 0;
+            // On définit la cible, le moteur de rendu fera le lissage
+            targetSpeed = speed ? speed * 3.6 : 0;
             
-            // Animation fluide du chiffre
-            speedEl.innerText = kmh;
-            accuracyEl.innerText = Math.round(accuracy);
-            altitudeEl.innerText = altitude ? Math.round(altitude) : 0;
+            accuracyEl.innerText = Math.round(accuracy) + "m";
+            altitudeEl.innerText = altitude ? Math.round(altitude) + "m" : "--";
             
-            updateShiftLights(kmh);
-            
-            statusEl.innerText = "Signal GPS OK";
-            statusEl.classList.add('text-green-500');
+            statusEl.innerText = "GPS Tracking Active";
+            statusEl.style.color = "#444";
         }
 
         function handleError(error) {
-            let msg = "Erreur GPS";
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    msg = "Accès refusé";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    msg = "Position non disponible";
-                    break;
-                case error.TIMEOUT:
-                    msg = "Délai d'attente dépassé";
-                    break;
-            }
-            statusEl.innerText = msg;
-            statusEl.classList.add('text-red-500');
+            statusEl.innerText = "GPS Error: " + error.message;
+            statusEl.style.color = "#e60000";
         }
 
         function startTracking() {
+            overlay.style.display = 'none';
+            
             if ("geolocation" in navigator) {
-                overlay.style.display = 'none';
-                
-                // Options pour la haute précision (consomme plus de batterie)
-                const options = {
+                // Démarrer la boucle de rendu
+                requestAnimationFrame(updateDisplay);
+
+                navigator.geolocation.watchPosition(handleSuccess, handleError, {
                     enableHighAccuracy: true,
                     maximumAge: 0,
-                    timeout: 5000
-                };
-
-                watchId = navigator.geolocation.watchPosition(handleSuccess, handleError, options);
+                    timeout: Infinity
+                });
             } else {
-                statusEl.innerText = "GPS non supporté sur ce navigateur";
+                statusEl.innerText = "GPS non supporté";
             }
         }
 
-        // Empêcher le zoom arrière sur iOS lors du double tap
-        document.addEventListener('touchstart', function (event) {
-            if (event.touches.length > 1) {
-                event.preventDefault();
-            }
+        // Sécurité contre le zoom iOS
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) e.preventDefault();
         }, { passive: false });
 
         let lastTouchEnd = 0;
-        document.addEventListener('touchend', function (event) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
-            }
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) e.preventDefault();
             lastTouchEnd = now;
         }, false);
 
