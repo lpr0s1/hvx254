@@ -3,431 +3,329 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IRC Anonyme Pro</title>
+    <title>IRC P2P - Connexion Directe</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Inter:wght@400;700&display=swap');
         
-        :root {
-            --bg-main: #020617;
-            --bg-card: #0f172a;
-        }
-
         body {
-            background-color: var(--bg-main);
-            color: #f8fafc;
+            background-color: #0a0a0c;
+            color: #d1d5db;
             font-family: 'Inter', sans-serif;
-            overflow: hidden;
             height: 100vh;
-            height: 100dvh;
+            overflow: hidden;
         }
 
         .mono { font-family: 'JetBrains Mono', monospace; }
         
-        .glass {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .irc-container {
+            background: #111114;
+            border-right: 1px solid #27272a;
         }
 
-        .chat-scroll::-webkit-scrollbar { width: 4px; }
-        .chat-scroll::-webkit-scrollbar-track { background: transparent; }
-        .chat-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-
-        .message-bubble {
-            animation: slideIn 0.2s ease-out;
-            word-break: break-word;
+        .message-line:hover {
+            background: rgba(255,255,255,0.02);
         }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
 
-        input:focus, textarea:focus { outline: none; }
+        .btn-masculine {
+            background: #2563eb;
+            transition: all 0.2s;
+        }
+        .btn-masculine:hover { background: #1d4ed8; transform: translateY(-1px); }
+        .btn-masculine:active { transform: translateY(0); }
+
+        #room-link-display {
+            word-break: break-all;
+            user-select: all;
+        }
     </style>
 </head>
-<body class="flex flex-col">
+<body class="flex flex-col md:flex-row">
 
-    <!-- Auth / Overlay Pseudo -->
-    <div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-6 transition-all duration-500">
-        <div class="w-full max-w-md p-8 glass rounded-3xl shadow-2xl text-center">
-            <div class="mb-6 flex justify-center">
-                <div class="w-20 h-20 bg-blue-600/20 rounded-2xl flex items-center justify-center border border-blue-500/30 text-blue-500 text-3xl shadow-lg shadow-blue-500/10">
-                    <i class="fa-solid fa-terminal"></i>
+    <!-- Ecran de Configuration Initiale -->
+    <div id="setup-screen" class="fixed inset-0 z-50 bg-[#0a0a0c] flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-[#111114] border border-[#27272a] p-8 rounded-lg shadow-2xl">
+            <h1 class="text-2xl font-black mb-6 text-white tracking-tight border-b border-blue-600 pb-2 flex items-center gap-3">
+                <i class="fa-solid fa-network-wired text-blue-500"></i> IRC P2P ENGINE
+            </h1>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Pseudo</label>
+                    <input type="text" id="username-input" maxlength="15" 
+                        class="w-full bg-[#18181b] border border-[#27272a] rounded px-4 py-3 text-white focus:border-blue-500 outline-none mono"
+                        placeholder="Utilisateur_XYZ">
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+                    <button id="btn-create" class="btn-masculine text-white font-bold py-3 rounded uppercase text-sm tracking-wider">
+                        Créer un nouveau salon
+                    </button>
+                    <div class="relative flex items-center">
+                        <div class="flex-grow border-t border-[#27272a]"></div>
+                        <span class="flex-shrink mx-4 text-gray-600 text-xs font-bold uppercase">Ou rejoindre</span>
+                        <div class="flex-grow border-t border-[#27272a]"></div>
+                    </div>
+                    <input type="text" id="join-id-input" 
+                        class="w-full bg-[#18181b] border border-[#27272a] rounded px-4 py-2 text-white focus:border-blue-500 outline-none text-sm mono"
+                        placeholder="Coller l'ID du salon ici">
+                    <button id="btn-join" class="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded uppercase text-sm tracking-wider transition-all">
+                        Se connecter à l'hôte
+                    </button>
                 </div>
             </div>
-            <h1 class="text-3xl font-black mb-2 tracking-tight">IRC ANONYME</h1>
-            <p class="text-slate-400 mb-8 text-sm uppercase tracking-widest font-bold">Réseau décentralisé</p>
-            
-            <form id="auth-form" class="space-y-4">
-                <input type="text" id="pseudo-input" required maxlength="15" minlength="3"
-                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-5 py-4 text-center font-bold text-xl focus:border-blue-500 transition-colors placeholder:text-slate-600"
-                    placeholder="VOTRE_PSEUDO">
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-95">
-                    REJOINDRE LE CANAL
-                </button>
-            </form>
+            <p class="mt-8 text-[10px] text-gray-600 text-center leading-relaxed">
+                Technologie WebRTC : Les messages ne transitent par aucun serveur.<br>Anonymat total et gratuité illimitée.
+            </p>
         </div>
     </div>
 
-    <!-- Main Chat UI -->
-    <div id="main-ui" class="hidden flex-1 flex flex-col h-full overflow-hidden opacity-0 transition-opacity duration-500">
+    <!-- Interface IRC Principale -->
+    <div id="main-interface" class="hidden flex-1 flex flex-col h-full">
         
-        <!-- Header -->
-        <header class="h-16 glass flex items-center justify-between px-4 sm:px-6 z-40">
+        <!-- Top Bar -->
+        <header class="h-12 bg-[#18181b] border-b border-[#27272a] flex items-center justify-between px-4 shrink-0">
             <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-                    <h2 class="font-black text-sm uppercase tracking-tighter sm:text-lg">#general-irc</h2>
-                </div>
-                <div class="hidden sm:block h-6 w-px bg-slate-700"></div>
-                <p id="user-display-name" class="hidden sm:block text-xs font-bold text-slate-400 mono"></p>
+                <span class="text-blue-500 font-bold mono text-sm">#P2P-CHANNEL</span>
+                <span id="status-tag" class="text-[10px] bg-red-900/30 text-red-400 px-2 py-0.5 rounded border border-red-500/20 font-bold uppercase tracking-widest">Déconnecté</span>
             </div>
-            
-            <div class="flex items-center gap-2">
-                <button id="toggle-list" class="flex items-center gap-2 bg-slate-800/50 hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors border border-slate-700">
-                    <i class="fa-solid fa-users text-blue-400"></i>
-                    <span id="counter" class="font-bold text-xs">0</span>
-                </button>
-                <button id="btn-settings" class="p-2.5 bg-slate-800/50 rounded-lg hover:text-blue-400 transition-colors border border-slate-700">
-                    <i class="fa-solid fa-gear"></i>
-                </button>
-                <button id="btn-logout" class="p-2.5 bg-slate-800/50 rounded-lg hover:text-red-400 transition-colors border border-slate-700">
-                    <i class="fa-solid fa-power-off"></i>
-                </button>
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex items-center bg-black/40 border border-white/5 rounded px-2 py-1 gap-2">
+                    <span class="text-[10px] text-gray-500 font-bold uppercase">ID SALON:</span>
+                    <span id="room-id-display" class="text-[10px] text-blue-400 mono select-all cursor-pointer">Génération...</span>
+                </div>
+                <button id="btn-copy-id" class="text-gray-400 hover:text-white" title="Copier l'ID"><i class="fa-solid fa-copy"></i></button>
             </div>
         </header>
 
-        <!-- Container Body -->
-        <div class="flex-1 flex overflow-hidden relative">
-            
-            <!-- Chat Feed -->
-            <main id="chat-feed" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 chat-scroll">
-                <!-- System markers injected here -->
-            </main>
-
-            <!-- Sidebar Users -->
-            <aside id="sidebar" class="absolute right-0 top-0 bottom-0 w-64 glass border-l border-white/5 transform translate-x-full md:relative md:translate-x-0 transition-transform duration-300 z-30">
-                <div class="p-4 border-b border-white/5 flex items-center justify-between bg-slate-900/50">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Utilisateurs</span>
-                    <button id="close-sidebar" class="md:hidden text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+        <div class="flex-1 flex overflow-hidden">
+            <!-- Messages -->
+            <div id="chat-window" class="flex-1 flex flex-col bg-[#0a0a0c]">
+                <div id="messages-list" class="flex-1 overflow-y-auto p-4 custom-scroll mono text-[13px] leading-relaxed">
+                    <div class="text-zinc-600 mb-4 border-b border-zinc-900 pb-2">*** Session IRC P2P démarrée. En attente de pairs...</div>
                 </div>
-                <ul id="user-list" class="p-2 space-y-1 overflow-y-auto h-full"></ul>
-            </aside>
-            <div id="overlay" class="hidden fixed inset-0 bg-black/60 z-20 md:hidden"></div>
-        </div>
-
-        <!-- Input Area -->
-        <footer class="p-3 sm:p-4 glass">
-            <form id="chat-form" class="max-w-5xl mx-auto flex items-end gap-3">
-                <div class="flex-1 relative">
-                    <textarea id="chat-input" rows="1" 
-                        class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 sm:py-4 text-slate-100 placeholder:text-slate-600 focus:border-blue-500 transition-all resize-none overflow-hidden max-h-32"
-                        placeholder="Tapez votre message..."></textarea>
+                
+                <!-- Input Area -->
+                <div class="p-4 bg-[#111114] border-t border-[#27272a]">
+                    <form id="input-form" class="flex gap-3">
+                        <span class="hidden sm:inline-block py-2 text-zinc-500 font-bold" id="prompt-name">&gt;</span>
+                        <input type="text" id="msg-input" autocomplete="off"
+                            class="flex-1 bg-transparent text-white outline-none placeholder:text-zinc-700" 
+                            placeholder="Écrire un message...">
+                        <button type="submit" class="text-blue-500 hover:text-blue-400 font-bold uppercase text-xs tracking-widest">Envoyer</button>
+                    </form>
                 </div>
-                <button type="submit" id="send-btn" disabled 
-                    class="w-12 h-12 sm:w-14 sm:h-14 bg-blue-600 rounded-xl flex items-center justify-center text-white disabled:opacity-20 transition-all active:scale-90 shadow-lg shadow-blue-600/10">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </button>
-            </form>
-        </footer>
-    </div>
-
-    <!-- Modal Rename -->
-    <div id="modal-rename" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-        <div class="w-full max-w-sm glass p-6 rounded-2xl animate__animated animate__zoomIn">
-            <h3 class="text-lg font-bold mb-4">Changer de pseudo</h3>
-            <input type="text" id="rename-input" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 mb-4 focus:border-blue-500 transition-colors font-bold">
-            <div class="flex gap-2">
-                <button id="cancel-rename" class="flex-1 py-3 bg-slate-800 rounded-xl font-bold">Annuler</button>
-                <button id="confirm-rename" class="flex-1 py-3 bg-blue-600 rounded-xl font-bold">Valider</button>
             </div>
+
+            <!-- Users Sidebar -->
+            <aside class="w-48 bg-[#111114] border-l border-[#27272a] hidden md:flex flex-col">
+                <div class="p-3 border-b border-[#27272a] text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                    Utilisateurs (<span id="user-count">0</span>)
+                </div>
+                <div id="users-list" class="flex-1 overflow-y-auto p-2 space-y-1 mono text-sm">
+                    <!-- Users injected here -->
+                </div>
+            </aside>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, serverTimestamp, query, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        // Palette de couleurs "Masculines" (Bleus, Gris, Verts sombres, Oranges, Ambre)
+        const COLORS = ['#60a5fa', '#34d399', '#fbbf24', '#f87171', '#818cf8', '#2dd4bf', '#fb923c', '#94a3b8', '#4ade80'];
 
-        // Firebase Setup
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'irc-master-secure';
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // State
-        let currentUser = null;
-        let myPseudo = '';
-        let knownUsers = new Map();
-        let renderedMsgs = new Set();
-        let initialPresenceLoad = true;
-
-        const MASCULINE_COLORS = [
-            '#3b82f6', // blue-500
-            '#0ea5e9', // sky-500
-            '#06b6d4', // cyan-500
-            '#10b981', // emerald-500
-            '#84cc16', // lime-500
-            '#f59e0b', // amber-500
-            '#64748b', // slate-500
-            '#22c55e', // green-500
-            '#6366f1', // indigo-500
-            '#14b8a6', // teal-500
-            '#f97316'  // orange-500
-        ];
-
-        // Color helper based on UID hash
-        const getUserColor = (uid) => {
-            let hash = 0;
-            for (let i = 0; i < uid.length; i++) {
-                hash = uid.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            return MASCULINE_COLORS[Math.abs(hash) % MASCULINE_COLORS.length];
-        };
+        let peer = null;
+        let connections = []; // Pour l'hôte : liste des clients. Pour le client : connexion à l'hôte.
+        let isHost = false;
+        let myUsername = "Anonyme";
+        let userList = new Set();
 
         const els = {
-            auth: document.getElementById('auth-overlay'),
-            main: document.getElementById('main-ui'),
-            authForm: document.getElementById('auth-form'),
-            pseudoInput: document.getElementById('pseudo-input'),
-            chatFeed: document.getElementById('chat-feed'),
-            chatInput: document.getElementById('chat-input'),
-            chatForm: document.getElementById('chat-form'),
-            userList: document.getElementById('user-list'),
-            counter: document.getElementById('counter'),
-            sendBtn: document.getElementById('send-btn'),
-            userName: document.getElementById('user-display-name'),
-            sidebar: document.getElementById('sidebar'),
-            overlay: document.getElementById('overlay'),
-            modalRename: document.getElementById('modal-rename'),
-            renameInput: document.getElementById('rename-input')
+            setup: document.getElementById('setup-screen'),
+            main: document.getElementById('main-interface'),
+            username: document.getElementById('username-input'),
+            joinId: document.getElementById('join-id-input'),
+            btnCreate: document.getElementById('btn-create'),
+            btnJoin: document.getElementById('btn-join'),
+            messages: document.getElementById('messages-list'),
+            input: document.getElementById('msg-input'),
+            form: document.getElementById('input-form'),
+            status: document.getElementById('status-tag'),
+            roomId: document.getElementById('room-id-display'),
+            users: document.getElementById('users-list'),
+            count: document.getElementById('user-count'),
+            prompt: document.getElementById('prompt-name')
         };
 
-        // --- AUTH LOGIC ---
-        const initSession = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
+        const getColor = (name) => {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            return COLORS[Math.abs(hash) % COLORS.length];
+        };
+
+        const addLog = (content, type = 'sys') => {
+            const div = document.createElement('div');
+            div.className = "message-line py-0.5";
+            const time = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+            
+            if (type === 'sys') {
+                div.innerHTML = `<span class="text-zinc-600">[${time}] *** ${content}</span>`;
             } else {
-                await signInAnonymously(auth);
+                const color = getColor(content.user);
+                div.innerHTML = `
+                    <span class="text-zinc-700">[${time}]</span> 
+                    <span style="color: ${color}" class="font-bold">&lt;${content.user}&gt;</span> 
+                    <span class="text-zinc-300">${content.text}</span>
+                `;
             }
+            els.messages.appendChild(div);
+            els.messages.scrollTop = els.messages.scrollHeight;
         };
 
-        onAuthStateChanged(auth, u => {
-            currentUser = u;
-            if (u) {
-                const saved = localStorage.getItem(`irc_pseudo_${appId}`);
-                if (saved) {
-                    myPseudo = saved;
-                    enterChat();
-                } else {
-                    els.auth.classList.remove('hidden');
-                }
-            }
-        });
-
-        els.authForm.onsubmit = e => {
-            e.preventDefault();
-            const val = els.pseudoInput.value.trim();
-            if (val.length >= 3) {
-                myPseudo = val;
-                localStorage.setItem(`irc_pseudo_${appId}`, val);
-                enterChat();
-            }
-        };
-
-        const enterChat = () => {
-            els.auth.classList.add('opacity-0');
-            setTimeout(() => {
-                els.auth.classList.add('hidden');
-                els.main.classList.remove('hidden');
-                void els.main.offsetWidth;
-                els.main.classList.remove('opacity-0');
-                els.userName.textContent = `@${myPseudo}`;
-                els.chatInput.focus();
-                
-                updatePresence();
-                setInterval(updatePresence, 20000);
-                startListeners();
-            }, 500);
-        };
-
-        // --- CORE FUNCTIONALITIES ---
-
-        const updatePresence = async (newPseudo = null) => {
-            if (!currentUser) return;
-            if (newPseudo) myPseudo = newPseudo;
-            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'presence', currentUser.uid);
-            await setDoc(ref, {
-                uid: currentUser.uid,
-                pseudo: myPseudo,
-                lastSeen: Date.now()
+        const updateUIUsers = () => {
+            els.users.innerHTML = '';
+            userList.forEach(u => {
+                const item = document.createElement('div');
+                item.className = "text-zinc-400 px-2 py-1 rounded";
+                item.innerHTML = `<span style="color: ${getColor(u)}">@</span> ${u}`;
+                els.users.appendChild(item);
             });
-            els.userName.textContent = `@${myPseudo}`;
+            els.count.textContent = userList.size;
         };
 
-        const startListeners = () => {
-            // 1. Presence Listener
-            const pRef = collection(db, 'artifacts', appId, 'public', 'data', 'presence');
-            onSnapshot(pRef, snap => {
-                const now = Date.now();
-                const currentMap = new Map();
-                snap.forEach(d => {
-                    const data = d.data();
-                    if (now - data.lastSeen < 60000) currentMap.set(data.uid, data);
+        const initPeer = () => {
+            peer = new Peer();
+            
+            peer.on('open', (id) => {
+                els.roomId.textContent = id;
+                els.status.textContent = "Connecté";
+                els.status.classList.replace('bg-red-900/30', 'bg-emerald-900/30');
+                els.status.classList.replace('text-red-400', 'text-emerald-400');
+                els.status.classList.add('border-emerald-500/20');
+                
+                if (isHost) {
+                    userList.add(myUsername);
+                    updateUIUsers();
+                }
+            });
+
+            peer.on('connection', (conn) => {
+                if (!isHost) {
+                    conn.close();
+                    return;
+                }
+                
+                conn.on('data', (data) => {
+                    if (data.type === 'join') {
+                        connections.push(conn);
+                        userList.add(data.user);
+                        addLog(`${data.user} a rejoint le canal.`);
+                        broadcast({ type: 'sys', text: `${data.user} a rejoint.` });
+                        broadcast({ type: 'users', list: Array.from(userList) });
+                        updateUIUsers();
+                    }
+                    if (data.type === 'msg') {
+                        addLog({ user: data.user, text: data.text }, 'user');
+                        broadcast(data);
+                    }
                 });
 
-                if (!initialPresenceLoad) {
-                    currentMap.forEach((u, uid) => {
-                        if (!knownUsers.has(uid) && uid !== currentUser.uid) {
-                            addSystemMarker(`[+] ${u.pseudo} est entré dans le canal`);
-                        } else if (knownUsers.has(uid) && knownUsers.get(uid).pseudo !== u.pseudo) {
-                            addSystemMarker(`[*] ${knownUsers.get(uid).pseudo} est maintenant connu sous le nom de ${u.pseudo}`);
-                        }
-                    });
-                    knownUsers.forEach((u, uid) => {
-                        if (!currentMap.has(uid) && uid !== currentUser.uid) {
-                            addSystemMarker(`[-] ${u.pseudo} est sorti (timeout)`);
-                        }
-                    });
-                }
-                knownUsers = currentMap;
-                initialPresenceLoad = false;
-                renderSidebar();
+                conn.on('close', () => {
+                    // Logique de déconnexion simplifiée
+                    connections = connections.filter(c => c !== conn);
+                });
             });
 
-            // 2. Message Listener
-            const mRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
-            // Fetch messages from last hour to avoid overload
-            onSnapshot(mRef, snap => {
-                let batch = [];
-                snap.forEach(d => batch.push({ id: d.id, ...d.data() }));
-                batch.sort((a,b) => a.timestamp - b.timestamp).forEach(m => {
-                    if (!renderedMsgs.has(m.id)) {
-                        appendMessage(m);
-                        renderedMsgs.add(m.id);
+            peer.on('error', (err) => {
+                console.error(err);
+                alert("Erreur PeerJS: " + err.type);
+            });
+        };
+
+        const broadcast = (data) => {
+            connections.forEach(conn => {
+                if (conn.open) conn.send(data);
+            });
+        };
+
+        // --- ACTIONS ---
+
+        els.btnCreate.onclick = () => {
+            const name = els.username.value.trim();
+            if (!name) return alert("Pseudo requis");
+            myUsername = name;
+            isHost = true;
+            els.prompt.textContent = `<${myUsername}>`;
+            initPeer();
+            els.setup.classList.add('hidden');
+            els.main.classList.remove('hidden');
+        };
+
+        els.btnJoin.onclick = () => {
+            const name = els.username.value.trim();
+            const hostId = els.joinId.value.trim();
+            if (!name || !hostId) return alert("Pseudo et ID Salon requis");
+            
+            myUsername = name;
+            isHost = false;
+            els.prompt.textContent = `<${myUsername}>`;
+            
+            peer = new Peer();
+            peer.on('open', () => {
+                const conn = peer.connect(hostId);
+                conn.on('open', () => {
+                    connections = [conn];
+                    conn.send({ type: 'join', user: myUsername });
+                    els.setup.classList.add('hidden');
+                    els.main.classList.remove('hidden');
+                    els.status.textContent = "Connecté à l'hôte";
+                    els.status.classList.replace('bg-red-900/30', 'bg-blue-900/30');
+                    els.status.classList.replace('text-red-400', 'text-blue-400');
+                });
+
+                conn.on('data', (data) => {
+                    if (data.type === 'users') {
+                        userList = new Set(data.list);
+                        updateUIUsers();
+                    }
+                    if (data.type === 'msg') {
+                        addLog({ user: data.user, text: data.text }, 'user');
+                    }
+                    if (data.type === 'sys') {
+                        addLog(data.text);
                     }
                 });
             });
         };
 
-        const renderSidebar = () => {
-            els.counter.textContent = knownUsers.size;
-            els.userList.innerHTML = '';
-            Array.from(knownUsers.values()).sort((a,b) => a.pseudo.localeCompare(b.pseudo)).forEach(u => {
-                const isMe = u.uid === currentUser.uid;
-                const color = getUserColor(u.uid);
-                const li = document.createElement('li');
-                li.className = `flex items-center gap-3 p-2.5 rounded-xl border border-transparent ${isMe ? 'bg-blue-600/10 border-blue-500/20' : 'hover:bg-white/5'}`;
-                li.innerHTML = `
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold border border-white/10 shrink-0" style="background: ${color}22; color: ${color}">
-                        ${u.pseudo.substring(0,2).toUpperCase()}
-                    </div>
-                    <span class="text-sm font-bold truncate ${isMe ? 'text-blue-400' : 'text-slate-200'}">${u.pseudo}</span>
-                `;
-                els.userList.appendChild(li);
-            });
-        };
-
-        const appendMessage = (m) => {
-            const isMe = m.uid === currentUser.uid;
-            const color = getUserColor(m.uid);
-            const time = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '--:--';
-
-            const div = document.createElement('div');
-            div.className = `flex flex-col mb-4 message-bubble ${isMe ? 'items-end' : 'items-start'}`;
-            
-            const escape = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-
-            div.innerHTML = `
-                <div class="flex items-center gap-2 mb-1 px-1">
-                    <span class="text-[11px] font-black uppercase tracking-tight mono" style="color: ${color}">${escape(m.pseudo)}</span>
-                    <span class="text-[9px] text-slate-600 mono">${time}</span>
-                </div>
-                <div class="max-w-[90%] sm:max-w-[75%] px-4 py-3 rounded-2xl ${isMe ? 'bg-blue-600 text-white rounded-tr-none shadow-lg shadow-blue-900/20' : 'glass text-slate-200 rounded-tl-none border-white/10'}">
-                    <p class="text-sm sm:text-[15px] whitespace-pre-wrap leading-relaxed">${escape(m.text)}</p>
-                </div>
-            `;
-            els.chatFeed.appendChild(div);
-            els.chatFeed.scrollTop = els.chatFeed.scrollHeight;
-        };
-
-        const addSystemMarker = (txt) => {
-            const div = document.createElement('div');
-            div.className = "flex justify-center my-4 opacity-50";
-            div.innerHTML = `<span class="text-[10px] mono bg-slate-800/50 px-3 py-1 rounded-full border border-white/5 uppercase">${txt}</span>`;
-            els.chatFeed.appendChild(div);
-            els.chatFeed.scrollTop = els.chatFeed.scrollHeight;
-        };
-
-        // --- EVENTS ---
-
-        els.chatInput.oninput = function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 128) + 'px';
-            els.sendBtn.disabled = this.value.trim() === '';
-        };
-
-        els.chatForm.onsubmit = async (e) => {
+        els.form.onsubmit = (e) => {
             e.preventDefault();
-            const text = els.chatInput.value.trim();
-            if (!text || !currentUser) return;
+            const text = els.input.value.trim();
+            if (!text) return;
+            
+            const payload = { type: 'msg', user: myUsername, text: text };
+            
+            if (isHost) {
+                addLog({ user: myUsername, text: text }, 'user');
+                broadcast(payload);
+            } else {
+                connections[0].send(payload);
+                addLog({ user: myUsername, text: text }, 'user');
+            }
+            
+            els.input.value = '';
+        };
 
-            els.chatInput.value = '';
-            els.chatInput.style.height = 'auto';
-            els.sendBtn.disabled = true;
-
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages'), {
-                uid: currentUser.uid,
-                pseudo: myPseudo,
-                text: text,
-                timestamp: Date.now()
+        document.getElementById('btn-copy-id').onclick = () => {
+            const id = els.roomId.textContent;
+            navigator.clipboard.writeText(id).then(() => {
+                alert("ID Salon copié ! Partagez-le avec vos amis.");
             });
         };
-
-        els.chatInput.onkeydown = (e) => {
-            if (e.key === 'Enter' && !e.shiftKey && !els.sendBtn.disabled) {
-                e.preventDefault();
-                els.chatForm.dispatchEvent(new Event('submit'));
-            }
-        };
-
-        // Sidebar logic
-        document.getElementById('toggle-list').onclick = () => {
-            els.sidebar.classList.remove('translate-x-full');
-            els.overlay.classList.remove('hidden');
-        };
-        document.getElementById('close-sidebar').onclick = els.overlay.onclick = () => {
-            els.sidebar.classList.add('translate-x-full');
-            els.overlay.classList.add('hidden');
-        };
-
-        // Settings / Rename
-        document.getElementById('btn-settings').onclick = () => {
-            els.renameInput.value = myPseudo;
-            els.modalRename.classList.remove('hidden');
-        };
-        document.getElementById('cancel-rename').onclick = () => els.modalRename.classList.add('hidden');
-        document.getElementById('confirm-rename').onclick = async () => {
-            const val = els.renameInput.value.trim();
-            if (val.length >= 3 && val !== myPseudo) {
-                await updatePresence(val);
-                localStorage.setItem(`irc_pseudo_${appId}`, val);
-            }
-            els.modalRename.classList.add('hidden');
-        };
-
-        document.getElementById('btn-logout').onclick = () => {
-            localStorage.removeItem(`irc_pseudo_${appId}`);
-            window.location.reload();
-        };
-
-        initSession();
     </script>
 </body>
 </html>
