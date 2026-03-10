@@ -23,7 +23,6 @@
             background-color: #09090b;
             color: #e4e4e7;
             font-family: 'Inter', sans-serif;
-            height: 100vh;
             height: 100dvh;
             overflow: hidden;
             -webkit-tap-highlight-color: transparent;
@@ -32,77 +31,65 @@
         .mono { font-family: 'JetBrains Mono', monospace; }
         
         .app-height {
-            height: 100vh;
             height: 100dvh;
             display: flex;
             flex-direction: column;
         }
 
         .glass-panel {
-            background: rgba(24, 24, 27, 0.8);
+            background: rgba(12, 12, 14, 0.95);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .message-line {
-            padding: 4px 12px;
-            transition: background 0.2s;
-            border-left: 2px solid transparent;
+            padding: 2px 12px;
+            animation: fadeIn 0.2s ease-out;
         }
         
-        .message-line:active { background: rgba(255,255,255,0.05); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
 
-        input, button { font-size: 16px !important; } /* Empêche le zoom auto sur iOS */
+        input, button { font-size: 16px !important; }
 
         .safe-pb { padding-bottom: var(--safe-bottom); }
         .safe-pt { padding-top: var(--safe-top); }
-
-        /* Animation de chargement */
-        .loader {
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="app-height">
 
-    <!-- Écran d'accueil / Setup -->
+    <!-- Écran d'accueil -->
     <div id="setup-screen" class="fixed inset-0 z-50 bg-[#09090b] flex items-center justify-center p-6 safe-pt safe-pb">
-        <div class="w-full max-w-md space-y-8 animate__animated animate__fadeIn">
+        <div class="w-full max-w-md space-y-8">
             <div class="text-center">
                 <div class="inline-flex p-4 rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-500 text-4xl mb-4">
-                    <i class="fa-solid fa-cloud-bolt"></i>
+                    <i class="fa-solid fa-microchip"></i>
                 </div>
                 <h1 class="text-3xl font-extrabold text-white tracking-tight">IRC P2P</h1>
-                <p class="text-zinc-500 text-sm mt-2 uppercase tracking-widest font-bold">Connexion Directe & Privée</p>
+                <p class="text-zinc-500 text-sm mt-2 uppercase tracking-widest font-bold">Connexion directe sécurisée</p>
             </div>
 
             <div class="bg-[#121215] border border-white/5 p-6 rounded-3xl shadow-2xl space-y-4">
                 <div>
-                    <label class="text-[10px] font-black text-zinc-500 uppercase ml-1">Ton Pseudo</label>
+                    <label class="text-[10px] font-black text-zinc-500 uppercase ml-1">Pseudo</label>
                     <input type="text" id="username-input" maxlength="12" 
                         class="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white focus:border-blue-500 outline-none transition-all"
-                        placeholder="Ex: Ghost_99">
+                        placeholder="Utilisateur_123">
                 </div>
 
                 <div class="pt-2 space-y-3">
-                    <button id="btn-create" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2">
-                        <span>Créer un salon</span>
-                        <i class="fa-solid fa-plus text-xs"></i>
+                    <button id="btn-create" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-600/20">
+                        Créer un salon
                     </button>
                     
                     <div class="relative flex items-center py-2">
                         <div class="flex-grow border-t border-zinc-800"></div>
-                        <span class="mx-4 text-zinc-600 text-[10px] font-bold uppercase">Rejoindre</span>
+                        <span class="mx-4 text-zinc-600 text-[10px] font-bold uppercase">Ou rejoindre</span>
                         <div class="flex-grow border-t border-zinc-800"></div>
                     </div>
 
@@ -120,13 +107,11 @@
 
     <!-- Interface principale -->
     <div id="main-interface" class="hidden flex-1 flex flex-col overflow-hidden">
-        
-        <!-- Header -->
         <header class="glass-panel px-4 py-3 safe-pt flex items-center justify-between z-40">
             <div class="flex items-center gap-3">
-                <div id="status-indicator" class="w-2.5 h-2.5 rounded-full bg-zinc-600 shadow-sm"></div>
+                <div id="status-indicator" class="w-2.5 h-2.5 rounded-full bg-zinc-600"></div>
                 <div>
-                    <h2 class="text-sm font-black text-white uppercase tracking-tight">#Direct-Channel</h2>
+                    <h2 class="text-sm font-black text-white uppercase tracking-tight">#P2P-GENERAL</h2>
                     <p id="room-id-display" class="text-[9px] text-zinc-500 mono select-all cursor-pointer">ID: --</p>
                 </div>
             </div>
@@ -141,29 +126,24 @@
             </div>
         </header>
 
-        <!-- Chat Area -->
         <div class="flex-1 flex overflow-hidden">
             <main class="flex-1 flex flex-col bg-[#09090b]">
-                <div id="messages-list" class="flex-1 overflow-y-auto py-4 custom-scroll mono text-[13px]">
-                    <!-- Les messages arrivent ici -->
-                </div>
+                <div id="messages-list" class="flex-1 overflow-y-auto py-4 custom-scroll mono text-[13px]"></div>
                 
-                <!-- Zone de saisie -->
                 <div class="p-3 sm:p-4 bg-zinc-900/30 border-t border-white/5 safe-pb">
                     <form id="input-form" class="flex gap-2 max-w-5xl mx-auto">
                         <input type="text" id="msg-input" autocomplete="off"
                             class="flex-1 bg-zinc-800/50 border border-zinc-700 rounded-2xl px-4 py-3 text-white outline-none focus:border-blue-500 transition-all" 
-                            placeholder="Message...">
-                        <button type="submit" class="w-12 h-12 bg-blue-600 rounded-2xl text-white flex items-center justify-center shadow-lg shadow-blue-600/10 active:scale-90 transition-all">
+                            placeholder="Écrire un message...">
+                        <button type="submit" class="w-12 h-12 bg-blue-600 rounded-2xl text-white flex items-center justify-center shadow-lg active:scale-90 transition-all">
                             <i class="fa-solid fa-paper-plane"></i>
                         </button>
                     </form>
                 </div>
             </main>
 
-            <!-- Sidebar Users (cachée sur petit mobile) -->
             <aside id="sidebar" class="hidden md:flex w-56 flex-col border-l border-white/5 bg-[#0c0c0e]">
-                <div class="p-4 border-b border-white/5 text-[10px] font-black text-zinc-500 uppercase tracking-widest flex justify-between">
+                <div class="p-4 border-b border-white/5 text-[10px] font-black text-zinc-500 uppercase flex justify-between">
                     <span>Membres</span>
                     <span id="user-count" class="text-blue-500">0</span>
                 </div>
@@ -172,7 +152,6 @@
         </div>
     </div>
 
-    <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 bg-zinc-800 text-white text-xs font-bold rounded-full shadow-2xl border border-white/10 opacity-0 transition-opacity pointer-events-none z-[100]"></div>
 
     <script>
@@ -182,8 +161,8 @@
         let connections = [];
         let isHost = false;
         let myUsername = localStorage.getItem('irc_user') || "";
-        let userList = new Set();
-        let lastRoomId = localStorage.getItem('irc_last_room') || "";
+        let userList = new Map();
+        let messageHistory = new Set();
 
         const els = {
             setup: document.getElementById('setup-screen'),
@@ -205,7 +184,6 @@
         };
 
         if (myUsername) els.username.value = myUsername;
-        if (lastRoomId) els.joinId.value = lastRoomId;
 
         const showToast = (msg) => {
             els.toast.textContent = msg;
@@ -240,71 +218,56 @@
 
         const updateUIUsers = () => {
             els.users.innerHTML = '';
-            userList.forEach(u => {
+            userList.forEach((pseudo, uid) => {
                 const item = document.createElement('div');
                 item.className = "flex items-center gap-2 text-zinc-400 py-1";
-                item.innerHTML = `<span class="w-1.5 h-1.5 rounded-full" style="background:${getColor(u)}"></span> <span class="truncate">${u}</span>`;
+                item.innerHTML = `<span class="w-1.5 h-1.5 rounded-full" style="background:${getColor(pseudo)}"></span> <span class="truncate">${pseudo}</span>`;
                 els.users.appendChild(item);
             });
             els.count.textContent = userList.size;
         };
 
-        const startPeer = (id = null) => {
-            peer = new Peer(id);
-            
-            peer.on('open', (id) => {
-                els.roomId.textContent = `ID: ${id}`;
-                localStorage.setItem('irc_last_room', id);
-                els.status.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]";
-                
-                if (isHost) {
-                    userList.add(myUsername);
-                    updateUIUsers();
-                    addLog("Salon créé. Prêt pour les connexions.");
-                }
-            });
+        const handleData = (data, senderConn) => {
+            // Évite de traiter deux fois le même message (par ID unique)
+            if (data.msgId && messageHistory.has(data.msgId)) return;
+            if (data.msgId) messageHistory.add(data.msgId);
 
-            peer.on('connection', (conn) => {
-                conn.on('open', () => {
-                    // L'hôte reçoit une demande
-                    conn.on('data', (data) => {
-                        if (data.type === 'join') {
-                            connections.push(conn);
-                            userList.add(data.user);
-                            addLog(`${data.user} a rejoint.`, 'sys');
-                            broadcast({ type: 'sys', text: `${data.user} est là.` });
-                            broadcast({ type: 'users', list: Array.from(userList) });
-                            updateUIUsers();
-                        }
-                        if (data.type === 'msg') {
-                            addLog({ user: data.user, text: data.text }, 'user');
-                            broadcast(data); // Rediffuse à tout le monde
+            if (data.type === 'join') {
+                if (!userList.has(data.uid)) {
+                    userList.set(data.uid, data.user);
+                    addLog(`${data.user} a rejoint le salon.`, 'sys');
+                    updateUIUsers();
+                    if (isHost) {
+                        broadcast({ type: 'users', list: Array.from(userList) });
+                    }
+                }
+            }
+
+            if (data.type === 'users') {
+                userList = new Map(data.list);
+                updateUIUsers();
+            }
+
+            if (data.type === 'msg') {
+                addLog({ user: data.user, text: data.text }, 'user');
+                if (isHost) {
+                    // L'hôte rediffuse à tout le monde SAUF à l'envoyeur
+                    connections.forEach(c => {
+                        if (c.open && c.peer !== senderConn.peer) {
+                            c.send(data);
                         }
                     });
-                });
-            });
-
-            peer.on('error', (err) => {
-                showToast("Erreur de connexion");
-                console.error(err);
-                if (err.type === 'peer-unavailable') {
-                    addLog("L'hôte est introuvable ou déconnecté.", 'sys');
-                    resetSession();
                 }
-            });
+            }
+
+            if (data.type === 'sys') addLog(data.text, 'sys');
         };
 
         const broadcast = (data) => {
             connections.forEach(c => { if(c.open) c.send(data); });
         };
 
-        const resetSession = () => {
-            localStorage.removeItem('irc_last_room');
-            if (peer) peer.destroy();
-            window.location.reload();
-        };
-
-        // --- EVENTS ---
+        // --- CORE ACTIONS ---
 
         els.btnCreate.onclick = () => {
             const name = els.username.value.trim();
@@ -312,9 +275,27 @@
             myUsername = name;
             localStorage.setItem('irc_user', myUsername);
             isHost = true;
-            els.setup.classList.add('hidden');
-            els.main.classList.remove('hidden');
-            startPeer();
+            
+            peer = new Peer();
+            peer.on('open', (id) => {
+                els.setup.classList.add('hidden');
+                els.main.classList.remove('hidden');
+                els.roomId.textContent = `ID: ${id}`;
+                els.status.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]";
+                userList.set(peer.id, myUsername);
+                updateUIUsers();
+                addLog("Salon créé. Prêt pour les connexions.", 'sys');
+            });
+
+            peer.on('connection', (conn) => {
+                conn.on('open', () => {
+                    connections.push(conn);
+                    conn.on('data', (data) => handleData(data, conn));
+                });
+                conn.on('close', () => {
+                    connections = connections.filter(c => c.peer !== conn.peer);
+                });
+            });
         };
 
         els.btnJoin.onclick = () => {
@@ -327,30 +308,30 @@
             isHost = false;
             
             peer = new Peer();
-            peer.on('open', () => {
+            peer.on('open', (myId) => {
                 const conn = peer.connect(hostId);
                 conn.on('open', () => {
                     connections = [conn];
-                    conn.send({ type: 'join', user: myUsername });
                     els.setup.classList.add('hidden');
                     els.main.classList.remove('hidden');
-                    els.status.className = "w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]";
-                    addLog("Connecté au salon hôte.", 'sys');
+                    els.status.className = "w-2.5 h-2.5 rounded-full bg-blue-500";
+                    els.roomId.textContent = `ID: ${hostId}`;
+                    
+                    conn.send({ type: 'join', user: myUsername, uid: myId });
+                    addLog("Connecté au salon.", 'sys');
                 });
 
-                conn.on('data', (data) => {
-                    if (data.type === 'users') {
-                        userList = new Set(data.list);
-                        updateUIUsers();
-                    }
-                    if (data.type === 'msg') addLog({ user: data.user, text: data.text }, 'user');
-                    if (data.type === 'sys') addLog(data.text, 'sys');
-                });
-
+                conn.on('data', (data) => handleData(data, conn));
+                
                 conn.on('close', () => {
-                    addLog("Connexion perdue avec l'hôte.", 'sys');
-                    showToast("Hôte déconnecté");
+                    showToast("Déconnecté de l'hôte");
+                    setTimeout(() => window.location.reload(), 2000);
                 });
+            });
+
+            peer.on('error', (err) => {
+                showToast("Impossible de trouver le salon");
+                console.error(err);
             });
         };
 
@@ -359,16 +340,16 @@
             const text = els.input.value.trim();
             if (!text) return;
             
-            const payload = { type: 'msg', user: myUsername, text: text };
+            const msgId = Date.now() + "-" + Math.random().toString(36).substr(2, 9);
+            const payload = { type: 'msg', user: myUsername, text: text, msgId: msgId };
             
+            messageHistory.add(msgId);
+            addLog({ user: myUsername, text: text }, 'user');
+
             if (isHost) {
-                addLog({ user: myUsername, text: text }, 'user');
                 broadcast(payload);
             } else if (connections[0] && connections[0].open) {
                 connections[0].send(payload);
-                addLog({ user: myUsername, text: text }, 'user');
-            } else {
-                showToast("Non connecté");
             }
             els.input.value = '';
         };
@@ -379,16 +360,15 @@
         };
 
         els.btnReset.onclick = () => {
-            if(confirm("Se déconnecter et supprimer les données ?")) {
-                resetSession();
+            if(confirm("Voulez-vous quitter ?")) {
+                if (peer) peer.destroy();
+                window.location.reload();
             }
         };
 
-        // Gestion auto de la taille du clavier sur mobile
         window.addEventListener('resize', () => {
             els.messages.scrollTop = els.messages.scrollHeight;
         });
-
     </script>
 </body>
 </html>
