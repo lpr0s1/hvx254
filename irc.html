@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IRC Anonyme Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap');
+        
+        :root {
+            --bg-main: #020617;
+            --bg-card: #0f172a;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            height: 100dvh;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-scroll::-webkit-scrollbar { width: 4px; }
+        .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        .message-bubble {
+            animation: slideIn 0.2s ease-out;
+            word-break: break-word;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        input:focus, textarea:focus { outline: none; }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <!-- Auth / Overlay Pseudo -->
+    <div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-6 transition-all duration-500">
+        <div class="w-full max-w-md p-8 glass rounded-3xl shadow-2xl text-center">
+            <div class="mb-6 flex justify-center">
+                <div class="w-20 h-20 bg-blue-600/20 rounded-2xl flex items-center justify-center border border-blue-500/30 text-blue-500 text-3xl shadow-lg shadow-blue-500/10">
+                    <i class="fa-solid fa-terminal"></i>
+                </div>
+            </div>
+            <h1 class="text-3xl font-black mb-2 tracking-tight">IRC ANONYME</h1>
+            <p class="text-slate-400 mb-8 text-sm uppercase tracking-widest font-bold">Réseau décentralisé</p>
+            
+            <form id="auth-form" class="space-y-4">
+                <input type="text" id="pseudo-input" required maxlength="15" minlength="3"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-5 py-4 text-center font-bold text-xl focus:border-blue-500 transition-colors placeholder:text-slate-600"
+                    placeholder="VOTRE_PSEUDO">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-95">
+                    REJOINDRE LE CANAL
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Chat UI -->
+    <div id="main-ui" class="hidden flex-1 flex flex-col h-full overflow-hidden opacity-0 transition-opacity duration-500">
+        
+        <!-- Header -->
+        <header class="h-16 glass flex items-center justify-between px-4 sm:px-6 z-40">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                    <h2 class="font-black text-sm uppercase tracking-tighter sm:text-lg">#general-irc</h2>
+                </div>
+                <div class="hidden sm:block h-6 w-px bg-slate-700"></div>
+                <p id="user-display-name" class="hidden sm:block text-xs font-bold text-slate-400 mono"></p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button id="toggle-list" class="flex items-center gap-2 bg-slate-800/50 hover:bg-slate-800 px-3 py-2 rounded-lg transition-colors border border-slate-700">
+                    <i class="fa-solid fa-users text-blue-400"></i>
+                    <span id="counter" class="font-bold text-xs">0</span>
+                </button>
+                <button id="btn-settings" class="p-2.5 bg-slate-800/50 rounded-lg hover:text-blue-400 transition-colors border border-slate-700">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+                <button id="btn-logout" class="p-2.5 bg-slate-800/50 rounded-lg hover:text-red-400 transition-colors border border-slate-700">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Container Body -->
+        <div class="flex-1 flex overflow-hidden relative">
+            
+            <!-- Chat Feed -->
+            <main id="chat-feed" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 chat-scroll">
+                <!-- System markers injected here -->
+            </main>
+
+            <!-- Sidebar Users -->
+            <aside id="sidebar" class="absolute right-0 top-0 bottom-0 w-64 glass border-l border-white/5 transform translate-x-full md:relative md:translate-x-0 transition-transform duration-300 z-30">
+                <div class="p-4 border-b border-white/5 flex items-center justify-between bg-slate-900/50">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Utilisateurs</span>
+                    <button id="close-sidebar" class="md:hidden text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <ul id="user-list" class="p-2 space-y-1 overflow-y-auto h-full"></ul>
+            </aside>
+            <div id="overlay" class="hidden fixed inset-0 bg-black/60 z-20 md:hidden"></div>
+        </div>
+
+        <!-- Input Area -->
+        <footer class="p-3 sm:p-4 glass">
+            <form id="chat-form" class="max-w-5xl mx-auto flex items-end gap-3">
+                <div class="flex-1 relative">
+                    <textarea id="chat-input" rows="1" 
+                        class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 sm:py-4 text-slate-100 placeholder:text-slate-600 focus:border-blue-500 transition-all resize-none overflow-hidden max-h-32"
+                        placeholder="Tapez votre message..."></textarea>
+                </div>
+                <button type="submit" id="send-btn" disabled 
+                    class="w-12 h-12 sm:w-14 sm:h-14 bg-blue-600 rounded-xl flex items-center justify-center text-white disabled:opacity-20 transition-all active:scale-90 shadow-lg shadow-blue-600/10">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </footer>
+    </div>
+
+    <!-- Modal Rename -->
+    <div id="modal-rename" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="w-full max-w-sm glass p-6 rounded-2xl animate__animated animate__zoomIn">
+            <h3 class="text-lg font-bold mb-4">Changer de pseudo</h3>
+            <input type="text" id="rename-input" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 mb-4 focus:border-blue-500 transition-colors font-bold">
+            <div class="flex gap-2">
+                <button id="cancel-rename" class="flex-1 py-3 bg-slate-800 rounded-xl font-bold">Annuler</button>
+                <button id="confirm-rename" class="flex-1 py-3 bg-blue-600 rounded-xl font-bold">Valider</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, serverTimestamp, query, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'irc-master-secure';
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State
+        let currentUser = null;
+        let myPseudo = '';
+        let knownUsers = new Map();
+        let renderedMsgs = new Set();
+        let initialPresenceLoad = true;
+
+        const MASCULINE_COLORS = [
+            '#3b82f6', // blue-500
+            '#0ea5e9', // sky-500
+            '#06b6d4', // cyan-500
+            '#10b981', // emerald-500
+            '#84cc16', // lime-500
+            '#f59e0b', // amber-500
+            '#64748b', // slate-500
+            '#22c55e', // green-500
+            '#6366f1', // indigo-500
+            '#14b8a6', // teal-500
+            '#f97316'  // orange-500
+        ];
+
+        // Color helper based on UID hash
+        const getUserColor = (uid) => {
+            let hash = 0;
+            for (let i = 0; i < uid.length; i++) {
+                hash = uid.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return MASCULINE_COLORS[Math.abs(hash) % MASCULINE_COLORS.length];
+        };
+
+        const els = {
+            auth: document.getElementById('auth-overlay'),
+            main: document.getElementById('main-ui'),
+            authForm: document.getElementById('auth-form'),
+            pseudoInput: document.getElementById('pseudo-input'),
+            chatFeed: document.getElementById('chat-feed'),
+            chatInput: document.getElementById('chat-input'),
+            chatForm: document.getElementById('chat-form'),
+            userList: document.getElementById('user-list'),
+            counter: document.getElementById('counter'),
+            sendBtn: document.getElementById('send-btn'),
+            userName: document.getElementById('user-display-name'),
+            sidebar: document.getElementById('sidebar'),
+            overlay: document.getElementById('overlay'),
+            modalRename: document.getElementById('modal-rename'),
+            renameInput: document.getElementById('rename-input')
+        };
+
+        // --- AUTH LOGIC ---
+        const initSession = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        };
+
+        onAuthStateChanged(auth, u => {
+            currentUser = u;
+            if (u) {
+                const saved = localStorage.getItem(`irc_pseudo_${appId}`);
+                if (saved) {
+                    myPseudo = saved;
+                    enterChat();
+                } else {
+                    els.auth.classList.remove('hidden');
+                }
+            }
+        });
+
+        els.authForm.onsubmit = e => {
+            e.preventDefault();
+            const val = els.pseudoInput.value.trim();
+            if (val.length >= 3) {
+                myPseudo = val;
+                localStorage.setItem(`irc_pseudo_${appId}`, val);
+                enterChat();
+            }
+        };
+
+        const enterChat = () => {
+            els.auth.classList.add('opacity-0');
+            setTimeout(() => {
+                els.auth.classList.add('hidden');
+                els.main.classList.remove('hidden');
+                void els.main.offsetWidth;
+                els.main.classList.remove('opacity-0');
+                els.userName.textContent = `@${myPseudo}`;
+                els.chatInput.focus();
+                
+                updatePresence();
+                setInterval(updatePresence, 20000);
+                startListeners();
+            }, 500);
+        };
+
+        // --- CORE FUNCTIONALITIES ---
+
+        const updatePresence = async (newPseudo = null) => {
+            if (!currentUser) return;
+            if (newPseudo) myPseudo = newPseudo;
+            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'presence', currentUser.uid);
+            await setDoc(ref, {
+                uid: currentUser.uid,
+                pseudo: myPseudo,
+                lastSeen: Date.now()
+            });
+            els.userName.textContent = `@${myPseudo}`;
+        };
+
+        const startListeners = () => {
+            // 1. Presence Listener
+            const pRef = collection(db, 'artifacts', appId, 'public', 'data', 'presence');
+            onSnapshot(pRef, snap => {
+                const now = Date.now();
+                const currentMap = new Map();
+                snap.forEach(d => {
+                    const data = d.data();
+                    if (now - data.lastSeen < 60000) currentMap.set(data.uid, data);
+                });
+
+                if (!initialPresenceLoad) {
+                    currentMap.forEach((u, uid) => {
+                        if (!knownUsers.has(uid) && uid !== currentUser.uid) {
+                            addSystemMarker(`[+] ${u.pseudo} est entré dans le canal`);
+                        } else if (knownUsers.has(uid) && knownUsers.get(uid).pseudo !== u.pseudo) {
+                            addSystemMarker(`[*] ${knownUsers.get(uid).pseudo} est maintenant connu sous le nom de ${u.pseudo}`);
+                        }
+                    });
+                    knownUsers.forEach((u, uid) => {
+                        if (!currentMap.has(uid) && uid !== currentUser.uid) {
+                            addSystemMarker(`[-] ${u.pseudo} est sorti (timeout)`);
+                        }
+                    });
+                }
+                knownUsers = currentMap;
+                initialPresenceLoad = false;
+                renderSidebar();
+            });
+
+            // 2. Message Listener
+            const mRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
+            // Fetch messages from last hour to avoid overload
+            onSnapshot(mRef, snap => {
+                let batch = [];
+                snap.forEach(d => batch.push({ id: d.id, ...d.data() }));
+                batch.sort((a,b) => a.timestamp - b.timestamp).forEach(m => {
+                    if (!renderedMsgs.has(m.id)) {
+                        appendMessage(m);
+                        renderedMsgs.add(m.id);
+                    }
+                });
+            });
+        };
+
+        const renderSidebar = () => {
+            els.counter.textContent = knownUsers.size;
+            els.userList.innerHTML = '';
+            Array.from(knownUsers.values()).sort((a,b) => a.pseudo.localeCompare(b.pseudo)).forEach(u => {
+                const isMe = u.uid === currentUser.uid;
+                const color = getUserColor(u.uid);
+                const li = document.createElement('li');
+                li.className = `flex items-center gap-3 p-2.5 rounded-xl border border-transparent ${isMe ? 'bg-blue-600/10 border-blue-500/20' : 'hover:bg-white/5'}`;
+                li.innerHTML = `
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold border border-white/10 shrink-0" style="background: ${color}22; color: ${color}">
+                        ${u.pseudo.substring(0,2).toUpperCase()}
+                    </div>
+                    <span class="text-sm font-bold truncate ${isMe ? 'text-blue-400' : 'text-slate-200'}">${u.pseudo}</span>
+                `;
+                els.userList.appendChild(li);
+            });
+        };
+
+        const appendMessage = (m) => {
+            const isMe = m.uid === currentUser.uid;
+            const color = getUserColor(m.uid);
+            const time = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '--:--';
+
+            const div = document.createElement('div');
+            div.className = `flex flex-col mb-4 message-bubble ${isMe ? 'items-end' : 'items-start'}`;
+            
+            const escape = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+            div.innerHTML = `
+                <div class="flex items-center gap-2 mb-1 px-1">
+                    <span class="text-[11px] font-black uppercase tracking-tight mono" style="color: ${color}">${escape(m.pseudo)}</span>
+                    <span class="text-[9px] text-slate-600 mono">${time}</span>
+                </div>
+                <div class="max-w-[90%] sm:max-w-[75%] px-4 py-3 rounded-2xl ${isMe ? 'bg-blue-600 text-white rounded-tr-none shadow-lg shadow-blue-900/20' : 'glass text-slate-200 rounded-tl-none border-white/10'}">
+                    <p class="text-sm sm:text-[15px] whitespace-pre-wrap leading-relaxed">${escape(m.text)}</p>
+                </div>
+            `;
+            els.chatFeed.appendChild(div);
+            els.chatFeed.scrollTop = els.chatFeed.scrollHeight;
+        };
+
+        const addSystemMarker = (txt) => {
+            const div = document.createElement('div');
+            div.className = "flex justify-center my-4 opacity-50";
+            div.innerHTML = `<span class="text-[10px] mono bg-slate-800/50 px-3 py-1 rounded-full border border-white/5 uppercase">${txt}</span>`;
+            els.chatFeed.appendChild(div);
+            els.chatFeed.scrollTop = els.chatFeed.scrollHeight;
+        };
+
+        // --- EVENTS ---
+
+        els.chatInput.oninput = function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 128) + 'px';
+            els.sendBtn.disabled = this.value.trim() === '';
+        };
+
+        els.chatForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const text = els.chatInput.value.trim();
+            if (!text || !currentUser) return;
+
+            els.chatInput.value = '';
+            els.chatInput.style.height = 'auto';
+            els.sendBtn.disabled = true;
+
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages'), {
+                uid: currentUser.uid,
+                pseudo: myPseudo,
+                text: text,
+                timestamp: Date.now()
+            });
+        };
+
+        els.chatInput.onkeydown = (e) => {
+            if (e.key === 'Enter' && !e.shiftKey && !els.sendBtn.disabled) {
+                e.preventDefault();
+                els.chatForm.dispatchEvent(new Event('submit'));
+            }
+        };
+
+        // Sidebar logic
+        document.getElementById('toggle-list').onclick = () => {
+            els.sidebar.classList.remove('translate-x-full');
+            els.overlay.classList.remove('hidden');
+        };
+        document.getElementById('close-sidebar').onclick = els.overlay.onclick = () => {
+            els.sidebar.classList.add('translate-x-full');
+            els.overlay.classList.add('hidden');
+        };
+
+        // Settings / Rename
+        document.getElementById('btn-settings').onclick = () => {
+            els.renameInput.value = myPseudo;
+            els.modalRename.classList.remove('hidden');
+        };
+        document.getElementById('cancel-rename').onclick = () => els.modalRename.classList.add('hidden');
+        document.getElementById('confirm-rename').onclick = async () => {
+            const val = els.renameInput.value.trim();
+            if (val.length >= 3 && val !== myPseudo) {
+                await updatePresence(val);
+                localStorage.setItem(`irc_pseudo_${appId}`, val);
+            }
+            els.modalRename.classList.add('hidden');
+        };
+
+        document.getElementById('btn-logout').onclick = () => {
+            localStorage.removeItem(`irc_pseudo_${appId}`);
+            window.location.reload();
+        };
+
+        initSession();
+    </script>
+</body>
+</html>
+
