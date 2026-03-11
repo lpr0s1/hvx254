@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <title>Pomodoro PWA</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f172a">
 <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9vywgAAAAASUVORK5CYII=">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 const iconDataUrl="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9vywgAAAAASUVORK5CYII=";
-const manifestData={name:"Pomodoro PWA",short_name:"Etudes",start_url:"./",display:"standalone",background_color:"#020617",theme_color:"#0f172a",icons:[{src:iconDataUrl,sizes:"192x192",type:"image/png"},{src:iconDataUrl,sizes:"512x512",type:"image/png"}]};
+const manifestData={name:"Pomodoro",short_name:"Pomodoro",start_url:"./",display:"standalone",background_color:"#333",theme_color:"#0f172a",icons:[{src:iconDataUrl,sizes:"192x192",type:"image/png"},{src:iconDataUrl,sizes:"512x512",type:"image/png"}]};
 const manifestBlob=new Blob([JSON.stringify(manifestData)],{type:"application/json"});
 const manifestUrl=URL.createObjectURL(manifestBlob);
 const manifestLink=document.createElement("link");
