@@ -17,6 +17,7 @@
         :root {
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
+            --keyboard-offset: 0px;
         }
 
         body, html {
@@ -28,19 +29,26 @@
             background-color: #09090b;
             color: #e4e4e7;
             font-family: 'Inter', sans-serif;
-            position: fixed; /* Empêche le rebond élastique sur iOS */
+            /* Empêche le défilement élastique sur iOS qui casse le layout */
+            overscroll-behavior: none; 
         }
 
         .mono { font-family: 'JetBrains Mono', monospace; }
         
-        /* Layout principal */
+        /* Conteneur principal qui réagit à la taille du viewport réel */
         .app-shell {
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            height: 100dvh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 100%;
             padding-top: var(--safe-top);
-            padding-bottom: var(--safe-bottom);
+            /* On ajuste le bas dynamiquement avec le clavier */
+            padding-bottom: calc(var(--safe-bottom) + var(--keyboard-offset));
+            transition: padding-bottom 0.1s ease-out;
         }
 
         .chat-container {
@@ -56,6 +64,9 @@
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             padding: 10px 0;
+            /* Inversion de l'ordre pour coller en bas ou scroll normal */
+            display: flex;
+            flex-direction: column;
         }
 
         .message-line {
@@ -64,129 +75,135 @@
             font-size: 13px;
         }
 
+        /* Overlay de transition pour éviter le bug d'affichage blanc */
         .loading-overlay {
-            position: absolute;
+            position: fixed;
             inset: 0;
             background: #09090b;
-            z-index: 100;
+            z-index: 500;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
 
-        /* Fix pour les inputs sur iOS */
+        /* Fix pour les inputs sur iOS pour éviter le zoom automatique */
         input { font-size: 16px !important; }
 
         .btn-active:active { transform: scale(0.96); }
         
         .spinning { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Barre d'input flottante mieux gérée */
+        .input-bar {
+            background: rgba(24, 24, 27, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="app-shell">
-        
-        <!-- Écran de Setup -->
-        <div id="setup-screen" class="fixed inset-0 z-[200] bg-[#09090b] flex items-center justify-center p-6">
-            <div class="w-full max-w-sm space-y-6">
-                <div class="text-center space-y-2">
-                    <div class="inline-flex p-3 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-500 text-3xl mb-2">
-                        <i class="fa-solid fa-tower-broadcast"></i>
-                    </div>
-                    <h1 class="text-2xl font-black text-white">IRC P2P</h1>
-                    <p class="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Temps réel • Sans inscription</p>
+    <div id="loading-screen" class="loading-overlay hidden">
+        <i class="fa-solid fa-circle-notch text-blue-500 text-3xl spinning"></i>
+        <p id="loading-text" class="text-zinc-500 text-xs mt-4 font-bold uppercase tracking-widest text-center px-6">
+            Initialisation du canal...
+        </p>
+    </div>
+
+    <!-- Écran de Setup -->
+    <div id="setup-screen" class="fixed inset-0 z-[200] bg-[#09090b] flex items-center justify-center p-6">
+        <div class="w-full max-w-sm space-y-6">
+            <div class="text-center space-y-2">
+                <div class="inline-flex p-3 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-500 text-3xl mb-2">
+                    <i class="fa-solid fa-tower-broadcast"></i>
                 </div>
-
-                <div class="space-y-4">
-                    <input type="text" id="username-input" maxlength="12" 
-                        class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 text-white focus:border-blue-500 outline-none"
-                        placeholder="Ton pseudo">
-
-                    <div class="grid grid-cols-1 gap-3">
-                        <button id="btn-create" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl btn-active transition-all">
-                            Créer un salon
-                        </button>
-                        
-                        <div class="flex items-center gap-3 py-1">
-                            <div class="flex-grow border-t border-zinc-800"></div>
-                            <span class="text-zinc-600 text-[10px] font-bold uppercase">Ou rejoindre</span>
-                            <div class="flex-grow border-t border-zinc-800"></div>
-                        </div>
-
-                        <input type="text" id="join-id-input" 
-                            class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-3 text-white text-center mono text-sm focus:border-blue-500 outline-none"
-                            placeholder="ID du salon">
-                        
-                        <button id="btn-join" class="w-full bg-zinc-800 text-white font-bold py-4 rounded-2xl btn-active transition-all">
-                            Se connecter
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Interface de Chat -->
-        <div id="main-interface" class="hidden flex-1 flex flex-col overflow-hidden">
-            
-            <!-- Chargement interne -->
-            <div id="loader" class="loading-overlay hidden">
-                <i class="fa-solid fa-circle-notch text-blue-500 text-3xl spinning"></i>
-                <p class="text-zinc-500 text-xs mt-4 font-bold uppercase tracking-widest">Connexion au réseau...</p>
+                <h1 class="text-2xl font-black text-white">IRC P2P</h1>
+                <p class="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Connectivité Directe</p>
             </div>
 
-            <!-- Header -->
-            <header class="h-14 flex items-center justify-between px-4 border-b border-white/5 bg-zinc-900/50">
-                <div class="flex items-center gap-3">
-                    <div id="status-dot" class="w-2 h-2 rounded-full bg-zinc-600"></div>
-                    <div>
-                        <div class="text-[11px] font-black text-white uppercase leading-none">Canal P2P</div>
-                        <div id="room-display" class="text-[9px] text-zinc-500 mono mt-1">ID: --</div>
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <button id="btn-copy" class="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-800 text-zinc-400 btn-active">
-                        <i class="fa-solid fa-copy text-sm"></i>
-                    </button>
-                    <button id="btn-reset" class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-900/10 text-red-500 border border-red-500/10 btn-active">
-                        <i class="fa-solid fa-trash-can text-sm"></i>
-                    </button>
-                </div>
-            </header>
+            <div class="space-y-4">
+                <input type="text" id="username-input" maxlength="12" 
+                    class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 text-white focus:border-blue-500 outline-none"
+                    placeholder="Pseudo">
 
-            <div class="chat-container">
-                <div id="messages-list" class="mono"></div>
-                
-                <!-- Input bar -->
-                <div class="p-3 bg-zinc-900/80 border-t border-white/5">
-                    <form id="chat-form" class="flex gap-2 max-w-4xl mx-auto">
-                        <input type="text" id="chat-input" autocomplete="off"
-                            class="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500" 
-                            placeholder="Message...">
-                        <button type="submit" class="w-12 h-12 bg-blue-600 rounded-xl text-white flex items-center justify-center shadow-lg btn-active">
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
-                    </form>
+                <div class="grid grid-cols-1 gap-3">
+                    <button id="btn-create" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl btn-active transition-all">
+                        Créer un salon
+                    </button>
+                    
+                    <div class="flex items-center gap-3 py-1">
+                        <div class="flex-grow border-t border-zinc-800"></div>
+                        <span class="text-zinc-600 text-[10px] font-bold uppercase">Ou</span>
+                        <div class="flex-grow border-t border-zinc-800"></div>
+                    </div>
+
+                    <input type="text" id="join-id-input" 
+                        class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-3 text-white text-center mono text-sm focus:border-blue-500 outline-none"
+                        placeholder="ID du salon">
+                    
+                    <button id="btn-join" class="w-full bg-zinc-800 text-white font-bold py-4 rounded-2xl btn-active transition-all">
+                        Se connecter
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Notification -->
-    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 px-4 py-2 bg-zinc-800 text-white text-[10px] font-bold rounded-full shadow-2xl border border-white/10 opacity-0 transition-opacity pointer-events-none z-[300]"></div>
+    <!-- Interface de Chat -->
+    <div id="main-interface" class="hidden app-shell">
+        <header class="h-14 flex items-center justify-between px-4 border-b border-white/5 bg-zinc-900/50 flex-none">
+            <div class="flex items-center gap-3">
+                <div id="status-dot" class="w-2 h-2 rounded-full bg-zinc-600"></div>
+                <div>
+                    <div class="text-[11px] font-black text-white uppercase leading-none">Canal P2P</div>
+                    <div id="room-display" class="text-[9px] text-zinc-500 mono mt-1">ID: --</div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button id="btn-copy" class="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-800 text-zinc-400 btn-active">
+                    <i class="fa-solid fa-copy text-sm"></i>
+                </button>
+                <button id="btn-reset" class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-900/10 text-red-500 border border-red-500/10 btn-active">
+                    <i class="fa-solid fa-door-open text-sm"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="chat-container">
+            <div id="messages-list" class="mono"></div>
+            
+            <div class="input-bar flex-none">
+                <form id="chat-form" class="flex gap-2 max-w-4xl mx-auto">
+                    <input type="text" id="chat-input" autocomplete="off"
+                        class="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500" 
+                        placeholder="Écrire...">
+                    <button type="submit" class="w-12 h-12 bg-blue-600 rounded-xl text-white flex items-center justify-center shadow-lg btn-active">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 px-4 py-2 bg-zinc-800 text-white text-[10px] font-bold rounded-full shadow-2xl border border-white/10 opacity-0 transition-opacity pointer-events-none z-[600]"></div>
 
     <script>
         let peer = null;
         let connections = [];
         let isHost = false;
         let myUsername = localStorage.getItem('irc_user') || "";
-        let currentRoomId = "";
-
+        
         const els = {
             setup: document.getElementById('setup-screen'),
             main: document.getElementById('main-interface'),
-            loader: document.getElementById('loader'),
+            loader: document.getElementById('loading-screen'),
+            loadText: document.getElementById('loading-text'),
             username: document.getElementById('username-input'),
             joinId: document.getElementById('join-id-input'),
             btnCreate: document.getElementById('btn-create'),
@@ -203,6 +220,18 @@
 
         if (myUsername) els.username.value = myUsername;
 
+        // Gestion du clavier mobile via VisualViewport
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                const offset = window.innerHeight - window.visualViewport.height;
+                document.documentElement.style.setProperty('--keyboard-offset', `${offset}px`);
+                // Scroll au bas de la liste lors de l'ouverture du clavier
+                setTimeout(() => {
+                    els.messages.scrollTop = els.messages.scrollHeight;
+                }, 100);
+            });
+        }
+
         const notify = (msg) => {
             els.toast.textContent = msg;
             els.toast.style.opacity = "1";
@@ -215,21 +244,34 @@
             const time = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
             
             if (isSys) {
-                div.innerHTML = `<span class="text-zinc-600 italic">[${time}] • ${user}</span>`;
+                div.innerHTML = `<span class="text-zinc-600 italic text-[11px]">[${time}] • ${user}</span>`;
             } else {
                 const colors = ['#60a5fa', '#34d399', '#fbbf24', '#f87171', '#818cf8', '#fb923c'];
                 const hash = user.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
                 const color = colors[hash % colors.length];
-                div.innerHTML = `<span class="text-zinc-700 mr-1">${time}</span> <span style="color:${color}" class="font-bold">&lt;${user}&gt;</span> <span class="text-zinc-300 ml-1">${text}</span>`;
+                div.innerHTML = `<span class="text-zinc-700 text-[10px] mr-1">${time}</span> <span style="color:${color}" class="font-bold">&lt;${user}&gt;</span> <span class="text-zinc-300 ml-1 leading-relaxed">${text}</span>`;
             }
             els.messages.appendChild(div);
             els.messages.scrollTop = els.messages.scrollHeight;
         };
 
-        const initPeer = (hostToJoin = null) => {
-            els.loader.classList.remove('hidden');
+        const showMainInterface = () => {
+            // Force le reflow pour éviter le bug d'affichage
             els.setup.classList.add('hidden');
             els.main.classList.remove('hidden');
+            
+            // Hack pour forcer le navigateur à recalculer les dimensions immédiatement
+            window.dispatchEvent(new Event('resize'));
+            
+            setTimeout(() => {
+                els.loader.classList.add('hidden');
+                els.messages.scrollTop = els.messages.scrollHeight;
+            }, 100);
+        };
+
+        const initPeer = (hostToJoin = null) => {
+            els.loader.classList.remove('hidden');
+            els.loadText.textContent = hostToJoin ? "Recherche du salon..." : "Création du salon...";
 
             peer = new Peer();
 
@@ -239,11 +281,10 @@
                     setupConn(conn);
                 } else {
                     isHost = true;
-                    currentRoomId = id;
                     els.room.textContent = `ID: ${id}`;
-                    els.loader.classList.add('hidden');
-                    els.status.className = "w-2 h-2 rounded-full bg-emerald-500";
-                    addMessage("Salon créé avec succès.", null, true);
+                    els.status.className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]";
+                    showMainInterface();
+                    addMessage("Salon créé. Prêt pour les connexions.", null, true);
                 }
             });
 
@@ -253,17 +294,21 @@
 
             peer.on('error', (err) => {
                 console.error(err);
-                notify("Erreur de connexion.");
-                setTimeout(() => location.reload(), 2000);
+                els.loader.classList.add('hidden');
+                notify("Connexion impossible. Vérifiez l'ID.");
+                if(!isHost) {
+                    els.setup.classList.remove('hidden');
+                    els.main.classList.add('hidden');
+                }
             });
         };
 
         const setupConn = (conn) => {
             conn.on('open', () => {
                 if (!isHost) {
-                    els.loader.classList.add('hidden');
-                    els.status.className = "w-2 h-2 rounded-full bg-blue-500";
+                    els.status.className = "w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.3)]";
                     els.room.textContent = `ID: ${conn.peer}`;
+                    showMainInterface();
                     addMessage("Connecté au salon.", null, true);
                 }
                 
@@ -272,13 +317,16 @@
 
                 conn.on('data', (data) => {
                     if (data.type === 'join') {
-                        addMessage(`${data.user} a rejoint.`, null, true);
+                        // On évite les logs en boucle
+                        if (!isHost || !connections.find(c => c.peer === conn.peer && c.isAnnounced)) {
+                            addMessage(`${data.user} a rejoint le salon.`, null, true);
+                            conn.isAnnounced = true;
+                        }
                     } else if (data.type === 'msg') {
                         addMessage(data.user, data.text);
                         if (isHost) {
-                            // L'hôte rediffuse
                             connections.forEach(c => {
-                                if (c.peer !== conn.peer) c.send(data);
+                                if (c.peer !== conn.peer && c.open) c.send(data);
                             });
                         }
                     }
@@ -288,7 +336,7 @@
             conn.on('close', () => {
                 connections = connections.filter(c => c.peer !== conn.peer);
                 if (!isHost) {
-                    notify("Salon fermé par l'hôte.");
+                    notify("L'hôte s'est déconnecté.");
                     location.reload();
                 }
             });
@@ -296,7 +344,7 @@
 
         els.btnCreate.onclick = () => {
             const name = els.username.value.trim();
-            if (!name) return notify("Pseudo requis");
+            if (!name) return notify("Un pseudo est requis");
             myUsername = name;
             localStorage.setItem('irc_user', name);
             initPeer();
@@ -324,21 +372,22 @@
             });
 
             els.input.value = '';
+            // Sur mobile, on garde le focus pour que le clavier reste ouvert
             els.input.focus();
         };
 
         els.btnCopy.onclick = () => {
             const id = els.room.textContent.replace('ID: ', '');
-            navigator.clipboard.writeText(id).then(() => notify("ID Copié !"));
+            navigator.clipboard.writeText(id).then(() => notify("ID copié dans le presse-papier !"));
         };
 
         els.btnReset.onclick = () => {
-            if (confirm("Voulez-vous quitter ce salon ?")) {
+            if (confirm("Voulez-vous quitter ?")) {
                 location.reload();
             }
         };
 
-        // Fix resize mobile
+        // Redimensionnement automatique de la liste
         window.addEventListener('resize', () => {
             els.messages.scrollTop = els.messages.scrollHeight;
         });
