@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>IRC P2P Connect</title>
+    <title>IRC P2P Direct</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -19,195 +19,183 @@
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             background-color: #09090b;
             color: #e4e4e7;
             font-family: 'Inter', sans-serif;
-            height: 100dvh;
-            width: 100vw;
-            margin: 0;
-            padding: 0;
-            overflow: hidden; /* Empêche le scroll du body sur mobile */
-            position: fixed; /* Bloque l'écran pour éviter le "pull-to-refresh" */
+            position: fixed; /* Empêche le rebond élastique sur iOS */
         }
 
         .mono { font-family: 'JetBrains Mono', monospace; }
         
-        .app-container {
-            height: 100dvh;
+        /* Layout principal */
+        .app-shell {
             display: flex;
             flex-direction: column;
+            height: 100vh;
+            height: 100dvh;
             padding-top: var(--safe-top);
             padding-bottom: var(--safe-bottom);
         }
 
-        .glass-panel {
-            background: rgba(12, 12, 14, 0.95);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
         }
 
-        /* Optimisation de l'affichage des messages */
         #messages-list {
             flex: 1;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch; /* Scroll fluide iOS */
+            -webkit-overflow-scrolling: touch;
+            padding: 10px 0;
         }
 
         .message-line {
             padding: 4px 16px;
             word-break: break-word;
-            animation: fadeIn 0.15s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(2px); }
-            to { opacity: 1; transform: translateY(0); }
+            font-size: 13px;
         }
 
-        /* Scrollbar discrète */
-        .custom-scroll::-webkit-scrollbar { width: 3px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: #09090b;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
 
-        /* Correction input iOS : empêche le zoom forcé si font < 16px */
+        /* Fix pour les inputs sur iOS */
         input { font-size: 16px !important; }
 
-        /* Animation de chargement */
+        .btn-active:active { transform: scale(0.96); }
+        
         .spinning { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <!-- Écran d'accueil -->
-        <div id="setup-screen" class="fixed inset-0 z-50 bg-[#09090b] flex items-center justify-center p-6">
-            <div class="w-full max-w-md space-y-8">
-                <div class="text-center">
-                    <div class="inline-flex p-4 rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-500 text-4xl mb-4">
-                        <i class="fa-solid fa-bolt"></i>
+    <div class="app-shell">
+        
+        <!-- Écran de Setup -->
+        <div id="setup-screen" class="fixed inset-0 z-[200] bg-[#09090b] flex items-center justify-center p-6">
+            <div class="w-full max-w-sm space-y-6">
+                <div class="text-center space-y-2">
+                    <div class="inline-flex p-3 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-500 text-3xl mb-2">
+                        <i class="fa-solid fa-tower-broadcast"></i>
                     </div>
-                    <h1 class="text-3xl font-extrabold text-white tracking-tight">IRC P2P</h1>
-                    <p class="text-zinc-500 text-xs mt-2 uppercase tracking-widest font-bold">Instantané • Privé • Direct</p>
+                    <h1 class="text-2xl font-black text-white">IRC P2P</h1>
+                    <p class="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Temps réel • Sans inscription</p>
                 </div>
 
-                <div class="bg-[#121215] border border-white/5 p-6 rounded-3xl shadow-2xl space-y-4">
-                    <div>
-                        <label class="text-[10px] font-black text-zinc-500 uppercase ml-1">Pseudo</label>
-                        <input type="text" id="username-input" maxlength="12" 
-                            class="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl px-5 py-4 text-white focus:border-blue-500 outline-none transition-all"
-                            placeholder="Utilisateur">
-                    </div>
+                <div class="space-y-4">
+                    <input type="text" id="username-input" maxlength="12" 
+                        class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 text-white focus:border-blue-500 outline-none"
+                        placeholder="Ton pseudo">
 
-                    <div class="pt-2 space-y-3">
-                        <button id="btn-create" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
-                            <span>Créer un salon</span>
+                    <div class="grid grid-cols-1 gap-3">
+                        <button id="btn-create" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl btn-active transition-all">
+                            Créer un salon
                         </button>
                         
-                        <div class="relative flex items-center py-2">
+                        <div class="flex items-center gap-3 py-1">
                             <div class="flex-grow border-t border-zinc-800"></div>
-                            <span class="mx-4 text-zinc-600 text-[10px] font-bold uppercase tracking-widest">OU</span>
+                            <span class="text-zinc-600 text-[10px] font-bold uppercase">Ou rejoindre</span>
                             <div class="flex-grow border-t border-zinc-800"></div>
                         </div>
 
-                        <div class="space-y-3">
-                            <input type="text" id="join-id-input" 
-                                class="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl px-5 py-3 text-white text-center mono text-sm focus:border-blue-500 outline-none"
-                                placeholder="Coller l'ID ici">
-                            
-                            <button id="btn-join" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2">
-                                <span id="btn-join-text">Rejoindre le salon</span>
-                                <i id="btn-join-icon" class="fa-solid fa-arrow-right-to-bracket"></i>
-                            </button>
-                        </div>
+                        <input type="text" id="join-id-input" 
+                            class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-3 text-white text-center mono text-sm focus:border-blue-500 outline-none"
+                            placeholder="ID du salon">
+                        
+                        <button id="btn-join" class="w-full bg-zinc-800 text-white font-bold py-4 rounded-2xl btn-active transition-all">
+                            Se connecter
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Interface principale -->
+        <!-- Interface de Chat -->
         <div id="main-interface" class="hidden flex-1 flex flex-col overflow-hidden">
-            <header class="glass-panel px-4 py-3 flex items-center justify-between z-40">
+            
+            <!-- Chargement interne -->
+            <div id="loader" class="loading-overlay hidden">
+                <i class="fa-solid fa-circle-notch text-blue-500 text-3xl spinning"></i>
+                <p class="text-zinc-500 text-xs mt-4 font-bold uppercase tracking-widest">Connexion au réseau...</p>
+            </div>
+
+            <!-- Header -->
+            <header class="h-14 flex items-center justify-between px-4 border-b border-white/5 bg-zinc-900/50">
                 <div class="flex items-center gap-3">
-                    <div id="status-indicator" class="w-2.5 h-2.5 rounded-full bg-zinc-600"></div>
+                    <div id="status-dot" class="w-2 h-2 rounded-full bg-zinc-600"></div>
                     <div>
-                        <h2 class="text-xs font-black text-white uppercase tracking-tighter">Canal Direct</h2>
-                        <p id="room-id-display" class="text-[9px] text-zinc-500 mono">ID: --</p>
+                        <div class="text-[11px] font-black text-white uppercase leading-none">Canal P2P</div>
+                        <div id="room-display" class="text-[9px] text-zinc-500 mono mt-1">ID: --</div>
                     </div>
                 </div>
-                
-                <div class="flex items-center gap-2">
-                    <button id="btn-copy" class="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-800/50 text-zinc-400 active:scale-90 transition-all">
-                        <i class="fa-solid fa-share-nodes text-sm"></i>
+                <div class="flex gap-2">
+                    <button id="btn-copy" class="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-800 text-zinc-400 btn-active">
+                        <i class="fa-solid fa-copy text-sm"></i>
                     </button>
-                    <button id="btn-reset" class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-900/10 text-red-500 border border-red-500/10 active:scale-90 transition-all">
+                    <button id="btn-reset" class="w-9 h-9 flex items-center justify-center rounded-xl bg-red-900/10 text-red-500 border border-red-500/10 btn-active">
                         <i class="fa-solid fa-trash-can text-sm"></i>
                     </button>
                 </div>
             </header>
 
-            <div class="flex-1 flex overflow-hidden relative">
-                <main class="flex-1 flex flex-col bg-[#09090b]">
-                    <div id="messages-list" class="custom-scroll mono text-[13px] pt-2"></div>
-                    
-                    <div class="p-3 bg-zinc-900/30 border-t border-white/5">
-                        <form id="input-form" class="flex gap-2 max-w-5xl mx-auto">
-                            <input type="text" id="msg-input" autocomplete="off"
-                                class="flex-1 bg-zinc-800/50 border border-zinc-700 rounded-2xl px-4 py-3 text-white outline-none focus:border-blue-500 transition-all" 
-                                placeholder="Message...">
-                            <button type="submit" class="w-12 h-12 bg-blue-600 rounded-2xl text-white flex items-center justify-center shadow-lg active:scale-95">
-                                <i class="fa-solid fa-paper-plane"></i>
-                            </button>
-                        </form>
-                    </div>
-                </main>
-
-                <!-- Sidebar Desktop (cachée sur mobile par défaut) -->
-                <aside id="sidebar" class="hidden md:flex w-56 flex-col border-l border-white/5 bg-[#0c0c0e]">
-                    <div class="p-4 border-b border-white/5 text-[10px] font-black text-zinc-500 uppercase flex justify-between">
-                        <span>En ligne</span>
-                        <span id="user-count" class="text-blue-500">0</span>
-                    </div>
-                    <div id="users-list" class="flex-1 overflow-y-auto p-3 space-y-2 mono text-sm"></div>
-                </aside>
+            <div class="chat-container">
+                <div id="messages-list" class="mono"></div>
+                
+                <!-- Input bar -->
+                <div class="p-3 bg-zinc-900/80 border-t border-white/5">
+                    <form id="chat-form" class="flex gap-2 max-w-4xl mx-auto">
+                        <input type="text" id="chat-input" autocomplete="off"
+                            class="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500" 
+                            placeholder="Message...">
+                        <button type="submit" class="w-12 h-12 bg-blue-600 rounded-xl text-white flex items-center justify-center shadow-lg btn-active">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-zinc-800 text-white text-[11px] font-bold rounded-full shadow-2xl border border-white/10 opacity-0 transition-opacity pointer-events-none z-[100]"></div>
+    <!-- Notification -->
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 px-4 py-2 bg-zinc-800 text-white text-[10px] font-bold rounded-full shadow-2xl border border-white/10 opacity-0 transition-opacity pointer-events-none z-[300]"></div>
 
     <script>
-        const COLORS = ['#60a5fa', '#34d399', '#fbbf24', '#f87171', '#818cf8', '#2dd4bf', '#fb923c', '#94a3b8', '#4ade80', '#0ea5e9'];
-        
         let peer = null;
         let connections = [];
         let isHost = false;
         let myUsername = localStorage.getItem('irc_user') || "";
-        let userList = new Map();
-        let messageHistory = new Set();
+        let currentRoomId = "";
 
         const els = {
             setup: document.getElementById('setup-screen'),
             main: document.getElementById('main-interface'),
+            loader: document.getElementById('loader'),
             username: document.getElementById('username-input'),
             joinId: document.getElementById('join-id-input'),
             btnCreate: document.getElementById('btn-create'),
             btnJoin: document.getElementById('btn-join'),
-            btnJoinText: document.getElementById('btn-join-text'),
-            btnJoinIcon: document.getElementById('btn-join-icon'),
             messages: document.getElementById('messages-list'),
-            input: document.getElementById('msg-input'),
-            form: document.getElementById('input-form'),
-            status: document.getElementById('status-indicator'),
-            roomId: document.getElementById('room-id-display'),
-            users: document.getElementById('users-list'),
-            count: document.getElementById('user-count'),
+            input: document.getElementById('chat-input'),
+            form: document.getElementById('chat-form'),
+            status: document.getElementById('status-dot'),
+            room: document.getElementById('room-display'),
             toast: document.getElementById('toast'),
             btnReset: document.getElementById('btn-reset'),
             btnCopy: document.getElementById('btn-copy')
@@ -215,221 +203,146 @@
 
         if (myUsername) els.username.value = myUsername;
 
-        const showToast = (msg) => {
+        const notify = (msg) => {
             els.toast.textContent = msg;
             els.toast.style.opacity = "1";
-            setTimeout(() => els.toast.style.opacity = "0", 2500);
+            setTimeout(() => els.toast.style.opacity = "0", 3000);
         };
 
-        const getColor = (name) => {
-            let hash = 0;
-            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-            return COLORS[Math.abs(hash) % COLORS.length];
-        };
-
-        const addLog = (content, type = 'sys') => {
+        const addMessage = (user, text, isSys = false) => {
             const div = document.createElement('div');
             div.className = "message-line";
             const time = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
             
-            if (type === 'sys') {
-                div.innerHTML = `<span class="text-zinc-600 italic text-[11px]">[${time}] • ${content}</span>`;
+            if (isSys) {
+                div.innerHTML = `<span class="text-zinc-600 italic">[${time}] • ${user}</span>`;
             } else {
-                const color = getColor(content.user);
-                div.innerHTML = `
-                    <span class="text-zinc-700 text-[10px] mr-1">${time}</span> 
-                    <span style="color: ${color}" class="font-extrabold tracking-tight">&lt;${content.user}&gt;</span> 
-                    <span class="text-zinc-300 ml-1 leading-relaxed">${content.text}</span>
-                `;
+                const colors = ['#60a5fa', '#34d399', '#fbbf24', '#f87171', '#818cf8', '#fb923c'];
+                const hash = user.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                const color = colors[hash % colors.length];
+                div.innerHTML = `<span class="text-zinc-700 mr-1">${time}</span> <span style="color:${color}" class="font-bold">&lt;${user}&gt;</span> <span class="text-zinc-300 ml-1">${text}</span>`;
             }
             els.messages.appendChild(div);
-            // On utilise requestAnimationFrame pour s'assurer que le DOM est à jour avant le scroll
-            requestAnimationFrame(() => {
-                els.messages.scrollTop = els.messages.scrollHeight;
-            });
+            els.messages.scrollTop = els.messages.scrollHeight;
         };
 
-        const updateUIUsers = () => {
-            els.users.innerHTML = '';
-            userList.forEach((pseudo) => {
-                const item = document.createElement('div');
-                item.className = "flex items-center gap-2 text-zinc-400 py-1";
-                item.innerHTML = `<span class="w-1.5 h-1.5 rounded-full" style="background:${getColor(pseudo)}"></span> <span class="truncate">${pseudo}</span>`;
-                els.users.appendChild(item);
-            });
-            els.count.textContent = userList.size;
-        };
-
-        const handleData = (data, senderConn) => {
-            if (data.msgId && messageHistory.has(data.msgId)) return;
-            if (data.msgId) messageHistory.add(data.msgId);
-
-            if (data.type === 'join') {
-                if (!userList.has(data.uid)) {
-                    userList.set(data.uid, data.user);
-                    addLog(`${data.user} a rejoint.`, 'sys');
-                    updateUIUsers();
-                    if (isHost) {
-                        broadcast({ type: 'users', list: Array.from(userList) });
-                    }
-                }
-            }
-
-            if (data.type === 'users') {
-                userList = new Map(data.list);
-                updateUIUsers();
-            }
-
-            if (data.type === 'msg') {
-                addLog({ user: data.user, text: data.text }, 'user');
-                if (isHost) {
-                    connections.forEach(c => {
-                        if (c.open && c.peer !== senderConn.peer) {
-                            c.send(data);
-                        }
-                    });
-                }
-            }
-
-            if (data.type === 'sys') addLog(data.text, 'sys');
-        };
-
-        const broadcast = (data) => {
-            connections.forEach(c => { if(c.open) c.send(data); });
-        };
-
-        // --- CORE ACTIONS ---
-
-        const switchToChat = () => {
+        const initPeer = (hostToJoin = null) => {
+            els.loader.classList.remove('hidden');
             els.setup.classList.add('hidden');
             els.main.classList.remove('hidden');
+
+            peer = new Peer();
+
+            peer.on('open', (id) => {
+                if (hostToJoin) {
+                    const conn = peer.connect(hostToJoin);
+                    setupConn(conn);
+                } else {
+                    isHost = true;
+                    currentRoomId = id;
+                    els.room.textContent = `ID: ${id}`;
+                    els.loader.classList.add('hidden');
+                    els.status.className = "w-2 h-2 rounded-full bg-emerald-500";
+                    addMessage("Salon créé avec succès.", null, true);
+                }
+            });
+
+            peer.on('connection', (conn) => {
+                setupConn(conn);
+            });
+
+            peer.on('error', (err) => {
+                console.error(err);
+                notify("Erreur de connexion.");
+                setTimeout(() => location.reload(), 2000);
+            });
+        };
+
+        const setupConn = (conn) => {
+            conn.on('open', () => {
+                if (!isHost) {
+                    els.loader.classList.add('hidden');
+                    els.status.className = "w-2 h-2 rounded-full bg-blue-500";
+                    els.room.textContent = `ID: ${conn.peer}`;
+                    addMessage("Connecté au salon.", null, true);
+                }
+                
+                connections.push(conn);
+                conn.send({ type: 'join', user: myUsername });
+
+                conn.on('data', (data) => {
+                    if (data.type === 'join') {
+                        addMessage(`${data.user} a rejoint.`, null, true);
+                    } else if (data.type === 'msg') {
+                        addMessage(data.user, data.text);
+                        if (isHost) {
+                            // L'hôte rediffuse
+                            connections.forEach(c => {
+                                if (c.peer !== conn.peer) c.send(data);
+                            });
+                        }
+                    }
+                });
+            });
+
+            conn.on('close', () => {
+                connections = connections.filter(c => c.peer !== conn.peer);
+                if (!isHost) {
+                    notify("Salon fermé par l'hôte.");
+                    location.reload();
+                }
+            });
         };
 
         els.btnCreate.onclick = () => {
             const name = els.username.value.trim();
-            if (name.length < 2) return showToast("Pseudo trop court");
+            if (!name) return notify("Pseudo requis");
             myUsername = name;
-            localStorage.setItem('irc_user', myUsername);
-            isHost = true;
-            
-            peer = new Peer();
-            peer.on('open', (id) => {
-                switchToChat();
-                els.roomId.textContent = `ID: ${id}`;
-                els.status.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]";
-                userList.set(peer.id, myUsername);
-                updateUIUsers();
-                addLog("Salon créé. Prêt pour les connexions.", 'sys');
-            });
-
-            peer.on('connection', (conn) => {
-                conn.on('open', () => {
-                    connections.push(conn);
-                    conn.on('data', (data) => handleData(data, conn));
-                });
-                conn.on('close', () => {
-                    connections = connections.filter(c => c.peer !== conn.peer);
-                    // On retire l'utilisateur de la liste s'il se déconnecte
-                    // Pour simplifier ici on attendrait un broadcast de l'hôte
-                });
-            });
+            localStorage.setItem('irc_user', name);
+            initPeer();
         };
 
         els.btnJoin.onclick = () => {
             const name = els.username.value.trim();
             const hostId = els.joinId.value.trim();
-            if (!name || !hostId) return showToast("Pseudo et ID requis");
-            
+            if (!name || !hostId) return notify("Pseudo et ID requis");
             myUsername = name;
-            localStorage.setItem('irc_user', myUsername);
-            isHost = false;
-
-            // Feedback immédiat de chargement
-            els.btnJoinText.textContent = "Connexion...";
-            els.btnJoinIcon.className = "fa-solid fa-circle-notch spinning";
-            els.btnJoin.disabled = true;
-            
-            peer = new Peer();
-            
-            // Timeout si le serveur de signalement est trop long
-            const timeout = setTimeout(() => {
-                if (els.main.classList.contains('hidden')) {
-                    showToast("Délai de connexion dépassé");
-                    resetBtnJoin();
-                }
-            }, 8000);
-
-            peer.on('open', (myId) => {
-                const conn = peer.connect(hostId);
-                
-                conn.on('open', () => {
-                    clearTimeout(timeout);
-                    switchToChat();
-                    els.status.className = "w-2.5 h-2.5 rounded-full bg-blue-500";
-                    els.roomId.textContent = `ID: ${hostId}`;
-                    conn.send({ type: 'join', user: myUsername, uid: myId });
-                    addLog("Connecté au salon.", 'sys');
-                });
-
-                conn.on('data', (data) => handleData(data, conn));
-                
-                conn.on('close', () => {
-                    showToast("Déconnecté");
-                    setTimeout(() => window.location.reload(), 1500);
-                });
-            });
-
-            peer.on('error', (err) => {
-                clearTimeout(timeout);
-                showToast("ID introuvable ou erreur réseau");
-                resetBtnJoin();
-            });
-        };
-
-        const resetBtnJoin = () => {
-            els.btnJoinText.textContent = "Rejoindre le salon";
-            els.btnJoinIcon.className = "fa-solid fa-arrow-right-to-bracket";
-            els.btnJoin.disabled = false;
+            localStorage.setItem('irc_user', name);
+            initPeer(hostId);
         };
 
         els.form.onsubmit = (e) => {
             e.preventDefault();
             const text = els.input.value.trim();
             if (!text) return;
-            
-            const msgId = Date.now() + "-" + Math.random().toString(36).substr(2, 5);
-            const payload = { type: 'msg', user: myUsername, text: text, msgId: msgId };
-            
-            messageHistory.add(msgId);
-            addLog({ user: myUsername, text: text }, 'user');
 
-            if (isHost) {
-                broadcast(payload);
-            } else if (connections[0] && connections[0].open) {
-                connections[0].send(payload);
-            }
+            const msg = { type: 'msg', user: myUsername, text: text };
+            addMessage(myUsername, text);
+            
+            connections.forEach(c => {
+                if (c.open) c.send(msg);
+            });
+
             els.input.value = '';
             els.input.focus();
         };
 
         els.btnCopy.onclick = () => {
-            const idStr = els.roomId.textContent.replace('ID: ', '');
-            navigator.clipboard.writeText(idStr).then(() => showToast("ID copié !"));
+            const id = els.room.textContent.replace('ID: ', '');
+            navigator.clipboard.writeText(id).then(() => notify("ID Copié !"));
         };
 
         els.btnReset.onclick = () => {
-            if(confirm("Voulez-vous quitter ?")) {
-                if (peer) peer.destroy();
-                window.location.reload();
+            if (confirm("Voulez-vous quitter ce salon ?")) {
+                location.reload();
             }
         };
 
-        // Gestion du clavier mobile pour éviter que l'input ne soit caché
+        // Fix resize mobile
         window.addEventListener('resize', () => {
-            if (document.activeElement.tagName === 'INPUT') {
-                els.messages.scrollTop = els.messages.scrollHeight;
-            }
+            els.messages.scrollTop = els.messages.scrollHeight;
         });
+
     </script>
 </body>
 </html>
