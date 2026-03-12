@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Circuit editor pour debutant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --pcb-green: #064e3b; }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: var(--pcb-green); 
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            touch-action: none; user-select: none; 
+            -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+        }
+        #app-canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+        .ui-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; display: flex; flex-direction: column;
+        }
+        .header {
+            padding: 12px; background: rgba(15, 23, 42, 0.98);
+            color: white; display: flex; justify-content: space-between; align-items: center;
+            pointer-events: auto; border-bottom: 2px solid #10b981;
+        }
+        .log-console {
+            position: absolute; top: 75px; right: 10px; width: 240px;
+            background: rgba(2, 6, 23, 0.9); border-radius: 8px;
+            padding: 10px; pointer-events: auto; color: #10b981;
+            border: 1px solid #1e293b; font-family: monospace; font-size: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 50;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .log-console.minimized {
+            height: 32px; width: 100px; overflow: hidden; opacity: 0.8;
+        }
+        .log-entry { margin-bottom: 4px; border-left: 2px solid #334155; padding-left: 5px; animation: fadeIn 0.2s ease; }
+        .log-error { color: #f43f5e; border-left-color: #f43f5e; }
+        .log-success { color: #34d399; border-left-color: #34d399; }
+
+        .side-panel {
+            position: absolute; left: 10px; top: 75px; width: 280px;
+            background: rgba(15, 23, 42, 0.95); border-radius: 12px;
+            padding: 12px; pointer-events: auto; color: white;
+            border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            max-height: 70vh; overflow-y: auto;
+        }
+        .bottom-menu {
+            margin-top: auto; padding: 12px; background: #0f172a;
+            display: flex; gap: 8px; overflow-x: auto; pointer-events: auto;
+            border-top: 1px solid #1e293b; padding-bottom: 25px;
+        }
+        .comp-card {
+            min-width: 90px; height: 100px; background: #1e293b;
+            border-radius: 12px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; color: #94a3b8;
+            font-size: 10px; border: 1px solid transparent; flex-shrink: 0;
+            transition: all 0.2s; text-align: center; padding: 4px;
+        }
+        .comp-card.active { background: #10b981; color: white; border-color: #34d399; }
+        
+        #screen-overlay {
+            position: fixed; inset: 0; background: #0000aa; color: white;
+            display: none; flex-direction: column; justify-content: center;
+            align-items: center; padding: 40px; text-align: left; z-index: 1000;
+            font-family: 'Courier New', monospace;
+        }
+
+        .instruction-section {
+            margin-top: 8px; padding: 6px; background: rgba(0,0,0,0.3); border-radius: 4px; border-left: 2px solid #3b82f6;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div id="screen-overlay">
+        <h1 class="text-7xl mb-8">:(</h1>
+        <p class="text-xl mb-4">DÉFAILLANCE MATÉRIELLE CRITIQUE</p>
+        <p id="crash-msg" class="text-md opacity-80 mb-8">Un court-circuit a été détecté.</p>
+        <button onclick="resetSim()" class="mt-12 px-8 py-3 bg-white text-blue-900 font-black rounded-lg shadow-xl active:scale-95">RÉPARER L'UNITÉ</button>
+    </div>
+
+    <canvas id="app-canvas"></canvas>
+
+    <div class="ui-overlay">
+        <div class="header">
+            <div>
+                <h1 class="text-xs font-black text-emerald-400 italic uppercase">Circuit editor débutant</h1>
+                <p class="text-[8px] text-emerald-200/50 font-bold uppercase">Analyseur de bus actif</p>
+            </div>
+            <div class="flex gap-2 pointer-events-auto">
+                <button id="sim-btn" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg text-[10px] font-black shadow-lg transition-all active:scale-95">
+                    BRANCHER LA CLÉ
+                </button>
+                <button onclick="resetSim()" class="bg-red-600 p-2 rounded-lg text-white shadow-lg active:scale-90" title="Tout effacer">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- LOG CONSOLE AVEC BOUTON DE RÉDUCTION -->
+        <div id="log-console" class="log-console">
+            <div class="flex justify-between items-center mb-2 border-b border-emerald-900 pb-1">
+                <div class="text-[8px] opacity-50 font-bold">CONSOLE DE LOGS</div>
+                <button id="toggle-log" class="text-emerald-500 hover:text-white transition-colors">
+                    <i id="log-icon" data-lucide="eye" class="w-3 h-3"></i>
+                </button>
+            </div>
+            <div id="log-list">
+                <div class="log-entry">Système prêt.</div>
+            </div>
+        </div>
+
+        <div id="prop-panel" class="side-panel hidden">
+            <h2 id="prop-title" class="text-[12px] font-black border-b border-slate-700 pb-2 mb-2 text-emerald-400 uppercase italic">Paramètres</h2>
+            <div class="space-y-4">
+                <div id="input-v-group">
+                    <label class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Alimentation (Volts)</label>
+                    <input type="number" id="v-input" class="bg-black border border-slate-700 text-emerald-400 p-2 w-full rounded focus:outline-none focus:border-emerald-500" value="5">
+                </div>
+                
+                <div class="space-y-2">
+                    <div id="help-content" class="text-[10px] text-emerald-100 font-medium"></div>
+                    
+                    <div class="instruction-section">
+                        <p class="text-[8px] text-blue-400 font-bold uppercase mb-1">Branchement Entrée (IN)</p>
+                        <p id="help-in" class="text-[9px] text-slate-300"></p>
+                    </div>
+
+                    <div class="instruction-section" style="border-left-color: #10b981;">
+                        <p class="text-[8px] text-emerald-400 font-bold uppercase mb-1">Branchement Sortie (OUT)</p>
+                        <p id="help-out" class="text-[9px] text-slate-300"></p>
+                    </div>
+                </div>
+
+                <button id="delete-comp" class="w-full mt-2 bg-red-900/40 text-red-400 font-bold py-2 rounded border border-red-900/50 text-[10px] uppercase hover:bg-red-800/60 transition-colors">Supprimer l'élément</button>
+            </div>
+        </div>
+
+        <div class="bottom-menu" id="toolbar">
+            <div class="comp-card active" data-type="move"><i data-lucide="mouse-pointer"></i><span>Déplacer</span></div>
+            <div class="comp-card" data-type="trace"><i data-lucide="cable"></i><span>Relier</span></div>
+            <div class="comp-card" data-type="usb_plug"><i data-lucide="usb"></i><span>Prise USB</span></div>
+            <div class="comp-card" data-type="regulator"><i data-lucide="zap"></i><span>Régulateur</span></div>
+            <div class="comp-card" data-type="quartz"><i data-lucide="timer"></i><span>Quartz</span></div>
+            <div class="comp-card" data-type="usb_controller"><i data-lucide="cpu"></i><span>Contrôleur</span></div>
+            <div class="comp-card" data-type="flash_memory"><i data-lucide="hard-drive"></i><span>Mémoire</span></div>
+            <div class="comp-card" data-type="led"><i data-lucide="lightbulb"></i><span>LED</span></div>
+            <div class="comp-card" data-type="resistor"><i data-lucide="minus"></i><span>Résistance</span></div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('app-canvas');
+        const ctx = canvas.getContext('2d');
+        const propPanel = document.getElementById('prop-panel');
+        const logList = document.getElementById('log-list');
+        const logConsole = document.getElementById('log-console');
+        const toggleLogBtn = document.getElementById('toggle-log');
+        const simBtn = document.getElementById('sim-btn');
+        const crashMsg = document.getElementById('crash-msg');
+        
+        let width, height, selectedTool = 'move';
+        let components = [], traces = [], particles = [];
+        let isDragging = false, dragTarget = null, traceStart = null, lastSelected = null;
+        let flowAnim = 0, offset = { x: 0, y: 0 }, isConnected = false, logMinimized = false;
+
+        const COMP_DATA = {
+            usb_plug: { 
+                name: "Prise USB", tech: "Alimentation 5V", w: 60, h: 50, 
+                help: "C'est la source de tout. Sans elle, rien ne démarre.",
+                in: "Rien (C'est elle qui envoie le courant depuis l'ordi).",
+                out: "Relier la broche OUT vers le Régulateur 3.3V."
+            },
+            regulator: { 
+                name: "Régulateur", tech: "LDO 3.3V", w: 50, h: 40, 
+                help: "Transforme le 5V (trop fort) en 3.3V (parfait pour les puces).",
+                in: "Doit recevoir le 5V depuis la Prise USB.",
+                out: "Envoyer le 3.3V vers le Contrôleur et la Mémoire."
+            },
+            usb_controller: { 
+                name: "Contrôleur", tech: "Cerveau USB", w: 70, h: 70, 
+                help: "Il gère les fichiers. Sans lui, la mémoire est illisible.",
+                in: "Relier VCC au Régulateur (3.3V).",
+                out: "Relier DATA vers la Mémoire Flash."
+            },
+            flash_memory: { 
+                name: "Mémoire", tech: "NAND Flash", w: 80, h: 50, 
+                help: "C'est là que sont rangées tes photos et vidéos.",
+                in: "Relier IN au Régulateur (3.3V) ET DATA au Contrôleur.",
+                out: "Rien (C'est la fin du circuit de données)."
+            },
+            quartz: { 
+                name: "Quartz", tech: "Horloge 12MHz", w: 35, h: 25, 
+                help: "Donne le tempo. Sans horloge, le contrôleur ne démarre pas.",
+                in: "Doit être relié au Contrôleur (circuit oscillateur).",
+                out: "Boucle de retour vers le Contrôleur."
+            },
+            led: { 
+                name: "Témoin LED", tech: "Voyant d'état", w: 30, h: 30, 
+                help: "Sert à voir si la clé est allumée.",
+                in: "Doit passer par une Résistance pour ne pas brûler.",
+                out: "Relier au GND (Masse) ou retour circuit."
+            },
+            resistor: { 
+                name: "Résistance", tech: "Protection LED", w: 40, h: 10, 
+                help: "Freine le courant pour protéger la LED.",
+                in: "Depuis le Régulateur (3.3V).",
+                out: "Vers la LED."
+            }
+        };
+
+        function addLog(text, type = 'normal') {
+            const div = document.createElement('div');
+            div.className = `log-entry ${type === 'error' ? 'log-error' : (type === 'success' ? 'log-success' : '')}`;
+            div.innerText = `> ${text}`;
+            logList.prepend(div);
+            if(logList.children.length > 10) logList.lastChild.remove();
+        }
+
+        // Toggle log visibility
+        toggleLogBtn.onclick = (e) => {
+            e.stopPropagation();
+            logMinimized = !logMinimized;
+            logConsole.classList.toggle('minimized', logMinimized);
+            const icon = document.getElementById('log-icon');
+            icon.setAttribute('data-lucide', logMinimized ? 'eye-off' : 'eye');
+            lucide.createIcons();
+        };
+
+        class Component {
+            constructor(type, x, y) {
+                this.type = type; this.x = x; this.y = y;
+                this.id = Math.random().toString(36).substr(2, 9);
+                this.voltage = 0; this.userV = 5; this.isDead = false; this.isExploded = false;
+            }
+
+            getPorts() {
+                const d = COMP_DATA[this.type];
+                if (this.type === 'usb_controller') return [
+                    { x: this.x - d.w/2, y: this.y - 15, id: 'vcc', label: '3.3V' },
+                    { x: this.x + d.w/2, y: this.y, id: 'data', label: 'DATA' }
+                ];
+                return [{ x: this.x - d.w/2, y: this.y, id: 'in', label: 'IN' }, { x: this.x + d.w/2, y: this.y, id: 'out', label: 'OUT' }];
+            }
+
+            update() {
+                if (this.isExploded) return;
+                if (this.type === 'usb_plug') this.voltage = this.userV;
+                this.outV = (this.type === 'regulator' && this.voltage >= 3.3) ? 3.3 : this.voltage;
+                
+                let limit = 6;
+                if (this.type === 'usb_plug' || this.type === 'resistor') limit = 45;
+                if (this.voltage > limit + 5) this.explode();
+                else if (this.voltage > limit) this.isDead = true;
+            }
+
+            explode() {
+                this.isExploded = true; this.isDead = true;
+                for(let i=0; i<30; i++) particles.push({ x: this.x, y: this.y, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, life: 1 });
+                crashMsg.innerText = `Le composant ${COMP_DATA[this.type].name} a grillé à ${this.voltage.toFixed(1)}V !`;
+                setTimeout(() => document.getElementById('screen-overlay').style.display = 'flex', 800);
+            }
+
+            draw() {
+                const d = COMP_DATA[this.type];
+                ctx.save(); ctx.translate(this.x, this.y);
+                ctx.fillStyle = this.isExploded ? '#111' : (this.isDead ? '#222' : '#0f172a');
+                ctx.strokeStyle = lastSelected === this ? '#10b981' : 'rgba(255,255,255,0.1)';
+                ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(-d.w/2, -d.h/2, d.w, d.h, 6); ctx.fill(); ctx.stroke();
+
+                ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.font = 'bold 8px Arial';
+                ctx.fillText(`(${d.name})`, 0, -d.h/2 - 14);
+                ctx.fillStyle = '#10b981'; ctx.font = '7px monospace';
+                ctx.fillText(d.tech, 0, -d.h/2 - 5);
+
+                if (this.type === 'led') {
+                    ctx.fillStyle = (this.voltage > 1.8 && !this.isDead) ? '#fbbf24' : '#334155';
+                    ctx.beginPath(); ctx.arc(0,0,8,0,Math.PI*2); ctx.fill();
+                    if(this.voltage > 1.8 && !this.isDead) {
+                        ctx.shadowBlur = 15; ctx.shadowColor = "#fbbf24"; ctx.stroke();
+                    }
+                }
+
+                this.getPorts().forEach(p => {
+                    ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.arc(p.x - this.x, p.y - this.y, 4, 0, Math.PI*2); ctx.fill();
+                });
+                ctx.restore();
+            }
+        }
+
+        function resize() {
+            width = window.innerWidth; height = window.innerHeight;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = width * dpr; canvas.height = height * dpr;
+            canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
+            ctx.scale(dpr, dpr);
+        }
+
+        function resetSim() {
+            document.getElementById('screen-overlay').style.display = 'none';
+            components = []; traces = []; particles = []; lastSelected = null; isConnected = false;
+            simBtn.innerText = "BRANCHER LA CLÉ"; simBtn.className = "bg-blue-600 text-white px-6 py-2 rounded-lg text-[10px] font-black shadow-lg transition-all active:scale-95";
+            addLog("Circuit vidé.");
+        }
+
+        function checkCircuit() {
+            if(isConnected) {
+                isConnected = false; simBtn.innerText = "BRANCHER LA CLÉ";
+                simBtn.classList.replace('bg-emerald-600', 'bg-blue-600');
+                addLog("Clé retirée du port."); return;
+            }
+
+            addLog("Lancement des diagnostics...");
+            const has = (type) => components.find(c => c.type === type && c.voltage >= 3 && !c.isDead);
+            const plug = components.find(c => c.type === 'usb_plug');
+            const reg = has('regulator');
+            const ctrl = has('usb_controller');
+            const mem = has('flash_memory');
+            const qrtz = has('quartz');
+
+            if(!plug) { addLog("ERREUR : Pas de prise USB détectée.", "error"); return; }
+            
+            setTimeout(() => {
+                if(!reg) { addLog("ERREUR : Surtension ! Connecte le Régulateur 3.3V.", "error"); return; }
+                addLog("Alimentation 3.3V : STABLE");
+                
+                setTimeout(() => {
+                    if(!ctrl) { addLog("ERREUR : Le Contrôleur n'a pas de courant.", "error"); return; }
+                    if(!qrtz) { addLog("ERREUR : Horloge absente (Manque le Quartz).", "error"); return; }
+                    addLog("Contrôleur : ACTIF (Horloge détectée)");
+                    
+                    setTimeout(() => {
+                        if(!mem) { addLog("ERREUR : Mémoire Flash non reliée.", "error"); return; }
+                        addLog("Lecture NAND Flash... OK", "success");
+                        addLog("CLÉ RECONNUE : 128GB", "success");
+                        isConnected = true;
+                        simBtn.innerText = "DÉBRANCHER LA CLÉ";
+                        simBtn.classList.replace('bg-blue-600', 'bg-emerald-600');
+                    }, 600);
+                }, 600);
+            }, 600);
+        }
+
+        function init() {
+            resize(); lucide.createIcons();
+            document.querySelectorAll('.comp-card').forEach(c => c.onclick = () => {
+                document.querySelector('.comp-card.active').classList.remove('active');
+                c.classList.add('active'); selectedTool = c.dataset.type;
+            });
+            document.getElementById('v-input').oninput = (e) => { if(lastSelected) lastSelected.userV = parseFloat(e.target.value); };
+            document.getElementById('delete-comp').onclick = () => {
+                if(lastSelected) {
+                    components = components.filter(c => c !== lastSelected);
+                    traces = traces.filter(t => t.fId !== lastSelected.id && t.tId !== lastSelected.id);
+                    lastSelected = null; propPanel.classList.add('hidden');
+                    addLog("Composant effacé.");
+                }
+            };
+            simBtn.onclick = checkCircuit;
+            animate();
+        }
+
+        canvas.addEventListener('pointerdown', e => {
+            const x = e.clientX, y = e.clientY;
+            const hit = components.find(c => Math.hypot(c.x - x, c.y - y) < 40);
+            if (selectedTool === 'move') {
+                if (hit) {
+                    isDragging = true; dragTarget = hit; lastSelected = hit; offset.x = x - hit.x; offset.y = y - hit.y;
+                    propPanel.classList.remove('hidden');
+                    const info = COMP_DATA[hit.type];
+                    document.getElementById('prop-title').innerText = info.name;
+                    document.getElementById('help-content').innerText = info.help;
+                    document.getElementById('help-in').innerText = info.in;
+                    document.getElementById('help-out').innerText = info.out;
+                    document.getElementById('input-v-group').style.display = (hit.type === 'usb_plug') ? 'block' : 'none';
+                    if(hit.type === 'usb_plug') document.getElementById('v-input').value = hit.userV;
+                } else { lastSelected = null; propPanel.classList.add('hidden'); }
+            } else if (selectedTool === 'trace') {
+                components.forEach(c => c.getPorts().forEach(p => { if (Math.hypot(p.x - x, p.y - y) < 15) traceStart = { c, pId: p.id }; }));
+            } else { 
+                components.push(new Component(selectedTool, x, y)); 
+                addLog(`${COMP_DATA[selectedTool].name} installé.`); 
+            }
+        });
+
+        canvas.addEventListener('pointermove', e => { if (isDragging && dragTarget) { dragTarget.x = e.clientX - offset.x; dragTarget.y = e.clientY - offset.y; } });
+        window.addEventListener('pointerup', e => {
+            if (traceStart) components.forEach(c => c.getPorts().forEach(p => {
+                if (Math.hypot(p.x - e.clientX, p.y - e.clientY) < 15 && c.id !== traceStart.c.id) {
+                    traces.push({ fId: traceStart.c.id, fpId: traceStart.pId, tId: c.id, tpId: p.id });
+                    addLog("Fil connecté.");
+                }
+            }));
+            isDragging = false; dragTarget = null; traceStart = null;
+        });
+
+        function animate() {
+            flowAnim += 0.1; ctx.clearRect(0, 0, width, height);
+            
+            // Grille PCB Pro
+            ctx.strokeStyle = '#064e3b'; ctx.lineWidth = 1;
+            for(let i=0; i<width; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,height); ctx.stroke(); }
+            for(let i=0; i<height; i+=40) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(width,i); ctx.stroke(); }
+
+            // Propagation de la tension
+            components.forEach(c => { if(c.type !== 'usb_plug') c.voltage = 0; });
+            for(let i=0; i<10; i++) {
+                traces.forEach(t => {
+                    let c1 = components.find(c => c.id === t.fId), c2 = components.find(c => c.id === t.tId);
+                    if(c1 && c2 && !c1.isExploded && !c2.isExploded) {
+                        let v = Math.max(c1.outV || c1.voltage, c2.outV || c2.voltage);
+                        c1.voltage = Math.max(c1.voltage, v * 0.99);
+                        c2.voltage = Math.max(c2.voltage, v * 0.99);
+                    }
+                });
+            }
+            components.forEach(c => c.update());
+
+            // Dessin des pistes
+            traces.forEach(t => {
+                let c1 = components.find(c => c.id === t.fId), c2 = components.find(c => c.id === t.tId);
+                if(c1 && c2) {
+                    let p1 = c1.getPorts().find(p => p.id === t.fpId), p2 = c2.getPorts().find(p => p.id === t.tpId);
+                    ctx.strokeStyle = (c1.voltage > 1) ? '#fbbf24' : '#042f2e'; ctx.lineWidth = 4;
+                    ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p1.x, p2.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+                    if (c1.voltage > 1 && !c1.isDead) {
+                        ctx.fillStyle = '#fff'; let d = (flowAnim % 1);
+                        let cx = (d < 0.5) ? p1.x : p1.x + (p2.x - p1.x) * ((d-0.5)*2);
+                        let cy = (d < 0.5) ? p1.y + (p2.y - p1.y) * (d*2) : p2.y;
+                        ctx.beginPath(); ctx.arc(cx, cy, 2.5, 0, Math.PI*2); ctx.fill();
+                    }
+                }
+            });
+
+            // Particules d'explosion
+            particles = particles.filter(p => {
+                p.x += p.vx; p.y += p.vy; p.life -= 0.02;
+                ctx.fillStyle = '#ea580c'; ctx.globalAlpha = p.life;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2); ctx.fill();
+                return p.life > 0;
+            });
+            ctx.globalAlpha = 1;
+            components.forEach(c => c.draw());
+            requestAnimationFrame(animate);
+        }
+        init(); window.onresize = resize;
+    </script>
+</body>
+</html>
+
