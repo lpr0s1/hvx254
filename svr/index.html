@@ -1,0 +1,194 @@
+<html lang="fr" translate="no">
+  <head>
+    <link rel="icon" href="https://hzflix.online/favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="https://hzflix.online/favicon.ico">
+
+    <link rel="canonical" href="https://hzflix.online/svr">
+    <title>Controle a distance IOS > Windows</title>
+    <meta name="keywords" content="accès distant, hzprogram, local remote, remote, partage fichier, serveur, client iOS, scriptable, Windows">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Language" content="fr">
+    <meta name="author" content="HzFlix">
+    <meta property="og:site_name" content="Hzprogram local remote">
+    <meta property="og:title" content="Hzprogram local remote - Téléchargement rapide">
+    <meta property="og:description" content="Téléchargement du programme d’accès distant et local pour le partage de fichier rapide sans grosse installation.">
+    <meta property="og:url" content="https://hzflix.online/svr">
+    <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Hzprogram remote Local">
+    <meta name="twitter:site" content="@HzFlix">
+  <meta name="twitter:description" content="Téléchargement du programme d’accès distant et local pour le partage de fichier rapide sans grosse installation.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Hzprogram Accès Distant et Local",
+  "operatingSystem": ["Windows", "iOS"],
+  "applicationCategory": "DeveloperTool",
+  "url": "https://hzflix.online/svr",
+  "alternateName": "Contrôle a distance avec IOS > Windows",
+  "version": "1.0",
+  "description": "Telechargement du program d acces distant locale pour le partage de fichier rapide sans grosse installation.",
+  "inLanguage": "fr",
+  "datePublished": "2026-01-22",
+  "dateModified": "2026-01-22",
+  "publisher": {
+    "@type": "Organization",
+    "name": "HzFlix",
+    "url": "https://hzflix.online",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://hzflix.online/logo.png",
+      "width": 512,
+      "height": 512
+    }
+  },
+  "potentialAction": [
+    {
+      "@type": "DownloadAction",
+      "target": "https://hzflix.online/svr/server.exe",
+      "name": "Telecharger Server.exe"
+    },
+    {
+      "@type": "DownloadAction",
+      "target": "https://apps.apple.com/fr/app/scriptable/id1405459188",
+      "name": "Telecharger Scriptable"
+    }
+  ]
+}
+</script>
+    <meta name="description" content="Telechargement du program d acces distant et locale hzprogram pour le partage de fichier rapide sans grosse installation.">
+  </head>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://app.embed.im/snow.js" defer></script>
+  <style>
+    body{
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 15;
+      -webkit-user-select: none;
+    }
+  </style>
+  <body>
+    <pre style="display: none" id="cd">
+//////--- INSTRUCTIONS ---///////
+
+// Entre la commande que tu veux envoyer
+// a ton pc, dans: (cmd) par exemple
+// ls, pour voir tout les fichiers et
+// dossiers.
+
+// Clique sur le rectangle a coté du bouton play, pour voir les logs de la cible.
+
+// v1.3
+
+
+const KEY = "afficher_une_fois"
+if (!Keychain.contains(KEY)) {
+
+  const requi = new Alert()
+  requi.title = "Requis pour que le programme fonctionne bien :"
+  requi.message = "- Activez les notifications"
+  requi.addCancelAction("Je le fait de suite")
+  requi.addAction("C'est fait !")
+  await requi.present()
+  Keychain.set(KEY, "true")
+}
+
+
+//////////////////////////////////
+// interface de prise de controle:
+
+let cmd = ""
+
+if(cmd == ""){
+   console.warn("Tu as pas entrer de commande !\n\n")
+}
+// Remplace l ip par celle de ton pc
+// tape (ipconfig) dans ta console windows. Mais reste sur le port 8080
+
+let req = new Request("http://192.168.1.8:8080/run?cmd=" + encodeURIComponent(cmd))
+
+// Si tu veux changer de port demande moi
+// je ferais une nouvelle version
+try {
+  console.log("Tentative de connexion en cours...\n\n")
+  let nt = new Notification()
+  nt.title="Tentative de connexion..."
+  nt.body="Vous serez avertis quand vous serez connecter a la cible."
+  net.schedule()
+
+  let res = await req.loadString()
+  console.warn("Connexion reussi !")
+
+  console.log(res)
+
+  let xd = new Notification()
+  xd.title="Connexion réussi !"
+  xd.body="Cliquez sur le [ ] qui contient un chiffre a l interieur, pour ouvrir les logs de votre cible"
+  xd.schedule()
+
+} catch (error) {
+  console.error("Impossible de se connecter ! Verifiez que le program: (server.exe) est en cours sur l appareil cible.")
+
+let rkx = new Notification()
+  rkx.title="Connexion impossible !"
+  rkx.body="Verifiez que le program (server.exe) tourne sur la cible"
+  rkx.schedule()
+}
+    </pre>
+
+    <script>
+      function copier(){
+        const cd = document.getElementById("cd").innerText;
+        navigator.clipboard.writeText(cd);
+        alert("Le code source est copier ! Collez le dans l application (Scriptable)\n\net lancez vos commandes quand vous aurez telecharger et executer le server.exe sur votre windows.") 
+      }
+    </script>
+    <h2>Client [Scriptable] (IOS)</h2>
+    <a href="https://apps.apple.com/fr/app/scriptable/id1405459188">
+      Telecharger scriptable <i class="material-icons">get_app</i>
+    </a>
+    <br>
+    <h2>Et ensuite</h2>
+    <button onclick="copier()">Cliquez ici pour copier le script <i class="material-icons">content_copy</i></button>
+    <br>
+    <br>
+    <br>
+    <hr>
+    <br>
+    <br>
+    <h2>Server.exe (windows)</h2>
+    <a href="https://hzflix.online/svr/server.exe">Telecharger le serveur <i class="material-icons">file_download</i></a>
+    <br>
+
+    <br>
+    <div style="background-color: #333; padding: 10px 20px;">
+      <code style="color: lightgrey;">
+        Le serveur dois rester en cours d'execution sur l'ordinateur pour continuer
+        d'y acceder a distance. Et pour fermer la connexion, il suffit simplement de fermer le program.
+      </code>
+    </div>
+
+    <style>
+      button{
+        background-color: #333;
+        color: white;
+        font-size: 20px;
+        padding: 11px 22px;
+        border-radius: 6px;
+      }
+      a{
+        background-color: black;
+        font-size: 25px;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        padding: 11px 22px;
+      }
+    </style>
+
+    
+  </body>
+  
+</html>
