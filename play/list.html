@@ -1,4 +1,5 @@
 
+```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -58,12 +59,16 @@
         }
         .vibrate { animation: drift-shake 0.15s infinite; }
 
-        .progress-glow {
-            box-shadow: 0 0 15px var(--accent);
-            transition: width 0.3s linear;
+        /* Iframe invisible pour l'audio */
+        #audio-bridge {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+            border: none;
         }
 
-        /* Effet de scanline rétro */
         .scanline {
             width: 100%; height: 2px;
             background: rgba(0, 242, 255, 0.1);
@@ -83,19 +88,22 @@
     <div class="hz-massive">HZ</div>
     <div class="scanline"></div>
 
+    <!-- IFRAME AUDIO BRIDGE -->
+    <iframe id="audio-bridge" src=""></iframe>
+
     <!-- ECRAN DE DEMARRAGE -->
     <div id="intro-screen" class="screen z-[100] items-center justify-center p-10">
         <div class="text-center mb-20 space-y-2">
             <h1 class="text-7xl font-black italic tracking-tighter text-white">HZ</h1>
-            <p class="text-[9px] tracking-[0.8em] opacity-30 uppercase font-bold text-cyan-400">Audio Sync System</p>
+            <p class="text-[9px] tracking-[0.8em] opacity-30 uppercase font-bold text-cyan-400">Audio Bypass System</p>
         </div>
         
         <button id="ignition-btn" class="relative group">
             <div class="absolute inset-0 bg-[var(--accent)] opacity-20 rounded-full blur-3xl group-active:opacity-50 transition"></div>
             <div class="w-36 h-36 rounded-full border border-white/10 flex items-center justify-center glass-ui relative active:scale-90 transition-all duration-300">
-                <i data-lucide="power" class="w-16 h-16 text-white"></i>
+                <i data-lucide="zap" class="w-16 h-16 text-white"></i>
             </div>
-            <p id="ignition-text" class="absolute -bottom-16 left-1/2 -translate-x-1/2 w-max text-[10px] tracking-[0.5em] uppercase opacity-40 font-black">IGNITION</p>
+            <p id="ignition-text" class="absolute -bottom-16 left-1/2 -translate-x-1/2 w-max text-[10px] tracking-[0.5em] uppercase opacity-40 font-black">START BRIDGE</p>
         </button>
     </div>
 
@@ -103,11 +111,11 @@
     <div id="player-screen" class="screen screen-hidden z-50 p-6 pt-14">
         <header class="flex justify-between items-center mb-10 px-4">
             <div class="flex gap-8">
-                <button id="mode-night" class="text-xs font-black uppercase tracking-[0.3em] text-[var(--accent)] border-b-2 border-[var(--accent)] pb-2 transition-all">Night</button>
-                <button id="mode-phonk" class="text-xs font-black uppercase tracking-[0.3em] opacity-20 pb-2 transition-all">Phonk</button>
+                <button id="mode-night" class="text-xs font-black uppercase tracking-[0.3em] text-[var(--accent)] border-b-2 border-[var(--accent)] pb-2">Night</button>
+                <button id="mode-phonk" class="text-xs font-black uppercase tracking-[0.3em] opacity-20 pb-2">Phonk</button>
             </div>
             <div class="text-[8px] font-black tracking-widest opacity-30 border border-white/10 px-3 py-1 rounded-full flex items-center gap-2">
-                <span class="w-1 h-1 bg-green-500 rounded-full animate-ping"></span> LIVE_DATA
+                <span class="w-1 h-1 bg-green-500 rounded-full animate-ping"></span> BYPASS_ACTIVE
             </div>
         </header>
 
@@ -118,76 +126,42 @@
                     <img id="cover-art" src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80" class="w-full h-full object-cover rounded-[40px] grayscale brightness-50 contrast-150">
                 </div>
                 
-                <div class="absolute bottom-12 left-12 right-12">
-                    <div id="stream-label" class="text-[9px] font-black uppercase tracking-[0.5em] mb-4 text-[var(--accent)]">BORN TO DRIFT</div>
-                    <div class="h-[3px] w-full bg-white/5 rounded-full overflow-hidden">
-                        <div id="audio-progress" class="h-full bg-white progress-glow w-0"></div>
-                    </div>
+                <div class="absolute bottom-12 left-12 right-12 text-center">
+                    <div id="stream-label" class="text-[9px] font-black uppercase tracking-[0.5em] mb-4 text-[var(--accent)]">IFRAME_STREAM_LIVE</div>
+                    <div class="text-[10px] opacity-20 font-bold tracking-widest italic">BYPASSING PCLOUD RESTRICTIONS</div>
                 </div>
             </div>
         </main>
 
-        <footer class="mb-14 px-4">
-            <div class="flex justify-between items-center max-w-[280px] mx-auto">
-                <button class="opacity-20 active:scale-75 transition-transform"><i data-lucide="skip-back" class="w-10 h-10 fill-current"></i></button>
-                <button id="master-toggle" class="w-28 h-28 rounded-full bg-white text-black flex items-center justify-center active:scale-90 transition-all shadow-[0_0_60px_rgba(0,242,255,0.2)]">
-                    <i data-lucide="pause" id="toggle-icon" class="w-14 h-14 fill-current"></i>
+        <footer class="mb-14 px-4 text-center">
+            <div class="flex justify-center items-center gap-12">
+                 <button id="refresh-bridge" class="p-4 glass-ui rounded-full active:scale-90 transition">
+                    <i data-lucide="rotate-cw" class="w-6 h-6 opacity-40"></i>
                 </button>
-                <button class="opacity-20 active:scale-75 transition-transform"><i data-lucide="skip-forward" class="w-10 h-10 fill-current"></i></button>
+                <div class="text-[10px] font-black opacity-50 uppercase tracking-[0.3em]">Audio Linked</div>
             </div>
         </footer>
     </div>
 
-    <!-- AUDIO ENGINE CORRIGÉ -->
-    <audio id="engine-core" loop crossorigin="anonymous"></audio>
-
     <script>
         lucide.createIcons();
 
-        const engine = document.getElementById('engine-core');
         const ignition = document.getElementById('ignition-btn');
-        const ignitionText = document.getElementById('ignition-text');
-        const toggle = document.getElementById('master-toggle');
+        const bridge = document.getElementById('audio-bridge');
         const intro = document.getElementById('intro-screen');
         const player = document.getElementById('player-screen');
-        const progress = document.getElementById('audio-progress');
         const cover = document.getElementById('cover-art');
+        
+        // Ton lien pCloud avec un paramètre pour tenter de forcer l'autoplay si possible
+        const pCloudUrl = "https://e.pcloud.link/publink/show?code=XZh33iZR8zsaQ9mR4zbYDyEWPjJSYvmYq8V&autoplay=1";
 
-        // --- LOGIQUE DE CONTOURNEMENT PCLOUD ---
-        // On essaye de reconstruire un lien de téléchargement direct
-        const pCloudCode = "XZh33iZR8zsaQ9mR4zbYDyEWPjJSYvmYq8V";
-        // On utilise l'API pCloud pour obtenir le lien direct sans passer par l'UI
-        const directAudioUrl = `https://api.pcloud.com/getpublinkdownload?code=${pCloudCode}`;
-
-        async function initAudio() {
-            try {
-                ignitionText.innerText = "CONNECTING...";
-                const response = await fetch(directAudioUrl);
-                const data = await response.json();
-                
-                if (data.path) {
-                    const finalUrl = `https://${data.hosts[0]}${data.path}`;
-                    engine.src = finalUrl;
-                    engine.load();
-                } else {
-                    // Fallback si l'API échoue : on tente la lecture directe quand même
-                    engine.src = "https://e.pcloud.link/publink/show?code=" + pCloudCode;
-                }
-            } catch (e) {
-                console.error("Audio Load Error:", e);
-                // Fallback local au cas où
-                engine.src = "playlist.mp3";
-            }
-        }
-
-        // Initialisation
-        ignition.addEventListener('click', async () => {
-            await initAudio();
+        ignition.addEventListener('click', () => {
+            // On charge l'iframe au moment du clic
+            bridge.src = pCloudUrl;
             
-            engine.play().catch(err => {
-                console.log("Audio trigger required or source invalid");
-            });
+            document.getElementById('ignition-text').innerText = "BYPASSING...";
 
+            // Transition UI
             gsap.to(intro, {
                 opacity: 0, scale: 0.7, duration: 0.8, ease: "power4.in",
                 onComplete: () => {
@@ -198,18 +172,8 @@
             });
         });
 
-        // Play/Pause
-        toggle.addEventListener('click', () => {
-            const icon = document.getElementById('toggle-icon');
-            if (engine.paused) {
-                engine.play().catch(() => {});
-                icon.setAttribute('data-lucide', 'pause');
-            } else {
-                engine.pause();
-                icon.setAttribute('data-lucide', 'play');
-            }
-            lucide.createIcons();
-            
+        document.getElementById('refresh-bridge').addEventListener('click', () => {
+            bridge.src = bridge.src; // Force le rechargement de l'iframe
             const block = document.getElementById('visual-block');
             block.classList.add('vibrate');
             setTimeout(() => block.classList.remove('vibrate'), 150);
@@ -233,27 +197,15 @@
             pBtn.style.borderBottomColor = isP ? color : "transparent";
             
             cover.src = img;
-            document.getElementById('stream-label').innerText = isP ? "PHONK DRIFT ACTIVE" : "NIGHT STREAM ACTIVE";
+            document.getElementById('stream-label').innerText = isP ? "PHONK BYPASS ACTIVE" : "NIGHT BYPASS ACTIVE";
             document.getElementById('stream-label').style.color = color;
             document.getElementById('bloom').style.backgroundColor = color;
-            
-            // Flash color sur le canvas
-            ctx.fillStyle = color;
-            ctx.fillRect(0,0,canvas.width, canvas.height);
         }
 
         nBtn.addEventListener('click', () => changeMode('night'));
         pBtn.addEventListener('click', () => changeMode('phonk'));
 
-        // Progress logic
-        engine.addEventListener('timeupdate', () => {
-            if (engine.duration) {
-                const pct = (engine.currentTime / engine.duration) * 100;
-                progress.style.width = pct + "%";
-            }
-        });
-
-        // Warp Canvas (Vitesse)
+        // Warp Canvas
         const canvas = document.getElementById('warp-field');
         const ctx = canvas.getContext('2d');
         let lines = [];
@@ -297,8 +249,9 @@
         window.addEventListener('resize', init);
         init(); anim();
 
-        // Bloquage Zoom/Scroll
         document.addEventListener('touchstart', (e) => { if(e.touches.length > 1) e.preventDefault(); }, {passive:false});
     </script>
 </body>
 </html>
+
+```
