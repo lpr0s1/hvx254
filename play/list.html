@@ -16,7 +16,7 @@
 
         :root { --accent: #00f2ff; }
 
-        * { -webkit-tap-highlight-color: transparent; outline: none; }
+        * { -webkit-tap-highlight-color: transparent; outline: none; box-sizing: border-box; }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -32,10 +32,10 @@
         }
 
         .glass-ui {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         #warp-field {
@@ -44,41 +44,31 @@
 
         .screen {
             position: absolute; inset: 0; display: flex; flex-direction: column;
-            transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        .screen-hidden { opacity: 0; transform: scale(1.1) translateY(20px); pointer-events: none; filter: blur(10px); }
+        .screen-hidden { opacity: 0; transform: scale(0.9); pointer-events: none; filter: blur(20px); }
 
-        @keyframes drift-shake {
+        @keyframes pulse-accent {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+        .bloom-effect { animation: pulse-accent 3s infinite ease-in-out; }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* Vibration au clic */
+        .vibrate { animation: shake 0.1s linear 2; }
+        @keyframes shake {
             0% { transform: translate(0,0); }
-            20% { transform: translate(-4px, 3px); }
-            40% { transform: translate(4px, -3px); }
-            60% { transform: translate(-4px, -3px); }
-            80% { transform: translate(4px, 3px); }
+            50% { transform: translate(5px, -5px); }
             100% { transform: translate(0,0); }
-        }
-        .vibrate { animation: drift-shake 0.15s infinite; }
-
-        /* Iframe invisible pour l'audio */
-        #audio-bridge {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            opacity: 0;
-            pointer-events: none;
-            border: none;
-        }
-
-        .scanline {
-            width: 100%; height: 2px;
-            background: rgba(0, 242, 255, 0.1);
-            position: absolute; top: 0; left: 0;
-            z-index: 10; pointer-events: none;
-            animation: scan 4s linear infinite;
-        }
-        @keyframes scan {
-            0% { top: 0%; }
-            100% { top: 100%; }
         }
     </style>
 </head>
@@ -86,59 +76,56 @@
 
     <canvas id="warp-field"></canvas>
     <div class="hz-massive">HZ</div>
-    <div class="scanline"></div>
 
-    <!-- IFRAME AUDIO BRIDGE -->
-    <iframe id="audio-bridge" src=""></iframe>
-
-    <!-- ECRAN DE DEMARRAGE -->
-    <div id="intro-screen" class="screen z-[100] items-center justify-center p-10">
-        <div class="text-center mb-20 space-y-2">
-            <h1 class="text-7xl font-black italic tracking-tighter text-white">HZ</h1>
-            <p class="text-[9px] tracking-[0.8em] opacity-30 uppercase font-bold text-cyan-400">Audio Bypass System</p>
+    <!-- ECRAN D'IGNITION -->
+    <div id="intro-screen" class="screen z-[100] items-center justify-center p-10 bg-black">
+        <div class="text-center mb-24 space-y-2">
+            <h1 class="text-8xl font-black italic tracking-tighter text-white">HZ</h1>
+            <p class="text-[10px] tracking-[0.9em] opacity-40 uppercase font-bold text-cyan-400">Direct Link System</p>
         </div>
         
         <button id="ignition-btn" class="relative group">
-            <div class="absolute inset-0 bg-[var(--accent)] opacity-20 rounded-full blur-3xl group-active:opacity-50 transition"></div>
-            <div class="w-36 h-36 rounded-full border border-white/10 flex items-center justify-center glass-ui relative active:scale-90 transition-all duration-300">
-                <i data-lucide="zap" class="w-16 h-16 text-white"></i>
+            <div class="absolute inset-0 bg-[var(--accent)] opacity-20 rounded-full blur-3xl group-active:opacity-60 transition"></div>
+            <div class="w-40 h-40 rounded-full border-2 border-white/10 flex items-center justify-center glass-ui relative active:scale-90 transition-all duration-300">
+                <i data-lucide="play" class="w-20 h-20 fill-white ml-2"></i>
             </div>
-            <p id="ignition-text" class="absolute -bottom-16 left-1/2 -translate-x-1/2 w-max text-[10px] tracking-[0.5em] uppercase opacity-40 font-black">START BRIDGE</p>
+            <p id="ignition-status" class="absolute -bottom-20 left-1/2 -translate-x-1/2 w-max text-[11px] tracking-[0.6em] uppercase opacity-50 font-black">LANCER LE FLUX</p>
         </button>
     </div>
 
-    <!-- LECTEUR PRINCIPAL -->
-    <div id="player-screen" class="screen screen-hidden z-50 p-6 pt-14">
-        <header class="flex justify-between items-center mb-10 px-4">
+    <!-- LECTEUR CARPLAY -->
+    <div id="player-screen" class="screen screen-hidden z-50 p-6 pt-12">
+        <header class="flex justify-between items-center mb-8 px-4">
             <div class="flex gap-8">
-                <button id="mode-night" class="text-xs font-black uppercase tracking-[0.3em] text-[var(--accent)] border-b-2 border-[var(--accent)] pb-2">Night</button>
-                <button id="mode-phonk" class="text-xs font-black uppercase tracking-[0.3em] opacity-20 pb-2">Phonk</button>
+                <button id="btn-night" class="text-sm font-black uppercase tracking-widest text-[var(--accent)] border-b-2 border-[var(--accent)] pb-1">Night</button>
+                <button id="btn-phonk" class="text-sm font-black uppercase tracking-widest opacity-20 pb-1">Phonk</button>
             </div>
-            <div class="text-[8px] font-black tracking-widest opacity-30 border border-white/10 px-3 py-1 rounded-full flex items-center gap-2">
-                <span class="w-1 h-1 bg-green-500 rounded-full animate-ping"></span> BYPASS_ACTIVE
+            <div class="glass-ui px-4 py-1.5 rounded-full text-[10px] font-black flex items-center gap-2">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> STREAMING_LIVE
             </div>
         </header>
 
         <main class="flex-1 flex flex-col items-center justify-center">
-            <div id="visual-block" class="relative w-full aspect-square max-w-[350px]">
-                <div id="bloom" class="absolute inset-0 rounded-full blur-[100px] opacity-30 bg-[var(--accent)]"></div>
-                <div class="w-full h-full glass-ui rounded-[60px] overflow-hidden p-5 border border-white/5">
-                    <img id="cover-art" src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80" class="w-full h-full object-cover rounded-[40px] grayscale brightness-50 contrast-150">
+            <div id="visual-container" class="relative w-full aspect-square max-w-[360px]">
+                <div id="bloom" class="absolute inset-0 rounded-full blur-[100px] bg-[var(--accent)] bloom-effect"></div>
+                <div class="w-full h-full glass-ui rounded-[55px] overflow-hidden p-5 border border-white/5 relative z-10">
+                    <img id="cover-img" src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80" class="w-full h-full object-cover rounded-[35px] grayscale brightness-50 contrast-125">
                 </div>
                 
-                <div class="absolute bottom-12 left-12 right-12 text-center">
-                    <div id="stream-label" class="text-[9px] font-black uppercase tracking-[0.5em] mb-4 text-[var(--accent)]">IFRAME_STREAM_LIVE</div>
-                    <div class="text-[10px] opacity-20 font-bold tracking-widest italic">BYPASSING PCLOUD RESTRICTIONS</div>
+                <div class="absolute bottom-12 left-12 right-12 z-20">
+                    <div id="track-title" class="text-[11px] font-black uppercase tracking-[0.4em] mb-4 text-[var(--accent)]">HZ_DRIVE_CORE</div>
+                    <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                        <div id="progress-indicator" class="progress-bar"></div>
+                    </div>
                 </div>
             </div>
         </main>
 
-        <footer class="mb-14 px-4 text-center">
-            <div class="flex justify-center items-center gap-12">
-                 <button id="refresh-bridge" class="p-4 glass-ui rounded-full active:scale-90 transition">
-                    <i data-lucide="rotate-cw" class="w-6 h-6 opacity-40"></i>
+        <footer class="mb-14">
+            <div class="flex justify-center items-center gap-16">
+                <button id="play-pause" class="w-32 h-32 rounded-full bg-white text-black flex items-center justify-center active:scale-95 transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)]">
+                    <i data-lucide="pause" id="play-icon" class="w-16 h-16 fill-current"></i>
                 </button>
-                <div class="text-[10px] font-black opacity-50 uppercase tracking-[0.3em]">Audio Linked</div>
             </div>
         </footer>
     </div>
@@ -146,110 +133,164 @@
     <script>
         lucide.createIcons();
 
-        const ignition = document.getElementById('ignition-btn');
-        const bridge = document.getElementById('audio-bridge');
+        // Éléments
+        const ignitionBtn = document.getElementById('ignition-btn');
+        const statusText = document.getElementById('ignition-status');
+        const playBtn = document.getElementById('play-pause');
+        const playIcon = document.getElementById('play-icon');
         const intro = document.getElementById('intro-screen');
         const player = document.getElementById('player-screen');
-        const cover = document.getElementById('cover-art');
-        
-        // Ton lien pCloud avec un paramètre pour tenter de forcer l'autoplay si possible
-        const pCloudUrl = "https://e.pcloud.link/publink/show?code=XZh33iZR8zsaQ9mR4zbYDyEWPjJSYvmYq8V&autoplay=1";
+        const progressBar = document.getElementById('progress-indicator');
+        const cover = document.getElementById('cover-img');
 
-        ignition.addEventListener('click', () => {
-            // On charge l'iframe au moment du clic
-            bridge.src = pCloudUrl;
+        // Moteur Audio Unique (Solution Native pour WebKit)
+        const audio = new Audio();
+        audio.loop = true;
+        audio.crossOrigin = "anonymous";
+
+        // Lien pCloud résolu via l'API (Download direct)
+        const PCLOUD_CODE = "XZh33iZR8zsaQ9mR4zbYDyEWPjJSYvmYq8V";
+        const API_URL = `https://api.pcloud.com/getpublinkdownload?code=${PCLOUD_CODE}`;
+
+        // Fonction pour démarrer le système
+        async function startSystem() {
+            statusText.innerText = "CONNEXION...";
             
-            document.getElementById('ignition-text').innerText = "BYPASSING...";
-
-            // Transition UI
-            gsap.to(intro, {
-                opacity: 0, scale: 0.7, duration: 0.8, ease: "power4.in",
-                onComplete: () => {
-                    intro.style.display = 'none';
-                    player.classList.remove('screen-hidden');
-                    gsap.from(player, { opacity: 0, y: 100, duration: 1.2, ease: "expo.out" });
+            try {
+                // 1. On récupère l'URL directe du fichier
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                
+                if (data.path && data.hosts) {
+                    const directUrl = `https://${data.hosts[0]}${data.path}`;
+                    audio.src = directUrl;
+                    
+                    // 2. On lance la lecture IMMEDIATEMENT (interaction utilisateur requise par iOS/Android)
+                    await audio.play();
+                    
+                    // 3. Transition Visuelle
+                    gsap.to(intro, {
+                        opacity: 0, scale: 0.8, duration: 0.8, ease: "power4.in",
+                        onComplete: () => {
+                            intro.style.display = 'none';
+                            player.classList.remove('screen-hidden');
+                            gsap.from(player, { opacity: 0, y: 50, duration: 1, ease: "expo.out" });
+                        }
+                    });
+                } else {
+                    throw new Error("Lien direct introuvable");
                 }
-            });
+            } catch (err) {
+                console.error("Erreur Audio:", err);
+                statusText.innerText = "ERREUR RÉSEAU";
+                // En cas d'erreur, on essaie quand même d'ouvrir l'UI
+                player.classList.remove('screen-hidden');
+                intro.style.display = 'none';
+            }
+        }
+
+        ignitionBtn.addEventListener('click', startSystem);
+
+        playBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                playIcon.setAttribute('data-lucide', 'pause');
+            } else {
+                audio.pause();
+                playIcon.setAttribute('data-lucide', 'play');
+            }
+            lucide.createIcons();
+            
+            // Effet visuel
+            const container = document.getElementById('visual-container');
+            container.classList.add('vibrate');
+            setTimeout(() => container.classList.remove('vibrate'), 150);
         });
 
-        document.getElementById('refresh-bridge').addEventListener('click', () => {
-            bridge.src = bridge.src; // Force le rechargement de l'iframe
-            const block = document.getElementById('visual-block');
-            block.classList.add('vibrate');
-            setTimeout(() => block.classList.remove('vibrate'), 150);
+        // Mise à jour barre de progression
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const pct = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = pct + "%";
+            }
         });
 
-        // Switch Modes
-        const nBtn = document.getElementById('mode-night');
-        const pBtn = document.getElementById('mode-phonk');
+        // Changement de modes
+        const bNight = document.getElementById('btn-night');
+        const bPhonk = document.getElementById('btn-phonk');
 
-        function changeMode(m) {
-            const isP = m === 'phonk';
+        function setMode(mode) {
+            const isP = mode === 'phonk';
             const color = isP ? '#ff0044' : '#00f2ff';
             const img = isP ? 
                 "https://images.unsplash.com/photo-1603584173870-7f3ca976230a?auto=format&fit=crop&q=80" : 
                 "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80";
 
             document.documentElement.style.setProperty('--accent', color);
-            nBtn.style.opacity = isP ? "0.2" : "1";
-            nBtn.style.borderBottomColor = isP ? "transparent" : color;
-            pBtn.style.opacity = isP ? "1" : "0.2";
-            pBtn.style.borderBottomColor = isP ? color : "transparent";
+            bNight.style.opacity = isP ? "0.2" : "1";
+            bNight.style.borderBottomColor = isP ? "transparent" : color;
+            bPhonk.style.opacity = isP ? "1" : "0.2";
+            bPhonk.style.borderBottomColor = isP ? color : "transparent";
             
             cover.src = img;
-            document.getElementById('stream-label').innerText = isP ? "PHONK BYPASS ACTIVE" : "NIGHT BYPASS ACTIVE";
-            document.getElementById('stream-label').style.color = color;
+            document.getElementById('track-title').innerText = isP ? "PHONK_DRIFT_STREAM" : "NIGHT_DRIVE_STREAM";
+            document.getElementById('track-title').style.color = color;
             document.getElementById('bloom').style.backgroundColor = color;
         }
 
-        nBtn.addEventListener('click', () => changeMode('night'));
-        pBtn.addEventListener('click', () => changeMode('phonk'));
+        bNight.addEventListener('click', () => setMode('night'));
+        bPhonk.addEventListener('click', () => setMode('phonk'));
 
-        // Warp Canvas
+        // Canvas Warp (Vitesse)
         const canvas = document.getElementById('warp-field');
         const ctx = canvas.getContext('2d');
         let lines = [];
 
-        function init() {
+        function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             lines = [];
-            for(let i=0; i<60; i++) {
+            for(let i=0; i<70; i++) {
                 lines.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
-                    s: Math.random() * 25 + 15,
-                    l: Math.random() * 60 + 30
+                    speed: Math.random() * 20 + 10,
+                    length: Math.random() * 40 + 20
                 });
             }
         }
 
-        function anim() {
-            ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        function draw() {
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
             ctx.fillRect(0,0,canvas.width, canvas.height);
-            ctx.lineWidth = 2;
             const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+            ctx.lineWidth = 1.5;
             
             lines.forEach(l => {
                 ctx.strokeStyle = accent;
-                ctx.globalAlpha = 0.3;
+                ctx.globalAlpha = 0.2;
                 ctx.beginPath();
                 ctx.moveTo(l.x, l.y);
-                ctx.lineTo(l.x, l.y + l.l);
+                ctx.lineTo(l.x, l.y + l.length);
                 ctx.stroke();
-                l.y += l.s;
+                
+                l.y += l.speed;
                 if(l.y > canvas.height) {
-                    l.y = -l.l;
+                    l.y = -l.length;
                     l.x = Math.random() * canvas.width;
                 }
             });
-            requestAnimationFrame(anim);
+            requestAnimationFrame(draw);
         }
 
-        window.addEventListener('resize', init);
-        init(); anim();
+        window.addEventListener('resize', resize);
+        resize();
+        draw();
 
-        document.addEventListener('touchstart', (e) => { if(e.touches.length > 1) e.preventDefault(); }, {passive:false});
+        // Anti-Zoom & Anti-Scroll iOS
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
