@@ -1,305 +1,148 @@
-```html
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>HZ - Night & Phonk</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        :root {
-            --night-accent: #00f2ff;
-            --phonk-accent: #ff0055;
-            --bg-dark: #050505;
-        }
-
-        body {
-            margin: 0;
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-            touch-action: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        .canvas-overlay {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .visual-bg {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .visual-bg img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: brightness(0.3) contrast(1.2) saturate(0.5);
-        }
-
-        .hz-watermark {
-            position: fixed;
-            bottom: -5vh;
-            right: -2vw;
-            font-size: 25vw;
-            font-weight: 900;
-            font-style: italic;
-            opacity: 0.05;
-            z-index: 0;
-            line-height: 0.7;
-            pointer-events: none;
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .mode-transition {
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .pulse-accent {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
-        }
-
-        .active-tab {
-            border-bottom: 2px solid white;
-            opacity: 1 !important;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>HZ Night Playlist</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+body {
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: 100%;
+  -webkit-user-select: none;
+  user-select: none;
+  background: #000;
+}
+.bg-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: -1;
+}
+.no-zoom {
+  touch-action: manipulation;
+}
+</style>
 </head>
-<body>
+<body class="no-zoom text-gray-100 overflow-hidden">
 
-    <canvas id="particles" class="canvas-overlay"></canvas>
-    <div class="hz-watermark">HZ</div>
+<video class="bg-video" autoplay muted loop playsinline>
+  <source src="car-loop.mp4" type="video/mp4">
+</video>
 
-    <div class="visual-bg" id="bg-container">
-        <img id="bg-image" src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=1000&auto=format&fit=crop" alt="Night Car">
+<div class="relative min-h-screen flex flex-col items-center justify-between px-4 py-6 bg-black/70 backdrop-blur-3xl">
+
+  <div class="w-full flex items-center justify-between mt-2 opacity-90">
+    <div class="text-xs tracking-[0.3em] uppercase text-gray-300">CarPlay screen adapt</div>
+    <div class="flex items-center space-x-3 text-gray-300 text-xl">
+      <i class="ri-bluetooth-fill animate-pulse"></i>
+      <i class="ri-moon-clear-fill"></i>
+    </div>
+  </div>
+
+  <div class="flex-1 flex flex-col items-center justify-center space-y-14 w-full">
+
+    <div class="flex flex-col items-center space-y-5 opacity-100">
+      <div id="hzTitle" class="text-7xl md:text-8xl font-extrabold tracking-tight bg-gradient-to-r from-purple-600 via-fuchsia-500 to-cyan-400 bg-clip-text text-transparent select-none animate__animated animate__pulse animate__infinite">
+        HZ
+      </div>
+      <div class="text-sm uppercase tracking-[0.3em] text-purple-300 animate__animated animate__fadeInDown">Phonk</div>
     </div>
 
-    <div id="intro" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black">
-        <div class="text-center space-y-6">
-            <h2 class="text-[10px] tracking-[0.5em] uppercase opacity-40">CarPlay screen adapt</h2>
-            <button id="btn-init" class="relative group">
-                <div class="absolute -inset-6 bg-white/5 rounded-full blur-2xl transition group-hover:bg-white/10"></div>
-                <div class="w-32 h-32 rounded-full border border-white/20 flex items-center justify-center glass-card relative">
-                    <i data-lucide="play" class="w-12 h-12 fill-white"></i>
-                </div>
-                <p class="mt-8 text-xs tracking-widest uppercase font-light">Lancer la playlist</p>
-            </button>
+    <div class="w-full max-w-md rounded-3xl bg-black/60 backdrop-blur-3xl border border-white/10 shadow-2xl shadow-purple-900/50 p-7 space-y-10 opacity-100 transform animate__animated animate__fadeInUp">
+
+      <div class="flex items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-xs uppercase tracking-[0.3em] text-purple-400">Phonk</span>
+          <span class="mt-3 text-xl font-semibold text-gray-100">lancer la playlist</span>
         </div>
+        <i class="ri-car-fill text-purple-400 text-2xl animate__animated animate__flash animate__infinite"></i>
+      </div>
+
+      <div class="flex items-center justify-between space-x-5">
+        <button id="launchBtn" class="flex-1 inline-flex items-center justify-center space-x-3 rounded-2xl bg-purple-700 hover:bg-purple-600 active:bg-purple-800 transition-all duration-200 py-4 text-sm font-semibold tracking-wide shadow-lg shadow-purple-900/70">
+          <span>lancer la playlist</span>
+          <i class="ri-flashlight-fill text-lg"></i>
+        </button>
+        <button id="playBtn" class="w-20 h-20 rounded-full bg-white text-slate-900 flex items-center justify-center text-4xl shadow-2xl shadow-purple-900/80 transform transition-all duration-200 hover:scale-110 active:scale-95">
+          <i class="ri-play-fill" id="playIcon"></i>
+        </button>
+      </div>
+
+      <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+        <div id="progressBar" class="h-full w-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-400"></div>
+      </div>
+
     </div>
+  </div>
 
-    <div id="player" class="fixed inset-0 z-40 flex flex-col p-6 opacity-0 translate-y-10 pointer-events-none">
-        
-        <header class="flex justify-between items-center mt-8">
-            <div class="flex gap-6">
-                <button id="nav-night" class="text-lg font-bold tracking-tighter uppercase opacity-40 active-tab transition-all">Night</button>
-                <button id="nav-phonk" class="text-lg font-bold tracking-tighter uppercase opacity-40 transition-all">Phonk</button>
-            </div>
-            <div class="w-10 h-10 rounded-full glass-card flex items-center justify-center">
-                <i data-lucide="bluetooth" class="w-4 h-4 text-blue-400"></i>
-            </div>
-        </header>
-
-        <main class="flex-1 flex flex-col items-center justify-center">
-            <div id="album-art" class="relative w-72 h-72 mb-12">
-                <div class="absolute inset-0 bg-white/5 rounded-[40px] rotate-3 blur-sm"></div>
-                <div class="relative w-full h-full rounded-[40px] overflow-hidden glass-card shadow-2xl">
-                    <img id="cover-img" src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover grayscale transition-all duration-1000">
-                </div>
-            </div>
-
-            <div class="w-full px-4 mb-12">
-                <div class="flex justify-between text-[10px] uppercase tracking-tighter opacity-40 mb-2">
-                    <span id="current-time">0:00</span>
-                    <span id="total-time">--:--</span>
-                </div>
-                <div class="h-[3px] w-full bg-white/10 rounded-full overflow-hidden">
-                    <div id="progress" class="h-full bg-white w-0 transition-all duration-300"></div>
-                </div>
-            </div>
-        </main>
-
-        <footer class="mb-10">
-            <div class="flex justify-around items-center">
-                <button class="opacity-30"><i data-lucide="shuffle" class="w-5 h-5"></i></button>
-                <button class="opacity-30"><i data-lucide="skip-back" class="w-8 h-8 fill-current"></i></button>
-                <button id="play-toggle" class="w-24 h-24 rounded-full bg-white text-black flex items-center justify-center shadow-2xl pulse-accent">
-                    <i data-lucide="pause" id="play-icon" class="w-10 h-10 fill-current"></i>
-                </button>
-                <button class="opacity-30"><i data-lucide="skip-forward" class="w-8 h-8 fill-current"></i></button>
-                <button class="opacity-30"><i data-lucide="repeat" class="w-5 h-5"></i></button>
-            </div>
-        </footer>
+  <div class="w-full flex items-center justify-between text-[0.7rem] text-gray-400 opacity-90">
+    <div class="flex items-center space-x-2">
+      <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+      <span>Bluetooth</span>
     </div>
+    <div class="flex items-center space-x-3">
+      <i class="ri-android-fill text-green-400"></i>
+      <i class="ri-apple-fill text-gray-200"></i>
+    </div>
+  </div>
 
-    <audio id="audio" src="playlist.mp3" loop prefetch="auto"></audio>
+</div>
 
-    <script>
-        lucide.createIcons();
+<audio id="audioPlayer" src="https://e.pcloud.link/publink/show?code=XZh33iZR8zsaQ9mR4zbYDyEWPjJSYvmYq8V"></audio>
 
-        const state = {
-            mode: 'night', // 'night' ou 'phonk'
-            isPlaying: false
-        };
+<script>
+let lastTouchEnd = 0;
+document.addEventListener('touchstart', function (e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+document.addEventListener('touchend', function (e) { const now = Date.now(); if (now - lastTouchEnd <= 300) e.preventDefault(); lastTouchEnd = now; }, { passive: false });
+document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
 
-        const config = {
-            night: {
-                accent: '#00f2ff',
-                img: 'https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=1000&auto=format&fit=crop',
-                cover: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=1000&auto=format&fit=crop'
-            },
-            phonk: {
-                accent: '#ff0055',
-                img: 'https://images.unsplash.com/photo-1563720223185-11003d516935?q=80&w=1000&auto=format&fit=crop',
-                cover: 'https://images.unsplash.com/photo-1603584173870-7f3ca976230a?q=80&w=1000&auto=format&fit=crop'
-            }
-        };
+const audio = document.getElementById('audioPlayer');
+const playBtn = document.getElementById('playBtn');
+const playIcon = document.getElementById('playIcon');
+const launchBtn = document.getElementById('launchBtn');
+const progressBar = document.getElementById('progressBar');
 
-        const audio = document.getElementById('audio');
-        const progress = document.getElementById('progress');
-        const playToggle = document.getElementById('play-toggle');
-        const bgImg = document.getElementById('bg-image');
-        const coverImg = document.getElementById('cover-img');
+function togglePlay() {
+  if (audio.paused) {
+    audio.play();
+    playIcon.classList.remove('ri-play-fill');
+    playIcon.classList.add('ri-pause-fill');
+    gsap.to(playBtn, { scale: 1.15, duration: 0.2, yoyo: true, repeat: 1 });
+  } else {
+    audio.pause();
+    playIcon.classList.remove('ri-pause-fill');
+    playIcon.classList.add('ri-play-fill');
+  }
+}
 
-        document.getElementById('btn-init').addEventListener('click', () => {
-            audio.play();
-            state.isPlaying = true;
-            
-            gsap.to('#intro', { opacity: 0, scale: 1.1, duration: 1, ease: "power4.inOut", onComplete: () => {
-                document.getElementById('intro').style.display = 'none';
-                const player = document.getElementById('player');
-                player.classList.remove('pointer-events-none');
-                gsap.to(player, { opacity: 1, y: 0, duration: 1.5, ease: "expo.out" });
-            }});
-        });
+playBtn.addEventListener('click', togglePlay);
+launchBtn.addEventListener('click', function () {
+  togglePlay();
+  gsap.fromTo('#progressBar', { width: '0%' }, { width: '100%', duration: 2, ease: 'power2.out' });
+});
 
-        const switchMode = (mode) => {
-            if (state.mode === mode) return;
-            state.mode = mode;
+audio.addEventListener('timeupdate', function () {
+  if (audio.duration) {
+    progressBar.style.width = (audio.currentTime / audio.duration) * 100 + '%';
+  }
+});
 
-            const isPhonk = mode === 'phonk';
-            document.getElementById('nav-night').classList.toggle('active-tab', !isPhonk);
-            document.getElementById('nav-phonk').classList.toggle('active-tab', isPhonk);
+audio.addEventListener('ended', function () {
+  playIcon.classList.remove('ri-pause-fill');
+  playIcon.classList.add('ri-play-fill');
+  gsap.to('#progressBar', { width: '0%', duration: 0.4, ease: 'power2.out' });
+});
 
-            gsap.to('#bg-container', { scale: 1.2, opacity: 0.5, duration: 0.4, onComplete: () => {
-                bgImg.src = config[mode].img;
-                coverImg.src = config[mode].cover;
-                gsap.to('#bg-container', { scale: 1, opacity: 1, duration: 1 });
-            }});
+gsap.from('#hzTitle', { opacity: 0, y: 60, duration: 1.2, ease: 'power3.out' });
+gsap.from('.bg-black\\/60', { opacity: 0, y: 40, duration: 1, delay: 0.3, ease: 'power3.out' });
+</script>
 
-            gsap.to(playToggle, { backgroundColor: config[mode].accent, duration: 0.6 });
-        };
-
-        document.getElementById('nav-night').addEventListener('click', () => switchMode('night'));
-        document.getElementById('nav-phonk').addEventListener('click', () => switchMode('phonk'));
-
-        playToggle.addEventListener('click', () => {
-            if (audio.paused) {
-                audio.play();
-                state.isPlaying = true;
-                document.getElementById('play-icon').setAttribute('data-lucide', 'pause');
-            } else {
-                audio.pause();
-                state.isPlaying = false;
-                document.getElementById('play-icon').setAttribute('data-lucide', 'play');
-            }
-            lucide.createIcons();
-        });
-
-        audio.addEventListener('timeupdate', () => {
-            const pct = (audio.currentTime / audio.duration) * 100;
-            progress.style.width = `${pct}%`;
-            
-            const m = Math.floor(audio.currentTime / 60);
-            const s = Math.floor(audio.currentTime % 60);
-            document.getElementById('current-time').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-        });
-
-        audio.addEventListener('loadedmetadata', () => {
-            const m = Math.floor(audio.duration / 60);
-            const s = Math.floor(audio.duration % 60);
-            document.getElementById('total-time').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-        });
-
-        const canvas = document.getElementById('particles');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Particle {
-            constructor() {
-                this.init();
-            }
-            init() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.speed = Math.random() * 2 + 1;
-                this.size = Math.random() * 2;
-                this.opacity = Math.random() * 0.5;
-            }
-            update() {
-                this.y += this.speed;
-                if (this.y > canvas.height) this.init();
-            }
-            draw() {
-                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < 50; i++) particles.push(new Particle());
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-        document.addEventListener('touchstart', (e) => {
-            if (e.touches.length > 1) e.preventDefault();
-        }, { passive: false });
-
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', (e) => {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) e.preventDefault();
-            lastTouchEnd = now;
-        }, false);
-    </script>
 </body>
 </html>
-
-```
