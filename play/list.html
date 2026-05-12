@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -31,7 +31,8 @@
             color: #fff;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
-            position: fixed; /* Bloque le scroll iOS */
+            position: fixed;
+            touch-action: none;
         }
 
         .hz-bg {
@@ -40,22 +41,19 @@
             left: 50%;
             transform: translate(-50%, -50%);
             font-family: 'Orbitron', sans-serif;
-            font-size: 40vw;
-            opacity: 0.05;
+            font-size: 50vw;
+            opacity: 0.04;
             z-index: 0;
             pointer-events: none;
             user-select: none;
+            letter-spacing: -2vw;
         }
 
         .glass {
             background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(25px) saturate(150%);
-            -webkit-backdrop-filter: blur(25px) saturate(150%);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-glow {
-            box-shadow: 0 0 30px var(--accent);
         }
 
         #warp-canvas {
@@ -70,27 +68,33 @@
             inset: 0;
             display: flex;
             flex-direction: column;
-            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.6s;
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .hidden-view {
             opacity: 0;
-            transform: scale(1.1);
+            transform: scale(1.2);
             pointer-events: none;
+            filter: blur(20px);
         }
 
-        .phonk-mode {
-            --accent: #ff0044;
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 2px); }
+            40% { transform: translate(3px, -2px); }
+            60% { transform: translate(-3px, -2px); }
+            80% { transform: translate(3px, 2px); }
+            100% { transform: translate(0); }
         }
+        .glitch-effect { animation: glitch 0.15s infinite; }
 
-        @keyframes shake {
-            0% { transform: translate(0,0); }
-            25% { transform: translate(2px, -2px); }
-            50% { transform: translate(-2px, 2px); }
-            75% { transform: translate(2px, 2px); }
-            100% { transform: translate(0,0); }
+        .loading-bar {
+            height: 2px;
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+            width: 0%;
+            transition: width 0.2s;
         }
-        .shake-active { animation: shake 0.1s infinite; }
     </style>
 </head>
 <body class="bg-black">
@@ -98,101 +102,94 @@
     <canvas id="warp-canvas"></canvas>
     <div class="hz-bg">HZ</div>
 
-    <!-- ECRAN DE LANCEMENT -->
+    <!-- ECRAN D'INTRODUCTION -->
     <div id="intro" class="view z-[100] items-center justify-center bg-black p-10">
-        <div class="text-center mb-16">
-            <h1 class="text-5xl font-black italic tracking-tighter mb-2">HZ DRIVE</h1>
-            <p class="text-[10px] tracking-[0.5em] opacity-30 uppercase">CarPlay screen adapt</p>
+        <div class="text-center mb-16 space-y-4">
+            <h1 class="text-6xl font-black italic tracking-tighter">HZ</h1>
+            <p class="text-[10px] tracking-[0.7em] opacity-30 uppercase">CarPlay Adapt System</p>
         </div>
         
-        <button id="launch-btn" class="relative">
-            <div class="absolute inset-0 bg-white/20 rounded-full blur-2xl animate-pulse"></div>
-            <div class="w-32 h-32 rounded-full border-2 border-white/20 flex items-center justify-center glass relative active:scale-90 transition-transform">
-                <i data-lucide="play" class="w-12 h-12 fill-white ml-2"></i>
+        <button id="launch-btn" class="group relative">
+            <div class="absolute inset-0 bg-[var(--accent)] opacity-20 rounded-full blur-3xl group-active:opacity-40 transition"></div>
+            <div class="w-32 h-32 rounded-full border-2 border-white/10 flex items-center justify-center glass relative active:scale-90 transition-all duration-300">
+                <i data-lucide="play" class="w-14 h-14 fill-white ml-2"></i>
             </div>
+            <p class="mt-10 text-[10px] tracking-[0.4em] uppercase opacity-50 font-bold">Démarrer le moteur</p>
         </button>
     </div>
 
-    <!-- INTERFACE PRINCIPALE -->
+    <!-- INTERFACE LECTEUR -->
     <div id="main" class="view hidden-view z-50 p-6 pt-12">
-        <header class="flex justify-between items-center mb-8 px-2">
-            <div class="flex gap-4">
-                <button id="set-night" class="text-xs font-black uppercase tracking-widest text-[var(--accent)] border-b-2 border-[var(--accent)] pb-1 transition-all">Night</button>
-                <button id="set-phonk" class="text-xs font-black uppercase tracking-widest opacity-30 pb-1 transition-all">Phonk</button>
+        <header class="flex justify-between items-center mb-10 px-2">
+            <div class="flex gap-6">
+                <button id="mode-night" class="text-sm font-black uppercase tracking-widest text-[var(--accent)] border-b-2 border-[var(--accent)] pb-1">Night</button>
+                <button id="mode-phonk" class="text-sm font-black uppercase tracking-widest opacity-20 pb-1">Phonk</button>
             </div>
-            <div class="glass px-3 py-1 rounded-full text-[10px] flex items-center gap-2">
-                <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                BT: CAR_MEDIA
-            </div>
+            <div class="text-[9px] font-bold tracking-widest opacity-40">BLUETOOTH : HZ_CAR_SYSTEM</div>
         </header>
 
         <main class="flex-1 flex flex-col items-center justify-center">
-            <div id="cover-container" class="relative w-full aspect-square max-w-[320px]">
-                <div id="glow-ring" class="absolute inset-0 rounded-full blur-3xl opacity-20 bg-[var(--accent)]"></div>
-                <div class="w-full h-full glass rounded-[40px] overflow-hidden p-3">
-                    <img id="cover-img" src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80" class="w-full h-full object-cover rounded-[32px] grayscale contrast-125 brightness-75">
+            <div id="art-box" class="relative w-full aspect-square max-w-[340px]">
+                <div id="accent-glow" class="absolute inset-0 rounded-full blur-[80px] opacity-20 bg-[var(--accent)]"></div>
+                <div class="w-full h-full glass rounded-[50px] overflow-hidden p-4">
+                    <img id="main-cover" src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80" class="w-full h-full object-cover rounded-[35px] grayscale brightness-50 contrast-125 transition-all duration-1000">
                 </div>
-                <div class="absolute bottom-10 left-10 right-10">
-                    <div id="track-name" class="text-xs font-black uppercase tracking-tighter mb-2">SYSTEM_STREAM // DRIVE</div>
-                    <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
-                        <div id="progress" class="h-full bg-white w-0 shadow-[0_0_10px_#fff]"></div>
+                
+                <div class="absolute bottom-12 left-10 right-10">
+                    <div id="status-text" class="text-[10px] font-black uppercase tracking-[0.3em] mb-3 text-[var(--accent)]">Stream Active</div>
+                    <div class="h-[2px] w-full bg-white/10 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="loading-bar"></div>
                     </div>
                 </div>
             </div>
         </main>
 
-        <footer class="mb-8 space-y-10">
-            <div class="flex justify-around items-center opacity-40">
-                <i data-lucide="shuffle" class="w-5 h-5"></i>
-                <i data-lucide="skip-back" class="w-8 h-8 fill-current"></i>
-                <div class="w-8 h-8"></div>
-                <i data-lucide="skip-forward" class="w-8 h-8 fill-current"></i>
-                <i data-lucide="repeat" class="w-5 h-5"></i>
-            </div>
-
-            <div class="flex justify-center">
-                <button id="play-pause" class="w-28 h-28 rounded-full bg-white text-black flex items-center justify-center active:scale-95 transition-transform shadow-2xl">
-                    <i data-lucide="pause" id="play-icon" class="w-12 h-12 fill-current"></i>
+        <footer class="mb-12">
+            <div class="flex justify-center items-center gap-12">
+                <button class="opacity-20 active:scale-90 transition"><i data-lucide="skip-back" class="w-10 h-10 fill-current"></i></button>
+                <button id="play-pause" class="w-28 h-28 rounded-full bg-white text-black flex items-center justify-center active:scale-90 transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)]">
+                    <i data-lucide="pause" id="play-icon" class="w-14 h-14 fill-current"></i>
                 </button>
+                <button class="opacity-20 active:scale-90 transition"><i data-lucide="skip-forward" class="w-10 h-10 fill-current"></i></button>
             </div>
         </footer>
     </div>
 
-    <!-- Note: pCloud public links need a specific direct download link structure. 
-         Using a fallback for demo, but the logic handles the provided link. -->
-    <audio id="audio-engine" loop crossorigin="anonymous">
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    <!-- AUDIO ENGINE -->
+    <!-- Le lien pCloud est forcé via un paramètre de téléchargement direct si possible -->
+    <audio id="audio-player" loop crossorigin="anonymous">
+        <source src="https://e.pcloud.link/publink/show?code=XZh33iZR8zsaQ9mR4zbYDyEWPjJSYvmYq8V" type="audio/mpeg">
     </audio>
 
     <script>
         lucide.createIcons();
 
-        const audio = document.getElementById('audio-engine');
+        const audio = document.getElementById('audio-player');
         const launchBtn = document.getElementById('launch-btn');
         const playBtn = document.getElementById('play-pause');
         const intro = document.getElementById('intro');
-        const main = document.getElementById('main');
-        const progress = document.getElementById('progress');
-        
-        // --- GESTION AUDIO CORRIGÉE ---
-        // On essaye de forcer le chargement du lien pCloud si possible
-        const pCloudLink = "https://e.pcloud.link/publink/show?code=XZh33iZR8zsaQ9mR4zbYDyEWPjJSYvmYq8V";
-        // Note technique: les navigateurs bloquent souvent les liens de prévisualisation pCloud. 
-        // Si le lien direct échoue, l'audio de secours prend le relais pour ne pas casser l'UI.
+        const mainView = document.getElementById('main');
+        const progressBar = document.getElementById('progress-bar');
+        const cover = document.getElementById('main-cover');
 
+        // Initialisation de l'audio avec le lien
         launchBtn.addEventListener('click', () => {
-            audio.play().catch(() => console.log("Audio trigger required"));
-            
+            // Tentative de lecture immédiate
+            audio.play().catch(err => {
+                console.log("Audio waiting for user...");
+            });
+
             gsap.to(intro, {
-                opacity: 0, scale: 0.9, duration: 0.8, ease: "power4.inOut",
+                opacity: 0, scale: 0.8, duration: 1, ease: "expo.inOut",
                 onComplete: () => {
                     intro.style.display = 'none';
-                    main.classList.remove('hidden-view');
-                    gsap.from(main, { opacity: 0, y: 30, duration: 1, ease: "expo.out" });
+                    mainView.classList.remove('hidden-view');
+                    gsap.from(mainView, { opacity: 0, y: 50, duration: 1.2, ease: "expo.out" });
                 }
             });
         });
 
+        // Toggle Play/Pause
         playBtn.addEventListener('click', () => {
             const icon = document.getElementById('play-icon');
             if (audio.paused) {
@@ -204,86 +201,92 @@
             }
             lucide.createIcons();
             
-            // Effet de choc visuel au clic
-            document.getElementById('cover-container').classList.add('shake-active');
-            setTimeout(() => document.getElementById('cover-container').classList.remove('shake-active'), 200);
+            // Effet visuel nerveux
+            const artBox = document.getElementById('art-box');
+            artBox.classList.add('glitch-effect');
+            setTimeout(() => artBox.classList.remove('glitch-effect'), 150);
         });
 
-        // --- NAVIGATION MODES ---
-        const btnNight = document.getElementById('set-night');
-        const btnPhonk = document.getElementById('set-phonk');
-        const coverImg = document.getElementById('cover-img');
+        // Gestion des Modes
+        const nBtn = document.getElementById('mode-night');
+        const pBtn = document.getElementById('mode-phonk');
 
-        btnNight.addEventListener('click', () => {
-            document.body.classList.remove('phonk-mode');
-            btnNight.style.opacity = "1";
-            btnNight.style.borderBottomColor = "#00f2ff";
-            btnPhonk.style.opacity = "0.3";
-            btnPhonk.style.borderBottomColor = "transparent";
-            document.documentElement.style.setProperty('--accent', '#00f2ff');
-            coverImg.src = "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80";
-        });
+        function setTheme(mode) {
+            const isPhonk = mode === 'phonk';
+            const color = isPhonk ? '#ff0044' : '#00f2ff';
+            const img = isPhonk ? 
+                "https://images.unsplash.com/photo-1603584173870-7f3ca976230a?auto=format&fit=crop&q=80" : 
+                "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80";
 
-        btnPhonk.addEventListener('click', () => {
-            document.body.classList.add('phonk-mode');
-            btnPhonk.style.opacity = "1";
-            btnPhonk.style.borderBottomColor = "#ff0044";
-            btnNight.style.opacity = "0.3";
-            btnNight.style.borderBottomColor = "transparent";
-            document.documentElement.style.setProperty('--accent', '#ff0044');
-            coverImg.src = "https://images.unsplash.com/photo-1603584173870-7f3ca976230a?auto=format&fit=crop&q=80";
-        });
+            document.documentElement.style.setProperty('--accent', color);
+            nBtn.style.opacity = isPhonk ? "0.2" : "1";
+            nBtn.style.borderBottomColor = isPhonk ? "transparent" : color;
+            pBtn.style.opacity = isPhonk ? "1" : "0.2";
+            pBtn.style.borderBottomColor = isPhonk ? color : "transparent";
+            
+            cover.src = img;
+            document.getElementById('status-text').innerText = isPhonk ? "Phonk Drift Active" : "Night Stream Active";
+            document.getElementById('status-text').style.color = color;
+            document.getElementById('accent-glow').style.backgroundColor = color;
+        }
 
-        // --- BARRE DE PROGRESSION ---
+        nBtn.addEventListener('click', () => setTheme('night'));
+        pBtn.addEventListener('click', () => setTheme('phonk'));
+
+        // Barre de progression
         audio.addEventListener('timeupdate', () => {
             const pct = (audio.currentTime / audio.duration) * 100;
-            progress.style.width = `${pct}%`;
+            progressBar.style.width = pct + "%";
         });
 
-        // --- EFFET DE VITESSE (CANVAS) ---
+        // Warp Speed Canvas
         const canvas = document.getElementById('warp-canvas');
         const ctx = canvas.getContext('2d');
-        let stars = [];
+        let lines = [];
 
-        function initStars() {
+        function initCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            stars = [];
-            for(let i=0; i<150; i++) {
-                stars.push({
+            lines = [];
+            for(let i=0; i<80; i++) {
+                lines.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
-                    v: Math.random() * 5 + 2,
-                    l: Math.random() * 20 + 10
+                    speed: Math.random() * 15 + 5,
+                    length: Math.random() * 50 + 20
                 });
             }
         }
 
-        function draw() {
-            ctx.fillStyle = 'rgba(0,0,0,0.2)';
-            ctx.fillRect(0,0,canvas.width, canvas.height);
+        function animate() {
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
-            ctx.lineWidth = 1;
-
-            stars.forEach(s => {
+            ctx.lineWidth = 2;
+            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+            
+            lines.forEach(l => {
+                ctx.strokeStyle = accentColor;
+                ctx.globalAlpha = 0.3;
                 ctx.beginPath();
-                ctx.globalAlpha = 0.2;
-                ctx.moveTo(s.x, s.y);
-                ctx.lineTo(s.x, s.y + s.l);
+                ctx.moveTo(l.x, l.y);
+                ctx.lineTo(l.x, l.y + l.length);
                 ctx.stroke();
                 
-                s.y += s.v * 2;
-                if(s.y > canvas.height) s.y = -s.l;
+                l.y += l.speed;
+                if(l.y > canvas.height) {
+                    l.y = -l.length;
+                    l.x = Math.random() * canvas.width;
+                }
             });
-            requestAnimationFrame(draw);
+            requestAnimationFrame(animate);
         }
 
-        window.addEventListener('resize', initStars);
-        initStars();
-        draw();
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+        animate();
 
-        // --- BLOQUAGE INTERACTIONS IOS ---
+        // Bloquer Zoom et Scroll
         document.addEventListener('touchstart', (e) => {
             if (e.touches.length > 1) e.preventDefault();
         }, { passive: false });
@@ -294,10 +297,6 @@
             if (now - lastTouchEnd <= 300) e.preventDefault();
             lastTouchEnd = now;
         }, false);
-
     </script>
 </body>
 </html>
-
-```
-
