@@ -6,297 +6,299 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>HZ DRIVE - SYSTEM</title>
+    <title>HZ DRIVE SYSTEM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Inter:wght@400;900&display=swap');
 
-        :root {
-            --accent: #00f2ff;
-        }
+        :root { --accent: #00f2ff; }
 
-        * {
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
-        }
+        * { -webkit-tap-highlight-color: transparent; outline: none; }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-            position: fixed;
-            touch-action: none;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: #000; color: #fff; font-family: 'Inter', sans-serif;
+            overflow: hidden; position: fixed; touch-action: none;
         }
 
-        .hz-bg {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 50vw;
-            opacity: 0.04;
-            z-index: 0;
-            pointer-events: none;
-            user-select: none;
-            letter-spacing: -2vw;
+        .hz-massive {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-family: 'Orbitron', sans-serif; font-size: 55vw;
+            opacity: 0.05; z-index: 0; pointer-events: none;
+            letter-spacing: -3vw; font-style: italic;
         }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .glass-ui {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        #warp-canvas {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            pointer-events: none;
+        #warp-field {
+            position: fixed; inset: 0; z-index: 1; pointer-events: none;
         }
 
-        .view {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        .screen {
+            position: absolute; inset: 0; display: flex; flex-direction: column;
+            transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        .hidden-view {
-            opacity: 0;
-            transform: scale(1.2);
-            pointer-events: none;
-            filter: blur(20px);
-        }
+        .screen-hidden { opacity: 0; transform: scale(1.1) translateY(20px); pointer-events: none; filter: blur(10px); }
 
-        @keyframes glitch {
-            0% { transform: translate(0); }
-            20% { transform: translate(-3px, 2px); }
-            40% { transform: translate(3px, -2px); }
-            60% { transform: translate(-3px, -2px); }
-            80% { transform: translate(3px, 2px); }
-            100% { transform: translate(0); }
+        @keyframes drift-shake {
+            0% { transform: translate(0,0); }
+            20% { transform: translate(-4px, 3px); }
+            40% { transform: translate(4px, -3px); }
+            60% { transform: translate(-4px, -3px); }
+            80% { transform: translate(4px, 3px); }
+            100% { transform: translate(0,0); }
         }
-        .glitch-effect { animation: glitch 0.15s infinite; }
+        .vibrate { animation: drift-shake 0.15s infinite; }
 
-        .loading-bar {
-            height: 2px;
-            background: var(--accent);
+        .progress-glow {
             box-shadow: 0 0 15px var(--accent);
-            width: 0%;
-            transition: width 0.2s;
+            transition: width 0.3s linear;
+        }
+
+        /* Effet de scanline rétro */
+        .scanline {
+            width: 100%; height: 2px;
+            background: rgba(0, 242, 255, 0.1);
+            position: absolute; top: 0; left: 0;
+            z-index: 10; pointer-events: none;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
         }
     </style>
 </head>
 <body class="bg-black">
 
-    <canvas id="warp-canvas"></canvas>
-    <div class="hz-bg">HZ</div>
+    <canvas id="warp-field"></canvas>
+    <div class="hz-massive">HZ</div>
+    <div class="scanline"></div>
 
-    <!-- ECRAN D'INTRODUCTION -->
-    <div id="intro" class="view z-[100] items-center justify-center bg-black p-10">
-        <div class="text-center mb-16 space-y-4">
-            <h1 class="text-6xl font-black italic tracking-tighter">HZ</h1>
-            <p class="text-[10px] tracking-[0.7em] opacity-30 uppercase">CarPlay Adapt System</p>
+    <!-- ECRAN DE DEMARRAGE -->
+    <div id="intro-screen" class="screen z-[100] items-center justify-center p-10">
+        <div class="text-center mb-20 space-y-2">
+            <h1 class="text-7xl font-black italic tracking-tighter text-white">HZ</h1>
+            <p class="text-[9px] tracking-[0.8em] opacity-30 uppercase font-bold text-cyan-400">Audio Sync System</p>
         </div>
         
-        <button id="launch-btn" class="group relative">
-            <div class="absolute inset-0 bg-[var(--accent)] opacity-20 rounded-full blur-3xl group-active:opacity-40 transition"></div>
-            <div class="w-32 h-32 rounded-full border-2 border-white/10 flex items-center justify-center glass relative active:scale-90 transition-all duration-300">
-                <i data-lucide="play" class="w-14 h-14 fill-white ml-2"></i>
+        <button id="ignition-btn" class="relative group">
+            <div class="absolute inset-0 bg-[var(--accent)] opacity-20 rounded-full blur-3xl group-active:opacity-50 transition"></div>
+            <div class="w-36 h-36 rounded-full border border-white/10 flex items-center justify-center glass-ui relative active:scale-90 transition-all duration-300">
+                <i data-lucide="power" class="w-16 h-16 text-white"></i>
             </div>
-            <p class="mt-10 text-[10px] tracking-[0.4em] uppercase opacity-50 font-bold">Démarrer le moteur</p>
+            <p id="ignition-text" class="absolute -bottom-16 left-1/2 -translate-x-1/2 w-max text-[10px] tracking-[0.5em] uppercase opacity-40 font-black">IGNITION</p>
         </button>
     </div>
 
-    <!-- INTERFACE LECTEUR -->
-    <div id="main" class="view hidden-view z-50 p-6 pt-12">
-        <header class="flex justify-between items-center mb-10 px-2">
-            <div class="flex gap-6">
-                <button id="mode-night" class="text-sm font-black uppercase tracking-widest text-[var(--accent)] border-b-2 border-[var(--accent)] pb-1">Night</button>
-                <button id="mode-phonk" class="text-sm font-black uppercase tracking-widest opacity-20 pb-1">Phonk</button>
+    <!-- LECTEUR PRINCIPAL -->
+    <div id="player-screen" class="screen screen-hidden z-50 p-6 pt-14">
+        <header class="flex justify-between items-center mb-10 px-4">
+            <div class="flex gap-8">
+                <button id="mode-night" class="text-xs font-black uppercase tracking-[0.3em] text-[var(--accent)] border-b-2 border-[var(--accent)] pb-2 transition-all">Night</button>
+                <button id="mode-phonk" class="text-xs font-black uppercase tracking-[0.3em] opacity-20 pb-2 transition-all">Phonk</button>
             </div>
-            <div class="text-[9px] font-bold tracking-widest opacity-40">BLUETOOTH : HZ_CAR_SYSTEM</div>
+            <div class="text-[8px] font-black tracking-widest opacity-30 border border-white/10 px-3 py-1 rounded-full flex items-center gap-2">
+                <span class="w-1 h-1 bg-green-500 rounded-full animate-ping"></span> LIVE_DATA
+            </div>
         </header>
 
         <main class="flex-1 flex flex-col items-center justify-center">
-            <div id="art-box" class="relative w-full aspect-square max-w-[340px]">
-                <div id="accent-glow" class="absolute inset-0 rounded-full blur-[80px] opacity-20 bg-[var(--accent)]"></div>
-                <div class="w-full h-full glass rounded-[50px] overflow-hidden p-4">
-                    <img id="main-cover" src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80" class="w-full h-full object-cover rounded-[35px] grayscale brightness-50 contrast-125 transition-all duration-1000">
+            <div id="visual-block" class="relative w-full aspect-square max-w-[350px]">
+                <div id="bloom" class="absolute inset-0 rounded-full blur-[100px] opacity-30 bg-[var(--accent)]"></div>
+                <div class="w-full h-full glass-ui rounded-[60px] overflow-hidden p-5 border border-white/5">
+                    <img id="cover-art" src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80" class="w-full h-full object-cover rounded-[40px] grayscale brightness-50 contrast-150">
                 </div>
                 
-                <div class="absolute bottom-12 left-10 right-10">
-                    <div id="status-text" class="text-[10px] font-black uppercase tracking-[0.3em] mb-3 text-[var(--accent)]">Stream Active</div>
-                    <div class="h-[2px] w-full bg-white/10 rounded-full overflow-hidden">
-                        <div id="progress-bar" class="loading-bar"></div>
+                <div class="absolute bottom-12 left-12 right-12">
+                    <div id="stream-label" class="text-[9px] font-black uppercase tracking-[0.5em] mb-4 text-[var(--accent)]">BORN TO DRIFT</div>
+                    <div class="h-[3px] w-full bg-white/5 rounded-full overflow-hidden">
+                        <div id="audio-progress" class="h-full bg-white progress-glow w-0"></div>
                     </div>
                 </div>
             </div>
         </main>
 
-        <footer class="mb-12">
-            <div class="flex justify-center items-center gap-12">
-                <button class="opacity-20 active:scale-90 transition"><i data-lucide="skip-back" class="w-10 h-10 fill-current"></i></button>
-                <button id="play-pause" class="w-28 h-28 rounded-full bg-white text-black flex items-center justify-center active:scale-90 transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)]">
-                    <i data-lucide="pause" id="play-icon" class="w-14 h-14 fill-current"></i>
+        <footer class="mb-14 px-4">
+            <div class="flex justify-between items-center max-w-[280px] mx-auto">
+                <button class="opacity-20 active:scale-75 transition-transform"><i data-lucide="skip-back" class="w-10 h-10 fill-current"></i></button>
+                <button id="master-toggle" class="w-28 h-28 rounded-full bg-white text-black flex items-center justify-center active:scale-90 transition-all shadow-[0_0_60px_rgba(0,242,255,0.2)]">
+                    <i data-lucide="pause" id="toggle-icon" class="w-14 h-14 fill-current"></i>
                 </button>
-                <button class="opacity-20 active:scale-90 transition"><i data-lucide="skip-forward" class="w-10 h-10 fill-current"></i></button>
+                <button class="opacity-20 active:scale-75 transition-transform"><i data-lucide="skip-forward" class="w-10 h-10 fill-current"></i></button>
             </div>
         </footer>
     </div>
 
-    <!-- AUDIO ENGINE -->
-    <!-- Le lien pCloud est forcé via un paramètre de téléchargement direct si possible -->
-    <audio id="audio-player" loop crossorigin="anonymous">
-        <source src="https://e.pcloud.link/publink/show?code=XZh33iZR8zsaQ9mR4zbYDyEWPjJSYvmYq8V" type="audio/mpeg">
-    </audio>
+    <!-- AUDIO ENGINE CORRIGÉ -->
+    <audio id="engine-core" loop crossorigin="anonymous"></audio>
 
     <script>
         lucide.createIcons();
 
-        const audio = document.getElementById('audio-player');
-        const launchBtn = document.getElementById('launch-btn');
-        const playBtn = document.getElementById('play-pause');
-        const intro = document.getElementById('intro');
-        const mainView = document.getElementById('main');
-        const progressBar = document.getElementById('progress-bar');
-        const cover = document.getElementById('main-cover');
+        const engine = document.getElementById('engine-core');
+        const ignition = document.getElementById('ignition-btn');
+        const ignitionText = document.getElementById('ignition-text');
+        const toggle = document.getElementById('master-toggle');
+        const intro = document.getElementById('intro-screen');
+        const player = document.getElementById('player-screen');
+        const progress = document.getElementById('audio-progress');
+        const cover = document.getElementById('cover-art');
 
-        // Initialisation de l'audio avec le lien
-        launchBtn.addEventListener('click', () => {
-            // Tentative de lecture immédiate
-            audio.play().catch(err => {
-                console.log("Audio waiting for user...");
+        // --- LOGIQUE DE CONTOURNEMENT PCLOUD ---
+        // On essaye de reconstruire un lien de téléchargement direct
+        const pCloudCode = "XZh33iZR8zsaQ9mR4zbYDyEWPjJSYvmYq8V";
+        // On utilise l'API pCloud pour obtenir le lien direct sans passer par l'UI
+        const directAudioUrl = `https://api.pcloud.com/getpublinkdownload?code=${pCloudCode}`;
+
+        async function initAudio() {
+            try {
+                ignitionText.innerText = "CONNECTING...";
+                const response = await fetch(directAudioUrl);
+                const data = await response.json();
+                
+                if (data.path) {
+                    const finalUrl = `https://${data.hosts[0]}${data.path}`;
+                    engine.src = finalUrl;
+                    engine.load();
+                } else {
+                    // Fallback si l'API échoue : on tente la lecture directe quand même
+                    engine.src = "https://e.pcloud.link/publink/show?code=" + pCloudCode;
+                }
+            } catch (e) {
+                console.error("Audio Load Error:", e);
+                // Fallback local au cas où
+                engine.src = "playlist.mp3";
+            }
+        }
+
+        // Initialisation
+        ignition.addEventListener('click', async () => {
+            await initAudio();
+            
+            engine.play().catch(err => {
+                console.log("Audio trigger required or source invalid");
             });
 
             gsap.to(intro, {
-                opacity: 0, scale: 0.8, duration: 1, ease: "expo.inOut",
+                opacity: 0, scale: 0.7, duration: 0.8, ease: "power4.in",
                 onComplete: () => {
                     intro.style.display = 'none';
-                    mainView.classList.remove('hidden-view');
-                    gsap.from(mainView, { opacity: 0, y: 50, duration: 1.2, ease: "expo.out" });
+                    player.classList.remove('screen-hidden');
+                    gsap.from(player, { opacity: 0, y: 100, duration: 1.2, ease: "expo.out" });
                 }
             });
         });
 
-        // Toggle Play/Pause
-        playBtn.addEventListener('click', () => {
-            const icon = document.getElementById('play-icon');
-            if (audio.paused) {
-                audio.play();
+        // Play/Pause
+        toggle.addEventListener('click', () => {
+            const icon = document.getElementById('toggle-icon');
+            if (engine.paused) {
+                engine.play().catch(() => {});
                 icon.setAttribute('data-lucide', 'pause');
             } else {
-                audio.pause();
+                engine.pause();
                 icon.setAttribute('data-lucide', 'play');
             }
             lucide.createIcons();
             
-            // Effet visuel nerveux
-            const artBox = document.getElementById('art-box');
-            artBox.classList.add('glitch-effect');
-            setTimeout(() => artBox.classList.remove('glitch-effect'), 150);
+            const block = document.getElementById('visual-block');
+            block.classList.add('vibrate');
+            setTimeout(() => block.classList.remove('vibrate'), 150);
         });
 
-        // Gestion des Modes
+        // Switch Modes
         const nBtn = document.getElementById('mode-night');
         const pBtn = document.getElementById('mode-phonk');
 
-        function setTheme(mode) {
-            const isPhonk = mode === 'phonk';
-            const color = isPhonk ? '#ff0044' : '#00f2ff';
-            const img = isPhonk ? 
+        function changeMode(m) {
+            const isP = m === 'phonk';
+            const color = isP ? '#ff0044' : '#00f2ff';
+            const img = isP ? 
                 "https://images.unsplash.com/photo-1603584173870-7f3ca976230a?auto=format&fit=crop&q=80" : 
                 "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80";
 
             document.documentElement.style.setProperty('--accent', color);
-            nBtn.style.opacity = isPhonk ? "0.2" : "1";
-            nBtn.style.borderBottomColor = isPhonk ? "transparent" : color;
-            pBtn.style.opacity = isPhonk ? "1" : "0.2";
-            pBtn.style.borderBottomColor = isPhonk ? color : "transparent";
+            nBtn.style.opacity = isP ? "0.2" : "1";
+            nBtn.style.borderBottomColor = isP ? "transparent" : color;
+            pBtn.style.opacity = isP ? "1" : "0.2";
+            pBtn.style.borderBottomColor = isP ? color : "transparent";
             
             cover.src = img;
-            document.getElementById('status-text').innerText = isPhonk ? "Phonk Drift Active" : "Night Stream Active";
-            document.getElementById('status-text').style.color = color;
-            document.getElementById('accent-glow').style.backgroundColor = color;
+            document.getElementById('stream-label').innerText = isP ? "PHONK DRIFT ACTIVE" : "NIGHT STREAM ACTIVE";
+            document.getElementById('stream-label').style.color = color;
+            document.getElementById('bloom').style.backgroundColor = color;
+            
+            // Flash color sur le canvas
+            ctx.fillStyle = color;
+            ctx.fillRect(0,0,canvas.width, canvas.height);
         }
 
-        nBtn.addEventListener('click', () => setTheme('night'));
-        pBtn.addEventListener('click', () => setTheme('phonk'));
+        nBtn.addEventListener('click', () => changeMode('night'));
+        pBtn.addEventListener('click', () => changeMode('phonk'));
 
-        // Barre de progression
-        audio.addEventListener('timeupdate', () => {
-            const pct = (audio.currentTime / audio.duration) * 100;
-            progressBar.style.width = pct + "%";
+        // Progress logic
+        engine.addEventListener('timeupdate', () => {
+            if (engine.duration) {
+                const pct = (engine.currentTime / engine.duration) * 100;
+                progress.style.width = pct + "%";
+            }
         });
 
-        // Warp Speed Canvas
-        const canvas = document.getElementById('warp-canvas');
+        // Warp Canvas (Vitesse)
+        const canvas = document.getElementById('warp-field');
         const ctx = canvas.getContext('2d');
         let lines = [];
 
-        function initCanvas() {
+        function init() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             lines = [];
-            for(let i=0; i<80; i++) {
+            for(let i=0; i<60; i++) {
                 lines.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
-                    speed: Math.random() * 15 + 5,
-                    length: Math.random() * 50 + 20
+                    s: Math.random() * 25 + 15,
+                    l: Math.random() * 60 + 30
                 });
             }
         }
 
-        function animate() {
-            ctx.fillStyle = 'rgba(0,0,0,0.15)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+        function anim() {
+            ctx.fillStyle = 'rgba(0,0,0,0.25)';
+            ctx.fillRect(0,0,canvas.width, canvas.height);
             ctx.lineWidth = 2;
-            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+            const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent');
             
             lines.forEach(l => {
-                ctx.strokeStyle = accentColor;
+                ctx.strokeStyle = accent;
                 ctx.globalAlpha = 0.3;
                 ctx.beginPath();
                 ctx.moveTo(l.x, l.y);
-                ctx.lineTo(l.x, l.y + l.length);
+                ctx.lineTo(l.x, l.y + l.l);
                 ctx.stroke();
-                
-                l.y += l.speed;
+                l.y += l.s;
                 if(l.y > canvas.height) {
-                    l.y = -l.length;
+                    l.y = -l.l;
                     l.x = Math.random() * canvas.width;
                 }
             });
-            requestAnimationFrame(animate);
+            requestAnimationFrame(anim);
         }
 
-        window.addEventListener('resize', initCanvas);
-        initCanvas();
-        animate();
+        window.addEventListener('resize', init);
+        init(); anim();
 
-        // Bloquer Zoom et Scroll
-        document.addEventListener('touchstart', (e) => {
-            if (e.touches.length > 1) e.preventDefault();
-        }, { passive: false });
-
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', (e) => {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) e.preventDefault();
-            lastTouchEnd = now;
-        }, false);
+        // Bloquage Zoom/Scroll
+        document.addEventListener('touchstart', (e) => { if(e.touches.length > 1) e.preventDefault(); }, {passive:false});
     </script>
 </body>
 </html>
