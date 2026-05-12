@@ -1,298 +1,171 @@
 
-```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>HZ DRIVE SYSTEM</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Inter:wght@400;900&display=swap');
-
-        :root { --accent: #00f2ff; }
-
-        * { -webkit-tap-highlight-color: transparent; outline: none; box-sizing: border-box; }
-
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background: #000; color: #fff; font-family: 'Inter', sans-serif;
-            overflow: hidden; position: fixed; touch-action: none;
-        }
-
-        .hz-massive {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-family: 'Orbitron', sans-serif; font-size: 55vw;
-            opacity: 0.05; z-index: 0; pointer-events: none;
-            letter-spacing: -3vw; font-style: italic;
-        }
-
-        .glass-ui {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        #warp-field {
-            position: fixed; inset: 0; z-index: 1; pointer-events: none;
-        }
-
-        .screen {
-            position: absolute; inset: 0; display: flex; flex-direction: column;
-            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .screen-hidden { opacity: 0; transform: scale(0.9); pointer-events: none; filter: blur(20px); }
-
-        @keyframes pulse-accent {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.1); }
-        }
-        .bloom-effect { animation: pulse-accent 3s infinite ease-in-out; }
-
-        .progress-bar {
-            height: 4px;
-            background: var(--accent);
-            box-shadow: 0 0 15px var(--accent);
-            width: 0%;
-            transition: width 0.1s linear;
-        }
-
-        /* Vibration au clic */
-        .vibrate { animation: shake 0.1s linear 2; }
-        @keyframes shake {
-            0% { transform: translate(0,0); }
-            50% { transform: translate(5px, -5px); }
-            100% { transform: translate(0,0); }
-        }
-    </style>
+<meta charset="UTF-8">
+<title>HZ Night Playlist</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+body {
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: 100%;
+  -webkit-user-select: none;
+  user-select: none;
+  background: #000;
+}
+.bg-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: -1;
+}
+.no-zoom {
+  touch-action: manipulation;
+}
+.glass {
+  background: radial-gradient(circle at top, rgba(168,85,247,0.18), transparent 55%), rgba(0,0,0,0.72);
+  backdrop-filter: blur(26px);
+}
+.pulse-ring {
+  position: relative;
+}
+.pulse-ring::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 9999px;
+  border: 2px solid rgba(168,85,247,0.6);
+  opacity: 0;
+  animation: pulse 1.4s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  100% { transform: scale(1.2); opacity: 0; }
+}
+</style>
 </head>
-<body class="bg-black">
+<body class="no-zoom text-gray-100 overflow-hidden">
 
-    <canvas id="warp-field"></canvas>
-    <div class="hz-massive">HZ</div>
+<video class="bg-video" autoplay muted loop playsinline>
+  <source src="car-loop.mp4" type="video/mp4">
+</video>
 
-    <!-- ECRAN D'IGNITION -->
-    <div id="intro-screen" class="screen z-[100] items-center justify-center p-10 bg-black">
-        <div class="text-center mb-24 space-y-2">
-            <h1 class="text-8xl font-black italic tracking-tighter text-white">HZ</h1>
-            <p class="text-[10px] tracking-[0.9em] opacity-40 uppercase font-bold text-cyan-400">Direct Link System</p>
+<div class="relative min-h-screen flex flex-col items-center justify-between px-4 py-6 bg-black/70 backdrop-blur-3xl">
+
+  <div class="w-full flex items-center justify-between mt-1 opacity-90">
+    <div class="text-[0.65rem] tracking-[0.35em] uppercase text-gray-300">CarPlay screen adapt</div>
+    <div class="flex items-center space-x-3 text-gray-300 text-xl">
+      <i class="ri-bluetooth-fill animate-pulse text-blue-400"></i>
+      <i class="ri-moon-clear-fill text-purple-300"></i>
+    </div>
+  </div>
+
+  <div class="flex-1 flex flex-col items-center justify-center space-y-10 w-full">
+
+    <div class="flex flex-col items-center space-y-3">
+      <div id="hzTitle" class="text-7xl md:text-8xl font-extrabold tracking-tight bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-400 bg-clip-text text-transparent select-none">
+        HZ
+      </div>
+      <div class="text-xs uppercase tracking-[0.4em] text-purple-300">Phonk</div>
+    </div>
+
+    <div class="w-full max-w-md rounded-3xl glass border border-white/10 shadow-[0_0_60px_rgba(88,28,135,0.7)] p-6 space-y-8">
+
+      <div class="flex items-center justify-between">
+        <div class="flex flex-col">
+          <span class="text-[0.65rem] uppercase tracking-[0.35em] text-purple-400">Phonk</span>
+          <span class="mt-3 text-xl font-semibold text-gray-100">lancer la playlist</span>
         </div>
-        
-        <button id="ignition-btn" class="relative group">
-            <div class="absolute inset-0 bg-[var(--accent)] opacity-20 rounded-full blur-3xl group-active:opacity-60 transition"></div>
-            <div class="w-40 h-40 rounded-full border-2 border-white/10 flex items-center justify-center glass-ui relative active:scale-90 transition-all duration-300">
-                <i data-lucide="play" class="w-20 h-20 fill-white ml-2"></i>
-            </div>
-            <p id="ignition-status" class="absolute -bottom-20 left-1/2 -translate-x-1/2 w-max text-[11px] tracking-[0.6em] uppercase opacity-50 font-black">LANCER LE FLUX</p>
+        <div class="flex items-center space-x-2 text-xs text-gray-300">
+          <i class="ri-car-fill text-purple-400 text-xl"></i>
+          <span>Night</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between space-x-5">
+        <button id="launchBtn" class="flex-1 inline-flex items-center justify-center space-x-3 rounded-2xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-cyan-500 hover:from-purple-600 hover:via-fuchsia-500 hover:to-cyan-400 active:scale-95 transition-all duration-150 py-3.5 text-sm font-semibold tracking-wide shadow-lg shadow-purple-900/70">
+          <span>lancer la playlist</span>
+          <i class="ri-flashlight-fill text-lg"></i>
         </button>
+        <button id="playBtn" class="pulse-ring w-20 h-20 rounded-full bg-white text-slate-900 flex items-center justify-center text-4xl shadow-2xl shadow-purple-900/80 transform transition-all duration-150 hover:scale-110 active:scale-95">
+          <i class="ri-play-fill" id="playIcon"></i>
+        </button>
+      </div>
+
+      <div class="w-full h-2 rounded-full bg-slate-900 overflow-hidden">
+        <div id="progressBar" class="h-full w-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-400"></div>
+      </div>
+
     </div>
+  </div>
 
-    <!-- LECTEUR CARPLAY -->
-    <div id="player-screen" class="screen screen-hidden z-50 p-6 pt-12">
-        <header class="flex justify-between items-center mb-8 px-4">
-            <div class="flex gap-8">
-                <button id="btn-night" class="text-sm font-black uppercase tracking-widest text-[var(--accent)] border-b-2 border-[var(--accent)] pb-1">Night</button>
-                <button id="btn-phonk" class="text-sm font-black uppercase tracking-widest opacity-20 pb-1">Phonk</button>
-            </div>
-            <div class="glass-ui px-4 py-1.5 rounded-full text-[10px] font-black flex items-center gap-2">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> STREAMING_LIVE
-            </div>
-        </header>
-
-        <main class="flex-1 flex flex-col items-center justify-center">
-            <div id="visual-container" class="relative w-full aspect-square max-w-[360px]">
-                <div id="bloom" class="absolute inset-0 rounded-full blur-[100px] bg-[var(--accent)] bloom-effect"></div>
-                <div class="w-full h-full glass-ui rounded-[55px] overflow-hidden p-5 border border-white/5 relative z-10">
-                    <img id="cover-img" src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80" class="w-full h-full object-cover rounded-[35px] grayscale brightness-50 contrast-125">
-                </div>
-                
-                <div class="absolute bottom-12 left-12 right-12 z-20">
-                    <div id="track-title" class="text-[11px] font-black uppercase tracking-[0.4em] mb-4 text-[var(--accent)]">HZ_DRIVE_CORE</div>
-                    <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
-                        <div id="progress-indicator" class="progress-bar"></div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <footer class="mb-14">
-            <div class="flex justify-center items-center gap-16">
-                <button id="play-pause" class="w-32 h-32 rounded-full bg-white text-black flex items-center justify-center active:scale-95 transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)]">
-                    <i data-lucide="pause" id="play-icon" class="w-16 h-16 fill-current"></i>
-                </button>
-            </div>
-        </footer>
+  <div class="w-full flex items-center justify-between text-[0.7rem] text-gray-400 opacity-90">
+    <div class="flex items-center space-x-2">
+      <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+      <span>Bluetooth</span>
     </div>
+    <div class="flex items-center space-x-3">
+      <i class="ri-android-fill text-green-400"></i>
+      <i class="ri-apple-fill text-gray-200"></i>
+    </div>
+  </div>
 
-    <script>
-        lucide.createIcons();
+</div>
 
-        // Éléments
-        const ignitionBtn = document.getElementById('ignition-btn');
-        const statusText = document.getElementById('ignition-status');
-        const playBtn = document.getElementById('play-pause');
-        const playIcon = document.getElementById('play-icon');
-        const intro = document.getElementById('intro-screen');
-        const player = document.getElementById('player-screen');
-        const progressBar = document.getElementById('progress-indicator');
-        const cover = document.getElementById('cover-img');
+<audio id="audioPlayer" src="AUDIO_DIRECT_URL_HERE"></audio>
 
-        // Moteur Audio Unique (Solution Native pour WebKit)
-        const audio = new Audio();
-        audio.loop = true;
-        audio.crossOrigin = "anonymous";
+<script>
+let lastTouchEnd = 0;
+document.addEventListener('touchstart', function (e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+document.addEventListener('touchend', function (e) { const now = Date.now(); if (now - lastTouchEnd <= 300) e.preventDefault(); lastTouchEnd = now; }, { passive: false });
+document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
 
-        // Lien pCloud résolu via l'API (Download direct)
-        const PCLOUD_CODE = "XZh33iZR8zsaQ9mR4zbYDyEWPjJSYvmYq8V";
-        const API_URL = `https://api.pcloud.com/getpublinkdownload?code=${PCLOUD_CODE}`;
+const audio = document.getElementById('audioPlayer');
+const playBtn = document.getElementById('playBtn');
+const playIcon = document.getElementById('playIcon');
+const launchBtn = document.getElementById('launchBtn');
+const progressBar = document.getElementById('progressBar');
 
-        // Fonction pour démarrer le système
-        async function startSystem() {
-            statusText.innerText = "CONNEXION...";
-            
-            try {
-                // 1. On récupère l'URL directe du fichier
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                
-                if (data.path && data.hosts) {
-                    const directUrl = `https://${data.hosts[0]}${data.path}`;
-                    audio.src = directUrl;
-                    
-                    // 2. On lance la lecture IMMEDIATEMENT (interaction utilisateur requise par iOS/Android)
-                    await audio.play();
-                    
-                    // 3. Transition Visuelle
-                    gsap.to(intro, {
-                        opacity: 0, scale: 0.8, duration: 0.8, ease: "power4.in",
-                        onComplete: () => {
-                            intro.style.display = 'none';
-                            player.classList.remove('screen-hidden');
-                            gsap.from(player, { opacity: 0, y: 50, duration: 1, ease: "expo.out" });
-                        }
-                    });
-                } else {
-                    throw new Error("Lien direct introuvable");
-                }
-            } catch (err) {
-                console.error("Erreur Audio:", err);
-                statusText.innerText = "ERREUR RÉSEAU";
-                // En cas d'erreur, on essaie quand même d'ouvrir l'UI
-                player.classList.remove('screen-hidden');
-                intro.style.display = 'none';
-            }
-        }
+function togglePlay() {
+  if (audio.paused) {
+    audio.play();
+    playIcon.classList.remove('ri-play-fill');
+    playIcon.classList.add('ri-pause-fill');
+    gsap.to(playBtn, { scale: 1.12, duration: 0.15, yoyo: true, repeat: 1, ease: 'power2.out' });
+  } else {
+    audio.pause();
+    playIcon.classList.remove('ri-pause-fill');
+    playIcon.classList.add('ri-play-fill');
+  }
+}
 
-        ignitionBtn.addEventListener('click', startSystem);
+playBtn.addEventListener('click', togglePlay);
+launchBtn.addEventListener('click', function () {
+  togglePlay();
+  gsap.fromTo('#progressBar', { width: '0%' }, { width: '100%', duration: 1.8, ease: 'power2.out' });
+});
 
-        playBtn.addEventListener('click', () => {
-            if (audio.paused) {
-                audio.play();
-                playIcon.setAttribute('data-lucide', 'pause');
-            } else {
-                audio.pause();
-                playIcon.setAttribute('data-lucide', 'play');
-            }
-            lucide.createIcons();
-            
-            // Effet visuel
-            const container = document.getElementById('visual-container');
-            container.classList.add('vibrate');
-            setTimeout(() => container.classList.remove('vibrate'), 150);
-        });
+audio.addEventListener('timeupdate', function () {
+  if (audio.duration) {
+    progressBar.style.width = (audio.currentTime / audio.duration) * 100 + '%';
+  }
+});
 
-        // Mise à jour barre de progression
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration) {
-                const pct = (audio.currentTime / audio.duration) * 100;
-                progressBar.style.width = pct + "%";
-            }
-        });
+audio.addEventListener('ended', function () {
+  playIcon.classList.remove('ri-pause-fill');
+  playIcon.classList.add('ri-play-fill');
+  gsap.to('#progressBar', { width: '0%', duration: 0.4, ease: 'power2.out' });
+});
 
-        // Changement de modes
-        const bNight = document.getElementById('btn-night');
-        const bPhonk = document.getElementById('btn-phonk');
+gsap.from('#hzTitle', { opacity: 0, y: 60, duration: 1.1, ease: 'power3.out' });
+gsap.from('.glass', { opacity: 0, y: 40, duration: 0.9, delay: 0.2, ease: 'power3.out' });
+</script>
 
-        function setMode(mode) {
-            const isP = mode === 'phonk';
-            const color = isP ? '#ff0044' : '#00f2ff';
-            const img = isP ? 
-                "https://images.unsplash.com/photo-1603584173870-7f3ca976230a?auto=format&fit=crop&q=80" : 
-                "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80";
-
-            document.documentElement.style.setProperty('--accent', color);
-            bNight.style.opacity = isP ? "0.2" : "1";
-            bNight.style.borderBottomColor = isP ? "transparent" : color;
-            bPhonk.style.opacity = isP ? "1" : "0.2";
-            bPhonk.style.borderBottomColor = isP ? color : "transparent";
-            
-            cover.src = img;
-            document.getElementById('track-title').innerText = isP ? "PHONK_DRIFT_STREAM" : "NIGHT_DRIVE_STREAM";
-            document.getElementById('track-title').style.color = color;
-            document.getElementById('bloom').style.backgroundColor = color;
-        }
-
-        bNight.addEventListener('click', () => setMode('night'));
-        bPhonk.addEventListener('click', () => setMode('phonk'));
-
-        // Canvas Warp (Vitesse)
-        const canvas = document.getElementById('warp-field');
-        const ctx = canvas.getContext('2d');
-        let lines = [];
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            lines = [];
-            for(let i=0; i<70; i++) {
-                lines.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    speed: Math.random() * 20 + 10,
-                    length: Math.random() * 40 + 20
-                });
-            }
-        }
-
-        function draw() {
-            ctx.fillStyle = 'rgba(0,0,0,0.15)';
-            ctx.fillRect(0,0,canvas.width, canvas.height);
-            const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent');
-            ctx.lineWidth = 1.5;
-            
-            lines.forEach(l => {
-                ctx.strokeStyle = accent;
-                ctx.globalAlpha = 0.2;
-                ctx.beginPath();
-                ctx.moveTo(l.x, l.y);
-                ctx.lineTo(l.x, l.y + l.length);
-                ctx.stroke();
-                
-                l.y += l.speed;
-                if(l.y > canvas.height) {
-                    l.y = -l.length;
-                    l.x = Math.random() * canvas.width;
-                }
-            });
-            requestAnimationFrame(draw);
-        }
-
-        window.addEventListener('resize', resize);
-        resize();
-        draw();
-
-        // Anti-Zoom & Anti-Scroll iOS
-        document.addEventListener('touchstart', (e) => {
-            if (e.touches.length > 1) e.preventDefault();
-        }, { passive: false });
-    </script>
 </body>
 </html>
-
-```
