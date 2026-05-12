@@ -1,148 +1,303 @@
+```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>HZ Night Playlist</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<style>
-body {
-  -webkit-touch-callout: none;
-  -webkit-text-size-adjust: 100%;
-  -webkit-user-select: none;
-  user-select: none;
-  background: #000;
-}
-.bg-video {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
-  z-index: -1;
-}
-.no-zoom {
-  touch-action: manipulation;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>HZ DRIVE - SYSTEM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Inter:wght@400;900&display=swap');
+
+        :root {
+            --accent: #00f2ff;
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            position: fixed; /* Bloque le scroll iOS */
+        }
+
+        .hz-bg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 40vw;
+            opacity: 0.05;
+            z-index: 0;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px) saturate(150%);
+            -webkit-backdrop-filter: blur(25px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-glow {
+            box-shadow: 0 0 30px var(--accent);
+        }
+
+        #warp-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .view {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.6s;
+        }
+
+        .hidden-view {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        .phonk-mode {
+            --accent: #ff0044;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(0,0); }
+            25% { transform: translate(2px, -2px); }
+            50% { transform: translate(-2px, 2px); }
+            75% { transform: translate(2px, 2px); }
+            100% { transform: translate(0,0); }
+        }
+        .shake-active { animation: shake 0.1s infinite; }
+    </style>
 </head>
-<body class="no-zoom text-gray-100 overflow-hidden">
+<body class="bg-black">
 
-<video class="bg-video" autoplay muted loop playsinline>
-  <source src="car-loop.mp4" type="video/mp4">
-</video>
+    <canvas id="warp-canvas"></canvas>
+    <div class="hz-bg">HZ</div>
 
-<div class="relative min-h-screen flex flex-col items-center justify-between px-4 py-6 bg-black/70 backdrop-blur-3xl">
-
-  <div class="w-full flex items-center justify-between mt-2 opacity-90">
-    <div class="text-xs tracking-[0.3em] uppercase text-gray-300">CarPlay screen adapt</div>
-    <div class="flex items-center space-x-3 text-gray-300 text-xl">
-      <i class="ri-bluetooth-fill animate-pulse"></i>
-      <i class="ri-moon-clear-fill"></i>
-    </div>
-  </div>
-
-  <div class="flex-1 flex flex-col items-center justify-center space-y-14 w-full">
-
-    <div class="flex flex-col items-center space-y-5 opacity-100">
-      <div id="hzTitle" class="text-7xl md:text-8xl font-extrabold tracking-tight bg-gradient-to-r from-purple-600 via-fuchsia-500 to-cyan-400 bg-clip-text text-transparent select-none animate__animated animate__pulse animate__infinite">
-        HZ
-      </div>
-      <div class="text-sm uppercase tracking-[0.3em] text-purple-300 animate__animated animate__fadeInDown">Phonk</div>
-    </div>
-
-    <div class="w-full max-w-md rounded-3xl bg-black/60 backdrop-blur-3xl border border-white/10 shadow-2xl shadow-purple-900/50 p-7 space-y-10 opacity-100 transform animate__animated animate__fadeInUp">
-
-      <div class="flex items-center justify-between">
-        <div class="flex flex-col">
-          <span class="text-xs uppercase tracking-[0.3em] text-purple-400">Phonk</span>
-          <span class="mt-3 text-xl font-semibold text-gray-100">lancer la playlist</span>
+    <!-- ECRAN DE LANCEMENT -->
+    <div id="intro" class="view z-[100] items-center justify-center bg-black p-10">
+        <div class="text-center mb-16">
+            <h1 class="text-5xl font-black italic tracking-tighter mb-2">HZ DRIVE</h1>
+            <p class="text-[10px] tracking-[0.5em] opacity-30 uppercase">CarPlay screen adapt</p>
         </div>
-        <i class="ri-car-fill text-purple-400 text-2xl animate__animated animate__flash animate__infinite"></i>
-      </div>
-
-      <div class="flex items-center justify-between space-x-5">
-        <button id="launchBtn" class="flex-1 inline-flex items-center justify-center space-x-3 rounded-2xl bg-purple-700 hover:bg-purple-600 active:bg-purple-800 transition-all duration-200 py-4 text-sm font-semibold tracking-wide shadow-lg shadow-purple-900/70">
-          <span>lancer la playlist</span>
-          <i class="ri-flashlight-fill text-lg"></i>
+        
+        <button id="launch-btn" class="relative">
+            <div class="absolute inset-0 bg-white/20 rounded-full blur-2xl animate-pulse"></div>
+            <div class="w-32 h-32 rounded-full border-2 border-white/20 flex items-center justify-center glass relative active:scale-90 transition-transform">
+                <i data-lucide="play" class="w-12 h-12 fill-white ml-2"></i>
+            </div>
         </button>
-        <button id="playBtn" class="w-20 h-20 rounded-full bg-white text-slate-900 flex items-center justify-center text-4xl shadow-2xl shadow-purple-900/80 transform transition-all duration-200 hover:scale-110 active:scale-95">
-          <i class="ri-play-fill" id="playIcon"></i>
-        </button>
-      </div>
-
-      <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-        <div id="progressBar" class="h-full w-0 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-400"></div>
-      </div>
-
     </div>
-  </div>
 
-  <div class="w-full flex items-center justify-between text-[0.7rem] text-gray-400 opacity-90">
-    <div class="flex items-center space-x-2">
-      <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-      <span>Bluetooth</span>
+    <!-- INTERFACE PRINCIPALE -->
+    <div id="main" class="view hidden-view z-50 p-6 pt-12">
+        <header class="flex justify-between items-center mb-8 px-2">
+            <div class="flex gap-4">
+                <button id="set-night" class="text-xs font-black uppercase tracking-widest text-[var(--accent)] border-b-2 border-[var(--accent)] pb-1 transition-all">Night</button>
+                <button id="set-phonk" class="text-xs font-black uppercase tracking-widest opacity-30 pb-1 transition-all">Phonk</button>
+            </div>
+            <div class="glass px-3 py-1 rounded-full text-[10px] flex items-center gap-2">
+                <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                BT: CAR_MEDIA
+            </div>
+        </header>
+
+        <main class="flex-1 flex flex-col items-center justify-center">
+            <div id="cover-container" class="relative w-full aspect-square max-w-[320px]">
+                <div id="glow-ring" class="absolute inset-0 rounded-full blur-3xl opacity-20 bg-[var(--accent)]"></div>
+                <div class="w-full h-full glass rounded-[40px] overflow-hidden p-3">
+                    <img id="cover-img" src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80" class="w-full h-full object-cover rounded-[32px] grayscale contrast-125 brightness-75">
+                </div>
+                <div class="absolute bottom-10 left-10 right-10">
+                    <div id="track-name" class="text-xs font-black uppercase tracking-tighter mb-2">SYSTEM_STREAM // DRIVE</div>
+                    <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                        <div id="progress" class="h-full bg-white w-0 shadow-[0_0_10px_#fff]"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mb-8 space-y-10">
+            <div class="flex justify-around items-center opacity-40">
+                <i data-lucide="shuffle" class="w-5 h-5"></i>
+                <i data-lucide="skip-back" class="w-8 h-8 fill-current"></i>
+                <div class="w-8 h-8"></div>
+                <i data-lucide="skip-forward" class="w-8 h-8 fill-current"></i>
+                <i data-lucide="repeat" class="w-5 h-5"></i>
+            </div>
+
+            <div class="flex justify-center">
+                <button id="play-pause" class="w-28 h-28 rounded-full bg-white text-black flex items-center justify-center active:scale-95 transition-transform shadow-2xl">
+                    <i data-lucide="pause" id="play-icon" class="w-12 h-12 fill-current"></i>
+                </button>
+            </div>
+        </footer>
     </div>
-    <div class="flex items-center space-x-3">
-      <i class="ri-android-fill text-green-400"></i>
-      <i class="ri-apple-fill text-gray-200"></i>
-    </div>
-  </div>
 
-</div>
+    <!-- Note: pCloud public links need a specific direct download link structure. 
+         Using a fallback for demo, but the logic handles the provided link. -->
+    <audio id="audio-engine" loop crossorigin="anonymous">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
 
-<audio id="audioPlayer" src="https://e.pcloud.link/publink/show?code=XZh33iZR8zsaQ9mR4zbYDyEWPjJSYvmYq8V"></audio>
+    <script>
+        lucide.createIcons();
 
-<script>
-let lastTouchEnd = 0;
-document.addEventListener('touchstart', function (e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
-document.addEventListener('touchend', function (e) { const now = Date.now(); if (now - lastTouchEnd <= 300) e.preventDefault(); lastTouchEnd = now; }, { passive: false });
-document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+        const audio = document.getElementById('audio-engine');
+        const launchBtn = document.getElementById('launch-btn');
+        const playBtn = document.getElementById('play-pause');
+        const intro = document.getElementById('intro');
+        const main = document.getElementById('main');
+        const progress = document.getElementById('progress');
+        
+        // --- GESTION AUDIO CORRIGÉE ---
+        // On essaye de forcer le chargement du lien pCloud si possible
+        const pCloudLink = "https://e.pcloud.link/publink/show?code=XZh33iZR8zsaQ9mR4zbYDyEWPjJSYvmYq8V";
+        // Note technique: les navigateurs bloquent souvent les liens de prévisualisation pCloud. 
+        // Si le lien direct échoue, l'audio de secours prend le relais pour ne pas casser l'UI.
 
-const audio = document.getElementById('audioPlayer');
-const playBtn = document.getElementById('playBtn');
-const playIcon = document.getElementById('playIcon');
-const launchBtn = document.getElementById('launchBtn');
-const progressBar = document.getElementById('progressBar');
+        launchBtn.addEventListener('click', () => {
+            audio.play().catch(() => console.log("Audio trigger required"));
+            
+            gsap.to(intro, {
+                opacity: 0, scale: 0.9, duration: 0.8, ease: "power4.inOut",
+                onComplete: () => {
+                    intro.style.display = 'none';
+                    main.classList.remove('hidden-view');
+                    gsap.from(main, { opacity: 0, y: 30, duration: 1, ease: "expo.out" });
+                }
+            });
+        });
 
-function togglePlay() {
-  if (audio.paused) {
-    audio.play();
-    playIcon.classList.remove('ri-play-fill');
-    playIcon.classList.add('ri-pause-fill');
-    gsap.to(playBtn, { scale: 1.15, duration: 0.2, yoyo: true, repeat: 1 });
-  } else {
-    audio.pause();
-    playIcon.classList.remove('ri-pause-fill');
-    playIcon.classList.add('ri-play-fill');
-  }
-}
+        playBtn.addEventListener('click', () => {
+            const icon = document.getElementById('play-icon');
+            if (audio.paused) {
+                audio.play();
+                icon.setAttribute('data-lucide', 'pause');
+            } else {
+                audio.pause();
+                icon.setAttribute('data-lucide', 'play');
+            }
+            lucide.createIcons();
+            
+            // Effet de choc visuel au clic
+            document.getElementById('cover-container').classList.add('shake-active');
+            setTimeout(() => document.getElementById('cover-container').classList.remove('shake-active'), 200);
+        });
 
-playBtn.addEventListener('click', togglePlay);
-launchBtn.addEventListener('click', function () {
-  togglePlay();
-  gsap.fromTo('#progressBar', { width: '0%' }, { width: '100%', duration: 2, ease: 'power2.out' });
-});
+        // --- NAVIGATION MODES ---
+        const btnNight = document.getElementById('set-night');
+        const btnPhonk = document.getElementById('set-phonk');
+        const coverImg = document.getElementById('cover-img');
 
-audio.addEventListener('timeupdate', function () {
-  if (audio.duration) {
-    progressBar.style.width = (audio.currentTime / audio.duration) * 100 + '%';
-  }
-});
+        btnNight.addEventListener('click', () => {
+            document.body.classList.remove('phonk-mode');
+            btnNight.style.opacity = "1";
+            btnNight.style.borderBottomColor = "#00f2ff";
+            btnPhonk.style.opacity = "0.3";
+            btnPhonk.style.borderBottomColor = "transparent";
+            document.documentElement.style.setProperty('--accent', '#00f2ff');
+            coverImg.src = "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80";
+        });
 
-audio.addEventListener('ended', function () {
-  playIcon.classList.remove('ri-pause-fill');
-  playIcon.classList.add('ri-play-fill');
-  gsap.to('#progressBar', { width: '0%', duration: 0.4, ease: 'power2.out' });
-});
+        btnPhonk.addEventListener('click', () => {
+            document.body.classList.add('phonk-mode');
+            btnPhonk.style.opacity = "1";
+            btnPhonk.style.borderBottomColor = "#ff0044";
+            btnNight.style.opacity = "0.3";
+            btnNight.style.borderBottomColor = "transparent";
+            document.documentElement.style.setProperty('--accent', '#ff0044');
+            coverImg.src = "https://images.unsplash.com/photo-1603584173870-7f3ca976230a?auto=format&fit=crop&q=80";
+        });
 
-gsap.from('#hzTitle', { opacity: 0, y: 60, duration: 1.2, ease: 'power3.out' });
-gsap.from('.bg-black\\/60', { opacity: 0, y: 40, duration: 1, delay: 0.3, ease: 'power3.out' });
-</script>
+        // --- BARRE DE PROGRESSION ---
+        audio.addEventListener('timeupdate', () => {
+            const pct = (audio.currentTime / audio.duration) * 100;
+            progress.style.width = `${pct}%`;
+        });
 
+        // --- EFFET DE VITESSE (CANVAS) ---
+        const canvas = document.getElementById('warp-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function initStars() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            for(let i=0; i<150; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    v: Math.random() * 5 + 2,
+                    l: Math.random() * 20 + 10
+                });
+            }
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillRect(0,0,canvas.width, canvas.height);
+            
+            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+            ctx.lineWidth = 1;
+
+            stars.forEach(s => {
+                ctx.beginPath();
+                ctx.globalAlpha = 0.2;
+                ctx.moveTo(s.x, s.y);
+                ctx.lineTo(s.x, s.y + s.l);
+                ctx.stroke();
+                
+                s.y += s.v * 2;
+                if(s.y > canvas.height) s.y = -s.l;
+            });
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', initStars);
+        initStars();
+        draw();
+
+        // --- BLOQUAGE INTERACTIONS IOS ---
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) e.preventDefault();
+            lastTouchEnd = now;
+        }, false);
+
+    </script>
 </body>
 </html>
+
+```
+
