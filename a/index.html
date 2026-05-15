@@ -341,6 +341,48 @@
         }
 
         document.addEventListener('touchstart', (e) => { if(e.touches.length > 1) e.preventDefault(); }, {passive: false});
+
+        function handleUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+
+    const tab = params.get("tab");
+    const cat = params.get("cat");
+    const tool = params.get("tool");
+    const copy = params.get("copy");
+    const toast = params.get("toast");
+    const title = params.get("title");
+
+    if (title) {
+        document.getElementById("page-title").innerText = title;
+    }
+
+    if (tab) {
+        switchTab(`sect-${tab}`, title || "HX Tools");
+    }
+
+    if (cat && Object.values(toolsData).some(t => t.cat === cat)) {
+        const catName = cat.charAt(0).toUpperCase() + cat.slice(1);
+        showCategory(cat, catName);
+    }
+
+    if (tool && toolsData[tool]) {
+        showTool(tool);
+    }
+
+    if (copy && toolsData[copy]) {
+        copyText(toolsData[copy].cmd);
+    }
+
+    if (toast) {
+        const toastBox = document.getElementById("toast");
+        toastBox.innerText = toast;
+        gsap.fromTo(toastBox, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 });
+        setTimeout(() => gsap.to(toastBox, { opacity: 0, y: 10, duration: 0.3 }), 2000);
+    }
+}
+
+window.addEventListener("load", handleUrlParams);
+
     </script>
 </body>
 </html>
