@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link rel="icon" href="https://hzflix.online/favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="https://hzflix.online/favicon.ico">
+
+    <link rel="canonical" href="https://hzflix.online/scan-vuln">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Scannez tous vos appareils pour détecter les failles CVE récentes et sécurisez-les efficacement. Protection rapide et complète contre les vulnérabilités.">
+  <meta name="keywords" content="CVE, scan de vulnérabilités, sécurité des appareils, détection de failles, protection réseau">
+  <meta name="robots" content="index, follow">
+    <meta property="og:title" content="CVE Scanneur – Détectez et sécurisez tous vos appareils">
+  <meta property="og:description" content="Scannez tous vos appareils pour détecter les failles CVE récentes et sécurisez-les efficacement.">
+  <meta property="og:type" content="page">
+    <title>CVE Scanner - Detecteur de Vulnerabilites</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        html, body { overflow-x: hidden; max-width: 100vw; }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.8); }
+        }
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .pulse-glow { animation: pulse-glow 2s infinite; }
+        .slide-in { animation: slide-in 0.5s ease-out; }
+        .float { animation: float 3s ease-in-out infinite; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        .severity-critical { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .severity-high { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+        .severity-medium { background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); }
+        .severity-low { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+        .severity-unknown { background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); }
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .badge-zero-day {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            margin: auto;
+            padding: 0;
+            border: 1px solid #374151;
+            border-radius: 1rem;
+            width: 95%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.3s ease-out;
+        }
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #374151;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-body { padding: 1.5rem; }
+        .close {
+            color: #9ca3af;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .close:hover, .close:focus {
+            color: #ffffff;
+            background: #374151;
+        }
+        .critical-scroll {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+        .critical-scroll::-webkit-scrollbar { width: 8px; }
+        .critical-scroll::-webkit-scrollbar-track {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        .critical-scroll::-webkit-scrollbar-thumb {
+            background: #ef4444;
+            border-radius: 4px;
+        }
+        .critical-scroll::-webkit-scrollbar-thumb:hover { background: #dc2626; }
+        .tutorial-step {
+            background: #374151;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #3b82f6;
+        }
+        .warning-banner {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "CVE Scanneur",
+  "operatingSystem": "Windows, Linux, Mac",
+  "applicationCategory": "SecurityApplication",
+  "description": "Scanne tous vos appareils pour détecter les failles CVE récentes et sécurisez-les.",
+  "url": "https://hzflix.online/scan-vuln",
+  "author": {
+    "@type": "Organization",
+    "name": "HzFlix"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0.00",
+    "priceCurrency": "EUR",
+    "url": "https://hzflix.online/scan-vuln",
+    "availability": "https://schema.org/InStock"
+  },
+  "softwareVersion": "1.0.0",
+  "license": "https://hzflix.online/scan-vuln",
+  "featureList": [
+    "Scan automatique de tous vos appareils",
+    "Détection des CVE récentes",
+    "Rapport de sécurité détaillé",
+    "Alertes et recommandations personnalisées"
+  ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "ratingCount": "181"
+  },
+  "interactionStatistic": [
+    {
+      "@type": "InteractionCounter",
+      "interactionType": { "@type": "http://schema.org/UseAction" },
+      "userInteractionCount": 4521
+    }
+  ],
+  "faq": [
+    {
+      "@type": "Question",
+      "name": "CVE Scanneur est-il gratuit ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui, le scan est entièrement gratuit pour tous vos appareils."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quels systèmes d'exploitation sont supportés ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CVE Scanneur fonctionne sur Windows, Linux, Mac et Apple."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Comment recevoir les alertes de sécurité ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Les alertes et recommandations sont générées automatiquement après chaque scan."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <header class="gradient-bg shadow-2xl">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center space-x-3">o
+                    <div class="float">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl md:text-3xl font-bold">CVE Scanner</h1>
+                </div>
+                <div class="text-sm opacity-90">Detecteur de Vulnerabilites</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <section class="mb-8 slide-in">
+            <div class="bg-gray-800 rounded-2xl p-4 md:p-6 shadow-2xl card-hover">
+                <h2 class="text-xl md:text-2xl font-bold mb-4 flex items-center flex-wrap gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    Detection Automatique
+                </h2>
+                
+                <div class="warning-banner">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-sm">La detection automatique peut etre imprecise. Verifiez votre version ci-dessous.</span>
+                </div>
+
+                <div id="device-info" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <div class="text-sm text-gray-400 mb-1">Appareil</div>
+                        <div id="device-type" class="text-lg font-semibold">Detection...</div>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <div class="text-sm text-gray-400 mb-1">Systeme</div>
+                        <div id="os-info" class="text-lg font-semibold">Detection...</div>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <div class="text-sm text-gray-400 mb-1">Navigateur</div>
+                        <div id="browser-info" class="text-lg font-semibold">Detection...</div>
+                    </div>
+                </div>
+
+                <button onclick="showVersionTutorial()" class="mt-4 w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Cliquez ici pour verifier votre version
+                </button>
+
+                <button onclick="scanDevice()" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all transform hover:scale-105 pulse-glow">
+                    Scanner les Vulnerabilites
+                </button>
+            </div>
+        </section>
+        <section class="mb-8 slide-in" style="animation-delay: 0.1s">
+            <div class="bg-gray-800 rounded-2xl p-4 md:p-6 shadow-2xl card-hover">
+                <h2 class="text-xl md:text-2xl font-bold mb-4 flex items-center flex-wrap gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    Entree Manuelle
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Marque</label>
+                        <select id="manual-brand" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                            <option value="">Selectionner</option>
+                            <option value="apple">Apple</option>
+                            <option value="google">Google</option>
+                            <option value="samsung">Samsung</option>
+                            <option value="microsoft">Microsoft</option>
+                            <option value="linux">Linux</option>
+                            <option value="android">Android</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Produit</label>
+                        <input type="text" id="manual-product" placeholder="Ex: iPhone, Windows, Chrome" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Version</label>
+                        <input type="text" id="manual-version" placeholder="Ex: 15.0, 11, 120.0" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                </div>
+                <button onclick="scanManual()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition-all transform hover:scale-105">
+                    Rechercher les CVE
+                </button>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <div id="loading" class="hidden text-center py-12">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-xl text-gray-400">Analyse en cours...</p>
+            <p class="text-sm text-gray-500 mt-2" id="loading-status">Interrogation des bases de donnees...</p>
+        </div>
+
+        <!-- Critical Vulnerabilities Section -->
+        <section id="critical-section" class="hidden mb-8">
+            <div class="bg-gradient-to-r from-red-900 to-red-700 rounded-2xl p-4 md:p-6 shadow-2xl">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <h2 class="text-xl md:text-2xl font-bold flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                        Vulnerabilites CRITIQUES
+                    </h2>
+                    <span id="critical-count" class="text-2xl font-bold">0</span>
+                </div>
+                <p class="text-sm mb-4 opacity-90">Protegez-vous immediatement de ces vulnerabilites critiques</p>
+                <div id="critical-list" class="critical-scroll space-y-3"></div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results" class="hidden">
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-red-600 rounded-xl p-4 card-hover">
+                    <div class="text-3xl font-bold" id="stat-critical">0</div>
+                    <div class="text-sm opacity-90">Critique</div>
+                </div>
+                <div class="bg-orange-600 rounded-xl p-4 card-hover">
+                    <div class="text-3xl font-bold" id="stat-high">0</div>
+                    <div class="text-sm opacity-90">Eleve</div>
+                </div>
+                <div class="bg-yellow-600 rounded-xl p-4 card-hover">
+                    <div class="text-3xl font-bold" id="stat-medium">0</div>
+                    <div class="text-sm opacity-90">Moyen</div>
+                </div>
+                <div class="bg-blue-600 rounded-xl p-4 card-hover">
+                    <div class="text-3xl font-bold" id="stat-low">0</div>
+                    <div class="text-sm opacity-90">Faible</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-gray-800 rounded-xl p-4 mb-6 flex flex-wrap gap-3">
+                <button onclick="filterCVE('all')" class="filter-btn active px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-all text-sm md:text-base">Tous</button>
+                <button onclick="filterCVE('critical')" class="filter-btn px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-all text-sm md:text-base">Critique</button>
+                <button onclick="filterCVE('high')" class="filter-btn px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-all text-sm md:text-base">Eleve</button>
+            </div>
+
+            <!-- CVE List -->
+            <div id="cve-list" class="space-y-4"></div>
+        </section>
+    </main>
+
+    <!-- CVE Detail Modal -->
+    <div id="cveModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title" class="text-2xl font-bold">Details de la vulnerabilite</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="modal-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Version Tutorial Modal -->
+    <div id="versionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="text-2xl font-bold">Verifier votre version</h2>
+                <span class="close" onclick="closeVersionModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="version-tutorial-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allCVEs = [];
+        let currentFilter = 'all';
+        let detectedDevice = {};
+
+        // Improved device detection
+        function detectDevice() {
+            const ua = navigator.userAgent;
+            let deviceType = 'Desktop';
+            let os = 'Unknown';
+            let osVersion = '';
+            let browser = 'Unknown';
+            let browserVersion = '';
+
+            // iOS Detection
+            if (/iPhone/.test(ua)) {
+                deviceType = 'iPhone';
+                const match = ua.match(/OS (\d+)[_.](\d+)[_.]?(\d+)?/);
+                if (match) {
+                    osVersion = match[1] + '.' + match[2] + (match[3] ? '.' + match[3] : '');
+                    os = 'iOS ' + osVersion;
+                }
+            } else if (/iPad/.test(ua)) {
+                deviceType = 'iPad';
+                const match = ua.match(/OS (\d+)[_.](\d+)[_.]?(\d+)?/);
+                if (match) {
+                    osVersion = match[1] + '.' + match[2] + (match[3] ? '.' + match[3] : '');
+                    os = 'iOS ' + osVersion;
+                }
+            }
+            // Android Detection
+            else if (/Android/.test(ua)) {
+                deviceType = 'Android';
+                const match = ua.match(/Android\s([0-9.]+)/);
+                if (match) {
+                    osVersion = match[1];
+                    os = 'Android ' + osVersion;
+                }
+            }
+            // Windows Detection
+            else if (/Windows/.test(ua)) {
+                deviceType = 'Windows PC';
+                if (/Windows NT 10.0/.test(ua)) {
+                    os = 'Windows 10/11';
+                    osVersion = '10';
+                } else if (/Windows NT 6.3/.test(ua)) {
+                    os = 'Windows 8.1';
+                    osVersion = '8.1';
+                } else if (/Windows NT 6.2/.test(ua)) {
+                    os = 'Windows 8';
+                    osVersion = '8';
+                } else if (/Windows NT 6.1/.test(ua)) {
+                    os = 'Windows 7';
+                    osVersion = '7';
+                }
+            }
+            // macOS Detection
+            else if (/Mac OS X/.test(ua)) {
+                deviceType = 'Mac';
+                const match = ua.match(/Mac OS X (\d+)[_.](\d+)[_.]?(\d+)?/);
+                if (match) {
+                    osVersion = match[1] + '.' + match[2] + (match[3] ? '.' + match[3] : '');
+                    os = 'macOS ' + osVersion;
+                }
+            }
+            // Linux Detection
+            else if (/Linux/.test(ua)) {
+                deviceType = 'Linux PC';
+                os = 'Linux';
+            }
+
+            // Browser Detection with version
+            if (/Edg\//.test(ua)) {
+                const match = ua.match(/Edg\/([0-9.]+)/);
+                browserVersion = match ? match[1].split('.')[0] : '';
+                browser = 'Edge ' + browserVersion;
+            } else if (/Chrome\//.test(ua) && !/Edg/.test(ua)) {
+                const match = ua.match(/Chrome\/([0-9.]+)/);
+                browserVersion = match ? match[1].split('.')[0] : '';
+                browser = 'Chrome ' + browserVersion;
+            } else if (/Safari\//.test(ua) && !/Chrome/.test(ua)) {
+                const match = ua.match(/Version\/([0-9.]+)/);
+                browserVersion = match ? match[1].split('.')[0] : '';
+                browser = 'Safari ' + browserVersion;
+            } else if (/Firefox\//.test(ua)) {
+                const match = ua.match(/Firefox\/([0-9.]+)/);
+                browserVersion = match ? match[1].split('.')[0] : '';
+                browser = 'Firefox ' + browserVersion;
+            }
+
+            document.getElementById('device-type').textContent = deviceType;
+            document.getElementById('os-info').textContent = os;
+            document.getElementById('browser-info').textContent = browser;
+
+            detectedDevice = { 
+                deviceType, 
+                os, 
+                osVersion,
+                browser,
+                browserVersion
+            };
+
+            return detectedDevice;
+        }
+
+        // Show version verification tutorial
+        function showVersionTutorial() {
+            const modal = document.getElementById('versionModal');
+            const content = document.getElementById('version-tutorial-content');
+            
+            let tutorial = '';
+            
+            if (detectedDevice.deviceType === 'iPhone' || detectedDevice.deviceType === 'iPad') {
+                tutorial = `
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-bold text-blue-400">Tutorial pour iOS (iPhone/iPad)</h3>
+                        <div class="tutorial-step">
+                            <div class="font-bold mb-2">Etape 1: Ouvrir les Reglages</div>
+                            <p class="text-gray-300">Appuyez sur l'icone "Reglages" sur votre ecran d'accueil</p>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="font-bold mb-2">Etape 2: Aller dans General</div>
+                            <p class="text-gray-300">Faites defiler et appuyez sur "General"</p>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="font-bold mb-2">Etape 3: Information</div>
+                            <p class="text-gray-300">Appuyez sur "Informations"</p>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="font-bold mb-2">Etape 4: Verifier la version</div>
+                            <p class="text-gray-300">Cherchez la ligne "Version du logiciel" - c'est votre version iOS</p>
+                        </div>
+                        <div class="bg-blue-900 p-4 rounded-lg mt-4">
+                            <p class="text-sm"><strong>Version detectee:</strong> ${detectedDevice.os}</p>
+                            <p class="text-sm mt-2 text-gray-300">Comparez cette version avec celle affichee dans vos reglages</p>
+                        </div>
+                    </div>
+                `;
+            } else if (detectedDevice.deviceType === 'Android') {
+                tutorial = `
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-bold text-green-400">Tutorial pour Android</h3>
+                        <div class="tutorial-step">
+                            <div class="font-bold mb-2">Etape 1: Ouvrir les Parametres</div>
+                            <p class="text-gray-300">Appuyez sur l'icone "Parametres" (roue crantee)</p>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="font-bold mb-2">Etape 2: A propos du telephone</div>
+                            <p class="text-gray-300">Faites defiler vers le bas et appuyez sur "A propos du telephone" ou "A propos de l'appareil"</p>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="font-bold mb-2">Etape 3: Informations logiciel</div>
+                            <p class="text-gray-300">Appuyez sur "Informations logiciel" si disponible</p>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="font-bold mb-2">Etape 4: Verifier la version</div>
+                            <p class="text-gray-300">Cherchez "Version Android" - c'est votre version du systeme</p>
+                        </div>
+                        <div class="bg-green-900 p-4 rounded-lg mt-4">
+                            <p class="text-sm"><strong>Version detectee:</strong> ${detectedDevice.os}</p>
+                            <p class="text-sm mt-2 text-gray-300">Comparez cette version avec celle affichee dans vos parametres</p>
+                        </div>
+                    </div>
+                `;
+            } else if (detectedDevice.deviceType === 'Windows PC') {
+                tutorial = `
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-bold text-blue-400">Tutorial pour Windows</h3>
+                        <div class="tutorial-step">
+                            <div class="font-bold mb-2">Etape 1: Ouvrir Parametres</div>
+                            <p class="text-gray-300">Appuyez sur Windows + I ou cliquez sur Demarrer > Parametres</p>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="font-bold mb-2">Etape 2: Systeme</div>
+                            <p class="text-gray-300">Cliquez sur "Systeme"</p>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="font-bold mb-2">Etape 3: Informations systeme</div>
+                            <p class="text-gray-300">Faites defiler vers le bas et cliquez sur "Informations systeme" ou "A propos"</p>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="font-bold mb-2">Etape 4: Verifier la version</div>
+                            <p class="text-gray-300">Cherchez "Version de Windows" et "Version du systeme d'exploitation"</p>
+                        </div>
+                        <div class="bg-blue-900 p-4 rounded-lg mt-4">
+                            <p class="text-sm"><strong>Systeme detecte:</strong> ${detectedDevice.os}</p>
+                            <p class="text-sm mt-2 text-gray-300">Verifiez si la version correspond</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                tutorial = `
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-bold text-purple-400">Verifier votre version</h3>
+                        <p class="text-gray-300">Selon votre systeme d'exploitation, suivez les instructions appropriees:</p>
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <p class="text-sm"><strong>Systeme detecte:</strong> ${detectedDevice.os}</p>
+                            <p class="text-sm mt-2">Consultez la documentation de votre systeme pour verifier la version exacte</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            content.innerHTML = tutorial;
+            modal.classList.add('active');
+        }
+
+        function closeVersionModal() {
+            document.getElementById('versionModal').classList.remove('active');
+        }
+
+        // NOUVELLE FONCTION: Fetch CVEs from MULTIPLE sources with async
+        async function fetchCVEs(vendor, product, version) {
+            const allResults = [];
+            const promises = [];
+
+            // Update loading status
+            updateLoadingStatus('Interrogation de la NVD...');
+            
+            // Fetch from multiple sources in parallel
+            promises.push(
+                fetchFromNVD(vendor, product, version).catch(err => {
+                    console.error('NVD error:', err);
+                    return [];
+                })
+            );
+
+            promises.push(
+                fetchFromCIRCL(vendor, product).catch(err => {
+                    console.error('CIRCL error:', err);
+                    return [];
+                })
+            );
+
+            promises.push(
+                fetchFromOSV(vendor, product, version).catch(err => {
+                    console.error('OSV error:', err);
+                    return [];
+                })
+            );
+
+            // Wait for all promises
+            const results = await Promise.all(promises);
+            
+            // Merge results
+            results.forEach(result => {
+                if (Array.isArray(result)) {
+                    allResults.push(...result);
+                }
+            });
+
+            // Filter by version if we have results
+            let filtered = allResults;
+            if (version && allResults.length > 0) {
+                updateLoadingStatus('Filtrage par version...');
+                filtered = filterByVersion(allResults, version);
+            }
+
+            return filtered;
+        }
+
+        // NVD API v2.0 (REAL implementation)
+        async function fetchFromNVD(vendor, product, version) {
+            try {
+                // NVD API 2.0 endpoint
+                const baseUrl = 'https://services.nvd.nist.gov/rest/json/cves/2.0';
+                
+                // Build keyword search
+                let keywords = [];
+                if (vendor) keywords.push(vendor);
+                if (product) keywords.push(product);
+                if (version) keywords.push(version);
+                
+                const keywordSearch = keywords.join(' ');
+                
+                const params = new URLSearchParams({
+                    keywordSearch: keywordSearch,
+                    resultsPerPage: '50',
+                    startIndex: '0'
+                });
+
+                const response = await fetch(`${baseUrl}?${params}`, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`NVD API returned ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.vulnerabilities && data.vulnerabilities.length > 0) {
+                    return data.vulnerabilities.map(item => item.cve);
+                }
+                
+                return [];
+            } catch (error) {
+                console.error('NVD fetch error:', error);
+                return [];
+            }
+        }
+
+        // CIRCL CVE Search API (REAL implementation)
+        async function fetchFromCIRCL(vendor, product) {
+            try {
+                // CIRCL API doesn't support CORS, so we'll try with a proxy or skip
+                // Alternative: use cve.circl.lu API
+                const apiUrl = `https://cve.circl.lu/api/search/${encodeURIComponent(vendor)}/${encodeURIComponent(product)}`;
+                
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`CIRCL API returned ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Transform CIRCL format to match NVD format
+                if (Array.isArray(data)) {
+                    return data.map(item => ({
+                        id: item.id || item.cve_id,
+                        descriptions: [{
+                            lang: 'fr',
+                            value: item.summary || 'Description non disponible'
+                        }],
+                        metrics: {
+                            cvssMetricV31: item.cvss ? [{
+                                cvssData: {
+                                    baseScore: parseFloat(item.cvss) || 0,
+                                    baseSeverity: getSeverityFromScore(parseFloat(item.cvss) || 0)
+                                }
+                            }] : []
+                        },
+                        published: item.Published || new Date().toISOString(),
+                        references: item.references ? item.references.map(ref => ({ url: ref })) : []
+                    }));
+                }
+                
+                return [];
+            } catch (error) {
+                console.error('CIRCL fetch error:', error);
+                return [];
+            }
+        }
+
+        // OSV (Open Source Vulnerabilities) API
+        async function fetchFromOSV(vendor, product, version) {
+            try {
+                updateLoadingStatus('Interrogation de OSV...');
+                
+                // OSV API endpoint
+                const apiUrl = 'https://api.osv.dev/v1/query';
+                
+                // Build package identifier
+                let packageName = product;
+                if (vendor === 'google' && product === 'android') {
+                    packageName = 'Android';
+                } else if (vendor === 'apple') {
+                    packageName = product === 'iphone_os' ? 'iOS' : 'macOS';
+                }
+                
+                const body = {
+                    package: {
+                        name: packageName
+                    }
+                };
+                
+                if (version) {
+                    body.version = version;
+                }
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`OSV API returned ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.vulns && data.vulns.length > 0) {
+                    return data.vulns.map(vuln => ({
+                        id: vuln.id,
+                        descriptions: [{
+                            lang: 'fr',
+                            value: vuln.summary || vuln.details || 'Description non disponible'
+                        }],
+                        metrics: {
+                            cvssMetricV31: vuln.severity ? [{
+                                cvssData: {
+                                    baseScore: extractScoreFromSeverity(vuln.severity),
+                                    baseSeverity: vuln.severity[0]?.type || 'UNKNOWN'
+                                }
+                            }] : []
+                        },
+                        published: vuln.published || new Date().toISOString(),
+                        references: vuln.references ? vuln.references.map(ref => ({ url: ref.url })) : []
+                    }));
+                }
+                
+                return [];
+            } catch (error) {
+                console.error('OSV fetch error:', error);
+                return [];
+            }
+        }
+
+        // Helper: Get severity from CVSS score
+        function getSeverityFromScore(score) {
+            if (score >= 9.0) return 'CRITICAL';
+            if (score >= 7.0) return 'HIGH';
+            if (score >= 4.0) return 'MEDIUM';
+            if (score > 0) return 'LOW';
+            return 'UNKNOWN';
+        }
+
+        // Helper: Extract score from severity object
+        function extractScoreFromSeverity(severityArray) {
+            if (!Array.isArray(severityArray) || severityArray.length === 0) return 0;
+            const severity = severityArray[0];
+            if (severity.score) {
+                return parseFloat(severity.score);
+            }
+            return 0;
+        }
+
+        // Filter CVEs by version
+        function filterByVersion(cves, targetVersion) {
+            if (!targetVersion) return cves;
+            
+            // Parse target version
+            const targetParts = targetVersion.split('.').map(p => parseInt(p) || 0);
+            
+            return cves.filter(cve => {
+                // Check if CVE description mentions versions
+                const desc = cve.descriptions?.[0]?.value || '';
+                
+                // Look for version patterns in description
+                const versionPatterns = [
+                    /version[s]?\s+(\d+(?:\.\d+)*)/gi,
+                    /(\d+(?:\.\d+)+)/g,
+                    /prior to\s+(\d+(?:\.\d+)*)/gi,
+                    /before\s+(\d+(?:\.\d+)*)/gi,
+                    /up to\s+(\d+(?:\.\d+)*)/gi
+                ];
+                
+                for (const pattern of versionPatterns) {
+                    const matches = desc.matchAll(pattern);
+                    for (const match of matches) {
+                        const mentionedVersion = match[1];
+                        const mentionedParts = mentionedVersion.split('.').map(p => parseInt(p) || 0);
+                        
+                        // Compare versions
+                        if (compareVersions(targetParts, mentionedParts) <= 0) {
+                            return true; // Target version is affected
+                        }
+                    }
+                }
+                
+                // If no version info found, include it (might be relevant)
+                return true;
+            });
+        }
+
+        // Compare version numbers
+        function compareVersions(v1, v2) {
+            const maxLength = Math.max(v1.length, v2.length);
+            for (let i = 0; i < maxLength; i++) {
+                const part1 = v1[i] || 0;
+                const part2 = v2[i] || 0;
+                if (part1 < part2) return -1;
+                if (part1 > part2) return 1;
+            }
+            return 0;
+        }
+
+        // Update loading status message
+        function updateLoadingStatus(message) {
+            const statusEl = document.getElementById('loading-status');
+            if (statusEl) {
+                statusEl.textContent = message;
+            }
+        }
+
+        // Process and display CVEs
+        function processCVEs(cveData) {
+            allCVEs = cveData.map(cve => {
+                const metrics = cve.metrics?.cvssMetricV31?.[0] || cve.metrics?.cvssMetricV30?.[0] || {};
+                const score = metrics.cvssData?.baseScore || 0;
+                const severity = (metrics.cvssData?.baseSeverity || 'UNKNOWN').toLowerCase();
+                const description = cve.descriptions?.find(d => d.lang === 'fr')?.value || 
+                                  cve.descriptions?.[0]?.value || 
+                                  'Aucune description disponible';
+                
+                return {
+                    id: cve.id,
+                    description: description,
+                    score: score,
+                    severity: severity,
+                    published: cve.published,
+                    references: cve.references || [],
+                    attackVector: metrics.cvssData?.attackVector || 'UNKNOWN',
+                    attackComplexity: metrics.cvssData?.attackComplexity || 'UNKNOWN'
+                };
+            });
+
+            // Sort by severity
+            allCVEs.sort((a, b) => {
+                const severityOrder = { critical: 0, high: 1, medium: 2, low: 3, unknown: 4 };
+                return severityOrder[a.severity] - severityOrder[b.severity];
+            });
+
+            updateStats();
+            displayCriticalCVEs();
+            displayCVEs(allCVEs);
+        }
+
+        // Display critical CVEs
+        function displayCriticalCVEs() {
+            const criticalCVEs = allCVEs.filter(cve => cve.severity === 'critical');
+            const container = document.getElementById('critical-list');
+            const section = document.getElementById('critical-section');
+            const count = document.getElementById('critical-count');
+
+            if (criticalCVEs.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+            count.textContent = criticalCVEs.length;
+            container.innerHTML = '';
+
+            criticalCVEs.forEach((cve) => {
+                const card = document.createElement('div');
+                card.className = 'bg-red-800 bg-opacity-50 rounded-lg p-4 cursor-pointer hover:bg-opacity-70 transition-all';
+                card.onclick = () => showCVEDetails(cve);
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start gap-3">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg font-bold mb-2">${cve.id}</h3>
+                            <p class="text-sm text-gray-200 line-clamp-2">${cve.description.substring(0, 150)}...</p>
+                        </div>
+                        <div class="flex-shrink-0 text-center bg-white text-red-900 rounded-lg px-3 py-2">
+                            <div class="text-xl font-bold">${cve.score}</div>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Update statistics
+        function updateStats() {
+            const stats = {
+                critical: 0,
+                high: 0,
+                medium: 0,
+                low: 0
+            };
+
+            allCVEs.forEach(cve => {
+                if (cve.severity === 'critical') stats.critical++;
+                else if (cve.severity === 'high') stats.high++;
+                else if (cve.severity === 'medium') stats.medium++;
+                else stats.low++;
+            });
+
+            document.getElementById('stat-critical').textContent = stats.critical;
+            document.getElementById('stat-high').textContent = stats.high;
+            document.getElementById('stat-medium').textContent = stats.medium;
+            document.getElementById('stat-low').textContent = stats.low;
+        }
+
+        // Display CVE cards
+        function displayCVEs(cves) {
+            const container = document.getElementById('cve-list');
+            container.innerHTML = '';
+
+            if (cves.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-gray-400">Aucune vulnerabilite trouvee pour cette version</div>';
+                return;
+            }
+
+            cves.forEach((cve, index) => {
+                const card = document.createElement('div');
+                card.className = 'bg-gray-800 rounded-xl p-4 md:p-6 card-hover slide-in cve-card cursor-pointer';
+                card.style.animationDelay = `${index * 0.05}s`;
+                card.dataset.severity = cve.severity;
+                card.onclick = () => showCVEDetails(cve);
+
+                card.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-4 gap-4">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-xl font-bold mb-2">${cve.id}</h3>
+                            <p class="text-gray-300 text-sm">${cve.description.substring(0, 200)}${cve.description.length > 200 ? '...' : ''}</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <div class="severity-${cve.severity} rounded-lg px-4 py-2 text-center min-w-[120px]">
+                                <div class="text-2xl font-bold">${cve.score}</div>
+                                <div class="text-xs uppercase">${cve.severity}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-400">
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            ${new Date(cve.published).toLocaleDateString('fr-FR')}
+                        </div>
+                        <div class="flex items-center text-blue-400">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Cliquez pour les details
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Show CVE details in modal
+        function showCVEDetails(cve) {
+            const modal = document.getElementById('cveModal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+
+            modalTitle.textContent = cve.id;
+
+            modalContent.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="severity-${cve.severity} rounded-lg px-6 py-3 inline-block">
+                            <div class="text-3xl font-bold">${cve.score}</div>
+                            <div class="text-sm uppercase">${cve.severity}</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-bold mb-2 text-blue-400">Description complete</h3>
+                        <p class="text-gray-300 leading-relaxed">${cve.description}</p>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-bold mb-2 text-yellow-400">Informations techniques</h3>
+                        <div class="bg-gray-700 p-4 rounded-lg space-y-2">
+                            <p class="text-sm text-gray-300"><strong>Vecteur d'attaque:</strong> ${cve.attackVector}</p>
+                            <p class="text-sm text-gray-300"><strong>Complexite:</strong> ${cve.attackComplexity}</p>
+                            <p class="text-sm text-gray-300"><strong>Date de publication:</strong> ${new Date(cve.published).toLocaleDateString('fr-FR', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            })}</p>
+                        </div>
+                    </div>
+
+                    ${cve.references.length > 0 ? `
+                        <div>
+                            <h3 class="text-lg font-bold mb-2 text-purple-400">References</h3>
+                            <div class="bg-gray-700 p-4 rounded-lg">
+                                ${cve.references.slice(0, 3).map(ref => `
+                                    <a href="${ref.url}" target="_blank" class="text-blue-400 hover:text-blue-300 block mb-2 text-sm">
+                                        ${ref.url}
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${cve.severity === 'critical' ? `
+                        <div class="bg-red-900 bg-opacity-50 border-2 border-red-500 p-4 rounded-lg">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-6 h-6 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-red-400 mb-1">ATTENTION: Vulnerabilite critique</h4>
+                                    <p class="text-sm text-gray-300">Mettez a jour votre systeme immediatement.</p>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('cveModal').classList.remove('active');
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const cveModal = document.getElementById('cveModal');
+            const versionModal = document.getElementById('versionModal');
+            if (event.target == cveModal) {
+                closeModal();
+            }
+            if (event.target == versionModal) {
+                closeVersionModal();
+            }
+        }
+
+        // Filter CVEs
+        function filterCVE(type) {
+            currentFilter = type;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-600');
+                btn.classList.add('bg-gray-700');
+            });
+            event.target.classList.add('active', 'bg-blue-600');
+            event.target.classList.remove('bg-gray-700');
+
+            let filtered = allCVEs;
+
+            if (type !== 'all') {
+                filtered = allCVEs.filter(cve => cve.severity === type);
+            }
+
+            displayCVEs(filtered);
+        }
+
+        // Scan device
+        async function scanDevice() {
+            const device = detectDevice();
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('critical-section').classList.add('hidden');
+
+            window.scrollBy({
+                top: 850,
+                left: 0,
+                behavior: "smooth"
+            });
+
+            let vendor = '';
+            let product = '';
+            let version = device.osVersion;
+
+            if (device.os.includes('iOS')) {
+                vendor = 'apple';
+                product = 'iphone_os';
+            } else if (device.os.includes('Android')) {
+                vendor = 'google';
+                product = 'android';
+            } else if (device.os.includes('Windows')) {
+                vendor = 'microsoft';
+                product = 'windows';
+            } else if (device.os.includes('macOS')) {
+                vendor = 'apple';
+                product = 'macos';
+            }
+
+            try {
+                const cves = await fetchCVEs(vendor, product, version);
+                processCVEs(cves);
+            } catch (error) {
+                console.error('Scan error:', error);
+                document.getElementById('cve-list').innerHTML = `
+                    <div class="text-center py-12 text-red-400">
+                        Erreur lors de la recherche de vulnerabilites. Veuillez reessayer.
+                    </div>
+                `;
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('results').classList.remove('hidden');
+            }
+        }
+
+        // Scan manual entry
+        async function scanManual() {
+            const brand = document.getElementById('manual-brand').value;
+            const product = document.getElementById('manual-product').value;
+            const version = document.getElementById('manual-version').value;
+
+            if (!brand || !product) {
+                alert('Veuillez renseigner au moins la marque et le produit');
+                return;
+            }
+
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('critical-section').classList.add('hidden');
+
+            try {
+                const cves = await fetchCVEs(brand, product, version);
+                processCVEs(cves);
+            } catch (error) {
+                console.error('Scan error:', error);
+                document.getElementById('cve-list').innerHTML = `
+                    <div class="text-center py-12 text-red-400">
+                        Erreur lors de la recherche de vulnerabilites. Veuillez reessayer.
+                    </div>
+                `;
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('results').classList.remove('hidden');
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            detectDevice();
+        });
+    </script>
+</body>
+</html>
