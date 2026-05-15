@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nova Empire 20.0 - Glitch Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            -webkit-user-select: none;
+            margin: 0; padding: 0; overflow: hidden;
+            background: #020205; font-family: 'Orbitron', sans-serif;
+            touch-action: none; user-select: none; color: white;
+        }
+        #game-container {
+            position: relative; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at center, #0a0a1a 0%, #000 100%);
+        }
+        canvas { display: block; }
+        
+        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+        .clickable { pointer-events: auto; }
+        
+        .hud-glass {
+            background: rgba(10, 10, 25, 0.7);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 251, 255, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .overlay {
+            display: none;
+            background: rgba(0, 3, 10, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 150;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .scroll-h { 
+            overflow-x: auto; 
+            display: flex; 
+            gap: 20px; 
+            padding: 20px; 
+            scrollbar-width: none;
+            min-height: 320px;
+        }
+        .scroll-h::-webkit-scrollbar { display: none; }
+        
+        .ship-selector-card {
+            min-width: 220px;
+            height: 300px;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .ship-canvas-container {
+            width: 150px;
+            height: 150px;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .glitch-text {
+            animation: glitch 1s linear infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .xp-bar-bg { width: 100px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+        #xp-bar-fill { height: 100%; width: 0%; background: #00fbff; transition: width 0.3s ease; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- HUD Principal -->
+    <div class="ui-layer flex flex-col p-4">
+        <div class="flex justify-between items-start">
+            <div class="hud-glass px-4 py-2 rounded-xl border-l-2 border-cyan-400">
+                <div class="flex items-center gap-2">
+                    <p class="text-[8px] text-cyan-400 font-bold uppercase tracking-wider">Crédits</p>
+                    <p id="score-val" class="text-lg font-black text-white italic">0</p>
+                </div>
+                <div class="flex items-center gap-2 mt-0.5">
+                    <p id="level-indicator" class="text-[8px] text-white/60 font-bold uppercase">LVL 1</p>
+                    <div class="xp-bar-bg"><div id="xp-bar-fill"></div></div>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button id="hangar-btn-ui" class="clickable hud-glass w-12 h-12 rounded-xl flex items-center justify-center hover:bg-cyan-500/20 transition-all border-white/10">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </button>
+                <button id="shop-btn-ui" class="clickable hud-glass w-12 h-12 rounded-xl flex items-center justify-center hover:bg-cyan-500/20 transition-all border-cyan-400/30">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00fbff" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1"></div>
+
+        <div class="flex justify-between items-end pb-4">
+            <div id="hp-container" class="flex gap-1.5"></div>
+        </div>
+    </div>
+
+    <!-- Hangar Overlay -->
+    <div id="hangar-overlay" class="overlay absolute inset-0 flex items-center justify-center p-4">
+        <div class="hud-glass p-6 rounded-[2.5rem] w-full max-w-5xl flex flex-col">
+            <h2 class="text-2xl font-black italic text-center text-cyan-400 mb-6 uppercase tracking-widest glitch-text">Hangar de la Flotte</h2>
+            <div class="scroll-h mb-8" id="ship-list"></div>
+            <button id="close-hangar" class="clickable py-4 bg-white/5 text-white font-bold rounded-2xl uppercase text-[10px] tracking-[0.3em] hover:bg-cyan-500/20 transition-all">Quitter le hangar</button>
+        </div>
+    </div>
+
+    <!-- Shop Overlay -->
+    <div id="upgrade-overlay" class="overlay absolute inset-0 flex items-center justify-center p-4">
+        <div class="hud-glass p-8 rounded-[2.5rem] w-full max-w-md flex flex-col">
+            <h2 class="text-xl font-black text-center text-cyan-400 mb-6 uppercase italic tracking-wider">Améliorations</h2>
+            <div class="space-y-3 mb-8 overflow-y-auto pr-2 max-h-[50vh]" id="upgrade-list"></div>
+            <button id="close-shop" class="clickable py-4 bg-cyan-500 text-black font-black rounded-2xl uppercase text-xs tracking-widest">Confirmer</button>
+        </div>
+    </div>
+
+    <!-- Menu Principal -->
+    <div id="menu-overlay" class="absolute inset-0 bg-black z-[200] flex items-center justify-center text-center">
+        <div class="p-8">
+            <h1 class="text-6xl font-black italic text-white tracking-tighter mb-2 glitch-text">NOVA<br><span class="text-cyan-400">EMPIRE</span></h1>
+            <p class="text-[8px] text-white/30 tracking-[1.2em] mb-16 uppercase font-bold">Protocol Glitch v20.0</p>
+            <button id="start-btn" class="clickable px-14 py-6 bg-white text-black font-black rounded-full uppercase text-xs hover:scale-110 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.4)]">Initialiser Mission</button>
+        </div>
+    </div>
+
+    <!-- Game Over -->
+    <div id="game-over-overlay" class="absolute inset-0 bg-black/95 backdrop-blur-2xl z-[300] hidden flex items-center justify-center text-center">
+        <div class="p-8">
+            <h2 class="text-5xl font-black italic text-red-500 mb-4 tracking-tight glitch-text">SYSTÈME CORROMPU</h2>
+            <p id="final-score" class="text-white/60 mb-12 text-xs font-bold uppercase tracking-widest">CREDITS RECOLTÉS: 0</p>
+            <button id="retry-btn" class="clickable px-14 py-6 bg-white text-black font-black rounded-full uppercase text-xs shadow-lg">Redémarrer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, score = 0, level = 1, xp = 0, lastTime = 0, shake = 0, spawnTimer = 0;
+    let gameState = 'MENU';
+    let glitchIntensity = 0;
+    const colors = ['#00fbff', '#ff3366', '#a855f7', '#f59e0b', '#10b981', '#ffffff'];
+
+    let player = {
+        x: 0, y: 0, hp: 5, maxHp: 5, fireRate: 450, lastFire: 0, power: 1,
+        bulletSpeed: 16, targetX: 0, targetY: 0
+    };
+
+    let upgrades = {
+        fire: { name: "Cadence Laser", lvl: 1, cost: 200, desc: "Tir plus fréquent" },
+        dmg: { name: "Noyau Plasma", lvl: 1, cost: 400, desc: "Puissance de feu +" },
+        hp: { name: "Coque Ionique", lvl: 1, cost: 700, desc: "Points de structure +" },
+        multi: { name: "Batteries Multiples", lvl: 1, cost: 1800, desc: "Tirs simultanés", max: 5 }
+    };
+
+    let enemies = [], bullets = [], enemyBullets = [], stars = [], particles = [];
+
+    const shipModels = [
+        { id: 'scout', name: 'Raptor Alpha', cost: 0, unlocked: true },
+        { id: 'phantom', name: 'Spectre Shadow', cost: 2500, unlocked: false },
+        { id: 'titan', name: 'Behemoth MK2', cost: 7500, unlocked: false },
+        { id: 'valkyrie', name: 'Valkyrie Ace', cost: 20000, unlocked: false },
+        { id: 'emperor', name: 'Nova Sovereign', cost: 60000, unlocked: false }
+    ];
+    let currentShipIdx = 0;
+
+    function resize() { 
+        width = canvas.width = window.innerWidth; 
+        height = canvas.height = window.innerHeight; 
+        if(gameState === 'MENU') { player.x = width/2; player.y = height * 0.8; }
+    }
+
+    // Système de rendu de vaisseaux universel
+    function drawShipModel(c, type, color, isLocked = false, isEnemy = false) {
+        c.save();
+        c.lineWidth = 2.5;
+        c.strokeStyle = isLocked ? 'rgba(255, 255, 255, 0.1)' : color;
+        c.fillStyle = isLocked ? 'rgba(255, 255, 255, 0.02)' : 'rgba(5, 5, 20, 0.8)';
+        
+        if (!isLocked) {
+            c.shadowBlur = 15;
+            c.shadowColor = color;
+        }
+
+        const dir = isEnemy ? 1 : -1;
+
+        switch(type) {
+            case 'scout':
+                c.beginPath();
+                c.moveTo(0, 25 * dir);
+                c.lineTo(-20, -5 * dir);
+                c.lineTo(-15, -15 * dir);
+                c.lineTo(0, -10 * dir);
+                c.lineTo(15, -15 * dir);
+                c.lineTo(20, -5 * dir);
+                c.closePath();
+                c.fill(); c.stroke();
+                c.beginPath(); c.moveTo(-10, 0); c.lineTo(-25, 10 * dir); c.stroke();
+                c.beginPath(); c.moveTo(10, 0); c.lineTo(25, 10 * dir); c.stroke();
+                break;
+            case 'phantom':
+                c.beginPath();
+                c.moveTo(0, 30 * dir);
+                c.lineTo(-30, 0);
+                c.lineTo(-15, -20 * dir);
+                c.lineTo(0, -5 * dir);
+                c.lineTo(15, -20 * dir);
+                c.lineTo(30, 0);
+                c.closePath();
+                c.fill(); c.stroke();
+                break;
+            case 'titan':
+                c.strokeRect(-15, -20, 30, 40);
+                c.strokeRect(-25, -10, 10, 30);
+                c.strokeRect(15, -10, 10, 30);
+                c.beginPath(); c.moveTo(0, 20 * dir); c.lineTo(-10, 35 * dir); c.lineTo(10, 35 * dir); c.closePath();
+                c.fill(); c.stroke();
+                break;
+            case 'valkyrie':
+                c.beginPath();
+                c.moveTo(0, 35 * dir);
+                c.lineTo(-15, 10 * dir);
+                c.lineTo(-40, -15 * dir);
+                c.lineTo(-10, -10 * dir);
+                c.lineTo(0, -30 * dir);
+                c.lineTo(10, -10 * dir);
+                c.lineTo(40, -15 * dir);
+                c.lineTo(15, 10 * dir);
+                c.closePath();
+                c.fill(); c.stroke();
+                break;
+            case 'emperor':
+                c.beginPath(); c.arc(0, 0, 18, 0, Math.PI*2); c.stroke();
+                c.beginPath();
+                c.moveTo(0, 45 * dir);
+                c.lineTo(-45, -20 * dir);
+                c.lineTo(-15, -10 * dir);
+                c.lineTo(0, -40 * dir);
+                c.lineTo(15, -10 * dir);
+                c.lineTo(45, -20 * dir);
+                c.closePath();
+                c.fill(); c.stroke();
+                break;
+        }
+
+        if(!isLocked) {
+            c.fillStyle = isEnemy ? 'rgba(255, 50, 50, 0.6)' : 'rgba(0, 255, 255, 0.6)';
+            c.beginPath(); c.ellipse(0, 5 * dir, 5, 8, 0, 0, Math.PI*2); c.fill();
+            c.fillStyle = color;
+            const engineY = -18 * dir;
+            c.beginPath(); c.arc(-8, engineY, 3 + Math.random()*3, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc(8, engineY, 3 + Math.random()*3, 0, Math.PI*2); c.fill();
+        }
+        c.restore();
+    }
+
+    // Effet de Glitch Visuel
+    function applyGlitch(ctx) {
+        if (glitchIntensity <= 0) return;
+        
+        // Aberration Chromatique
+        const offset = glitchIntensity * 5;
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.drawImage(canvas, offset, 0);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.restore();
+
+        // Scanlines & Slices
+        if (Math.random() < glitchIntensity * 0.3) {
+            const sliceY = Math.random() * height;
+            const sliceH = Math.random() * 20;
+            const sliceOff = (Math.random() - 0.5) * 50 * glitchIntensity;
+            ctx.drawImage(canvas, 0, sliceY, width, sliceH, sliceOff, sliceY, width, sliceH);
+        }
+
+        glitchIntensity *= 0.95;
+    }
+
+    function createParticle(x, y, color, speed = 5, life = 1) {
+        for(let i=0; i<12; i++) {
+            particles.push({
+                x, y, 
+                vx: (Math.random() - 0.5) * speed, 
+                vy: (Math.random() - 0.5) * speed,
+                life, maxLife: life, color, 
+                size: Math.random() * 3 + 1
+            });
+        }
+    }
+
+    function updateUI() {
+        document.getElementById('score-val').innerText = score.toLocaleString();
+        document.getElementById('level-indicator').innerText = `LVL ${level}`;
+        const xpNeeded = level * 1000;
+        document.getElementById('xp-bar-fill').style.width = Math.min(100, (xp / xpNeeded) * 100) + '%';
+
+        const list = document.getElementById('upgrade-list');
+        list.innerHTML = '';
+        Object.keys(upgrades).forEach(key => {
+            const u = upgrades[key];
+            const maxed = u.max && u.lvl >= u.max;
+            const canAfford = score >= u.cost && !maxed;
+            
+            const btn = document.createElement('div');
+            btn.className = `clickable p-4 rounded-2xl border flex justify-between items-center transition-all ${canAfford ? 'border-cyan-400 bg-cyan-400/5' : 'opacity-30 border-white/10'}`;
+            if(canAfford) {
+                btn.onclick = () => {
+                    score -= u.cost; u.lvl++; u.cost = Math.floor(u.cost * 1.9);
+                    if(key === 'fire') player.fireRate = Math.max(120, player.fireRate - 40);
+                    if(key === 'dmg') player.power += 1;
+                    if(key === 'hp') { player.maxHp++; player.hp = player.maxHp; renderHP(); }
+                    glitchIntensity = 0.5;
+                    updateUI();
+                };
+            }
+            btn.innerHTML = `<div><p class="text-[10px] font-black text-cyan-400 uppercase tracking-tighter">${u.name}</p><p class="text-[8px] text-white/40">${u.desc}</p></div><p class="text-[10px] font-black italic">${maxed ? 'MAX' : u.cost + ' CR'}</p>`;
+            list.appendChild(btn);
+        });
+    }
+
+    function buildHangarUI() {
+        const list = document.getElementById('ship-list');
+        list.innerHTML = '';
+        
+        shipModels.forEach((s, i) => {
+            const card = document.createElement('div');
+            card.className = `ship-selector-card hud-glass border-2 ${currentShipIdx === i ? 'border-cyan-400 bg-cyan-400/10' : 'border-white/10'}`;
+            
+            const container = document.createElement('div');
+            container.className = "ship-canvas-container";
+            
+            const canvasP = document.createElement('canvas');
+            canvasP.width = 150; canvasP.height = 150;
+            container.appendChild(canvasP);
+            card.appendChild(container);
+            
+            const info = document.createElement('div');
+            info.className = "text-center p-4 flex-1 flex flex-col justify-center";
+            info.innerHTML = `<p class="text-[10px] font-black uppercase tracking-widest mb-2">${s.name}</p>`;
+            
+            if(!s.unlocked) {
+                const p = document.createElement('div');
+                p.className = "px-4 py-1 bg-cyan-500/20 rounded-full text-cyan-400 font-black text-[9px]";
+                p.innerText = s.cost + " CR";
+                info.appendChild(p);
+                card.onclick = (e) => { 
+                    if(score >= s.cost) { 
+                        score -= s.cost; s.unlocked = true; currentShipIdx = i; 
+                        glitchIntensity = 0.8; buildHangarUI(); updateUI(); 
+                    } 
+                };
+            } else {
+                card.onclick = () => { currentShipIdx = i; buildHangarUI(); };
+                if (currentShipIdx === i) {
+                    const sel = document.createElement('p');
+                    sel.className = "text-cyan-400 text-[8px] font-bold uppercase";
+                    sel.innerText = "SÉLECTIONNÉ";
+                    info.appendChild(sel);
+                }
+            }
+            card.appendChild(info);
+            list.appendChild(card);
+            
+            // Animation du canvas
+            const ctxP = canvasP.getContext('2d');
+            let rot = 0;
+            const animateHangar = () => {
+                if(document.getElementById('hangar-overlay').style.display !== 'flex') return;
+                ctxP.clearRect(0, 0, 150, 150);
+                ctxP.save();
+                ctxP.translate(75, 75);
+                ctxP.rotate(rot);
+                drawShipModel(ctxP, s.id, colors[0], !s.unlocked);
+                ctxP.restore();
+                rot += 0.015;
+                requestAnimationFrame(animateHangar);
+            };
+            animateHangar();
+        });
+    }
+
+    function renderHP() {
+        const cont = document.getElementById('hp-container');
+        cont.innerHTML = '';
+        for(let i=0; i<player.maxHp; i++) {
+            const h = document.createElement('div');
+            h.className = `w-2.5 h-5 rounded-sm transition-all duration-500 ${i < player.hp ? 'bg-cyan-400 shadow-[0_0_15px_#0ff]' : 'bg-white/5'}`;
+            cont.appendChild(h);
+        }
+    }
+
+    function startGame() {
+        score = 0; level = 1; xp = 0;
+        player.hp = 5; player.maxHp = 5; 
+        player.fireRate = 450; player.power = 1;
+        enemies = []; bullets = []; enemyBullets = []; particles = [];
+        gameState = 'PLAYING';
+        glitchIntensity = 1.0;
+        document.getElementById('menu-overlay').style.display = 'none';
+        document.getElementById('game-over-overlay').style.display = 'none';
+        renderHP(); updateUI();
+    }
+
+    function toggleModal(id) {
+        const el = document.getElementById(id);
+        if(el.style.display === 'flex') { 
+            el.style.display = 'none'; 
+            gameState = 'PLAYING'; 
+        } else { 
+            el.style.display = 'flex'; 
+            gameState = 'PAUSED'; 
+            if(id === 'hangar-overlay') buildHangarUI(); 
+            updateUI(); 
+        }
+    }
+
+    function update(dt) {
+        if(gameState !== 'PLAYING') return;
+
+        player.x += (player.targetX - player.x) * 0.12;
+        player.y += (player.targetY - player.y) * 0.12;
+        
+        stars.forEach(s => { s.y += s.sp; if(s.y > height) s.y = 0; });
+
+        particles.forEach((p, i) => {
+            p.x += p.vx; p.y += p.vy; p.life -= dt/1000;
+            if(p.life <= 0) particles.splice(i, 1);
+        });
+
+        if(Date.now() - player.lastFire > player.fireRate) {
+            const m = upgrades.multi.lvl;
+            for(let i=0; i<m; i++) {
+                const angle = (i - (m-1)/2) * 0.12;
+                bullets.push({ 
+                    x: player.x, y: player.y - 30, 
+                    vx: Math.sin(angle) * player.bulletSpeed, 
+                    vy: -Math.cos(angle) * player.bulletSpeed, 
+                    dmg: player.power 
+                });
+            }
+            player.lastFire = Date.now();
+        }
+
+        bullets.forEach((b, i) => { 
+            b.x += b.vx; b.y += b.vy; 
+            if(b.y < -50 || b.x < -50 || b.x > width + 50) bullets.splice(i, 1); 
+        });
+
+        spawnTimer += dt;
+        const spawnRate = Math.max(600, 1800 - level * 80);
+        if(spawnTimer > spawnRate) {
+            const modelIds = ['scout', 'phantom', 'titan', 'valkyrie'];
+            const type = modelIds[Math.floor(Math.random() * Math.min(level, 4))];
+            enemies.push({
+                x: Math.random() * (width - 100) + 50, y: -80, modelId: type,
+                hp: (type === 'titan' ? 15 : 4) + (level * 2),
+                sp: 1.5 + (level * 0.1),
+                color: colors[Math.floor(Math.random() * colors.length)],
+                lastShot: Date.now() + Math.random() * 2000
+            });
+            spawnTimer = 0;
+        }
+
+        enemies.forEach((e, i) => {
+            e.y += e.sp;
+            
+            if(Date.now() - e.lastShot > 3500 - (level*40)) {
+                enemyBullets.push({ x: e.x, y: e.y + 30, vy: 4 + level/4 });
+                e.lastShot = Date.now();
+            }
+
+            if(Math.hypot(e.x - player.x, e.y - player.y) < 45) {
+                player.hp--; renderHP(); enemies.splice(i, 1);
+                shake = 20; glitchIntensity = 0.6; createParticle(player.x, player.y, '#fff', 8);
+                if(player.hp <= 0) endGame();
+            }
+
+            bullets.forEach((b, bi) => {
+                if(Math.hypot(b.x - e.x, b.y - e.y) < 30) {
+                    e.hp -= b.dmg; bullets.splice(bi, 1);
+                    createParticle(e.x, e.y, e.color, 3, 0.4);
+                    if(e.hp <= 0) {
+                        score += 50 + (level * 10); xp += 150;
+                        if(xp >= level * 1000) { xp = 0; level++; glitchIntensity = 0.4; }
+                        enemies.splice(i, 1);
+                        createParticle(e.x, e.y, e.color, 7, 1.2);
+                        updateUI();
+                    }
+                }
+            });
+            if(e.y > height + 100) enemies.splice(i, 1);
+        });
+
+        enemyBullets.forEach((eb, i) => {
+            eb.y += eb.vy;
+            if(Math.hypot(eb.x - player.x, eb.y - player.y) < 25) {
+                player.hp--; renderHP(); enemyBullets.splice(i, 1);
+                shake = 15; glitchIntensity = 0.5; createParticle(player.x, player.y, '#f00', 5);
+                if(player.hp <= 0) endGame();
+            }
+            if(eb.y > height) enemyBullets.splice(i, 1);
+        });
+
+        shake *= 0.92;
+    }
+
+    function draw() {
+        ctx.save();
+        if(shake > 0.5) ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake);
+        ctx.fillStyle = '#020208'; ctx.fillRect(0, 0, width, height);
+
+        stars.forEach(s => { ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.2; ctx.fillRect(s.x, s.y, s.s, s.s); });
+        ctx.globalAlpha = 1;
+
+        particles.forEach(p => {
+            ctx.globalAlpha = p.life / p.maxLife;
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+        });
+        ctx.globalAlpha = 1;
+
+        bullets.forEach(b => {
+            ctx.fillStyle = '#00fbff'; ctx.shadowBlur = 15; ctx.shadowColor = '#0ff';
+            ctx.fillRect(b.x-2, b.y, 4, 20);
+        });
+
+        enemyBullets.forEach(eb => {
+            ctx.fillStyle = '#ff3366'; ctx.shadowBlur = 10; ctx.shadowColor = '#f36';
+            ctx.beginPath(); ctx.arc(eb.x, eb.y, 5, 0, Math.PI*2); ctx.fill();
+        });
+
+        ctx.shadowBlur = 0;
+        enemies.forEach(e => {
+            ctx.save(); ctx.translate(e.x, e.y); 
+            drawShipModel(ctx, e.modelId, e.color, false, true); 
+            ctx.restore();
+        });
+
+        if(gameState === 'PLAYING') {
+            ctx.save(); ctx.translate(player.x, player.y);
+            drawShipModel(ctx, shipModels[currentShipIdx].id, colors[0]);
+            ctx.restore();
+        }
+
+        applyGlitch(ctx);
+        ctx.restore();
+    }
+
+    function loop(t) {
+        let dt = t - lastTime; lastTime = t;
+        if(dt > 100) dt = 16; 
+        update(dt); draw();
+        requestAnimationFrame(loop);
+    }
+
+    function init() {
+        resize(); window.addEventListener('resize', resize);
+        
+        const input = (e) => {
+            if(gameState !== 'PLAYING') return;
+            const x = e.touches ? e.touches[0].clientX : e.clientX;
+            const y = e.touches ? e.touches[0].clientY : e.clientY;
+            player.targetX = x; player.targetY = y - 50;
+        };
+        canvas.addEventListener('mousemove', input);
+        canvas.addEventListener('touchstart', input);
+        canvas.addEventListener('touchmove', input);
+
+        document.getElementById('start-btn').onclick = startGame;
+        document.getElementById('retry-btn').onclick = startGame;
+        document.getElementById('shop-btn-ui').onclick = () => toggleModal('upgrade-overlay');
+        document.getElementById('hangar-btn-ui').onclick = () => toggleModal('hangar-overlay');
+        document.getElementById('close-shop').onclick = () => toggleModal('upgrade-overlay');
+        document.getElementById('close-hangar').onclick = () => toggleModal('hangar-overlay');
+
+        for(let i=0; i<150; i++) stars.push({ x: Math.random()*width, y: Math.random()*height, s: Math.random()*2, sp: Math.random()*3+0.5 });
+        requestAnimationFrame(loop);
+    }
+
+    function endGame() {
+        gameState = 'GAMEOVER';
+        glitchIntensity = 2.0;
+        document.getElementById('final-score').innerText = "ARCHIVES RÉCUPÉRÉES: " + score.toLocaleString();
+        document.getElementById('game-over-overlay').style.display = 'flex';
+    }
+
+    init();
+</script>
+</body>
+</html>
