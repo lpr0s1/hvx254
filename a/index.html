@@ -27,12 +27,22 @@
 <meta name="twitter:title" content="PentestKit – Outils & Commandes Pentest">
 <meta name="twitter:description" content="Accès rapide aux outils de pentest : Termux, iSH, Windows, scripts, commandes automatiques.">
 <meta name="twitter:image" content="https://hvxsrc.online/preview.png">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="preconnect" href="https://cdn.tailwindcss.com">
 <link rel="icon" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <link rel="manifest" href="/manifest.json">
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://unpkg.com;
+    script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://unpkg.com;
+    style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+    img-src 'self' data: https:;
+    font-src 'self' https:;
+    connect-src 'self' https:;
+    object-src 'none';
+    frame-ancestors 'none';
+">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
