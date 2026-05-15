@@ -343,7 +343,13 @@
         document.addEventListener('touchstart', (e) => { if(e.touches.length > 1) e.preventDefault(); }, {passive: false});
 
         function handleUrlParams() {
+            
     const params = new URLSearchParams(window.location.search);
+const isAndroid = /Android/i.test(navigator.userAgent);
+const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+if (isiOS) window.location = "ish://";
+if (isAndroid) window.location = "termux://";
 
     const tab = params.get("tab");
     const cat = params.get("cat");
@@ -367,8 +373,7 @@
 
     if (tool && toolsData[tool]) {
         showTool(tool);
-        window.location.href = "ish://"
-        window.location.href = "termux://"
+        window.location = "ish://"
     }
 
     if (copy && toolsData[copy]) {
