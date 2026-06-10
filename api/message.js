@@ -1,19 +1,27 @@
+let lastMessage = "Aucun message pour le moment";
+
 export default function handler(req, res) {
-  // GET : afficher un message personnalisé via ?msg=
+  // GET → renvoyer le dernier message reçu
   if (req.method === "GET") {
-    const msg = req.query.msg || "Aucun message fourni";
     return res.status(200).json({
       status: "OK",
-      message: msg
+      message: lastMessage
     });
   }
 
-  // POST : afficher un message envoyé dans le body
+  // POST → recevoir un message
   if (req.method === "POST") {
     const { message } = req.body || {};
+
+    if (!message) {
+      return res.status(400).json({ error: "Aucun message reçu" });
+    }
+
+    lastMessage = message; // on sauvegarde le message
+
     return res.status(200).json({
       status: "OK",
-      message: message || "Aucun message fourni"
+      received: message
     });
   }
 
