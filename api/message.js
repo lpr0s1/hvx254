@@ -22,7 +22,6 @@ export default async function handler(req, res) {
 
       lastMessage = message;
 
-      // 🔥 Appel du webhook IFTTT
       await fetch(
         "https://maker.ifttt.com/trigger/api_message/with/key/tVEGob3-rpwoFAzaJA4gW",
         {
