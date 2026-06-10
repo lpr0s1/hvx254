@@ -6,7 +6,6 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  // GET → renvoie le dernier message + fichier
   if (req.method === "GET") {
     return res.status(200).json({
       status: "Disponible",
@@ -15,64 +14,69 @@ export default async function handler(req, res) {
     });
   }
 
-  // POST → réception message + fichier
   if (req.method === "POST") {
-    const contentType = req.headers["content-type"] || "";
+    try {
+      const contentType = req.headers["content-type"] || "";
 
-    // Lire le flux brut
-    const chunks = [];
-    for await (const chunk of req) chunks.push(chunk);
-    const buffer = Buffer.concat(chunks);
-
-    // Vérification multipart
-    if (!contentType.includes("multipart/form-data")) {
-      return res.status(400).json({ error: "Format non supporté" });
-    }
-
-    // Extraction du boundary
-    const boundaryMatch = contentType.match(/boundary=(.+)$/);
-    if (!boundaryMatch) {
-      return res.status(400).json({ error: "Boundary introuvable" });
-    }
-
-    const boundary = "--" + boundaryMatch[1];
-    const parts = buffer.toString("binary").split(boundary);
-
-    for (const part of parts) {
-      if (!part.includes("Content-Disposition")) continue;
-
-      // Extraction du contenu après les headers
-      const [rawHeaders, rawBody] = part.split("\r\n\r\n");
-      if (!rawBody) continue;
-
-      const body = rawBody.replace(/\r\n--$/, "");
-
-      // MESSAGE TEXTE
-      if (rawHeaders.includes('name="message"')) {
-        lastMessage = body.trim();
+      if (!contentType.includes("multipart/form-data")) {
+        return res.status(400).json({ error: "Format non supporté" });
       }
 
-      // FICHIER
-      if (rawHeaders.includes("filename=")) {
-        const filename = rawHeaders.match(/filename="(.+?)"/)?.[1];
+      // Lire tout le flux brut
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      const buffer = Buffer.concat(chunks);
 
-        if (filename) {
-          const binary = Buffer.from(body, "binary");
+      // Extraire boundary
+      const boundary = contentType.split("boundary=")[1];
+      if (!boundary) {
+        return res.status(400).json({ error: "Boundary manquant" });
+      }
+
+      const delimiter = "--" + boundary;
+      const parts = buffer.toString("latin1").split(delimiter);
+
+      for (const part of parts) {
+        if (!part.includes("Content-Disposition")) continue;
+
+        const [rawHeaders, rawBody] = part.split("\r\n\r\n");
+        if (!rawBody) continue;
+
+        const body = rawBody.replace(/\r\n--$/, "");
+
+        // Message texte
+        if (rawHeaders.includes('name="message"')) {
+          lastMessage = body;
+        }
+
+        // Fichier
+        if (rawHeaders.includes("filename=")) {
+          const filenameMatch = rawHeaders.match(/filename="(.+?)"/);
+          const filename = filenameMatch ? filenameMatch[1] : "fichier.bin";
+
+          // Convertir en base64 sans casser le binaire
+          const binaryBuffer = Buffer.from(body, "latin1");
+
           lastFile = {
             filename,
-            base64: binary.toString("base64")
+            base64: binaryBuffer.toString("base64")
           };
         }
       }
-    }
 
-    return res.status(200).json({
-      status: "OK",
-      receivedMessage: lastMessage,
-      receivedFile: lastFile ? lastFile.filename : null
-    });
+      return res.status(200).json({
+        status: "OK",
+        receivedMessage: lastMessage,
+        receivedFile: lastFile ? lastFile.filename : null
+      });
+
+    } catch (err) {
+      return res.status(500).json({
+        error: "Erreur interne",
+        details: err.message
+      });
+    }
   }
 
-  // Méthode non autorisée
   return res.status(405).json({ error: "405" });
 }
