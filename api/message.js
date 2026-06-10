@@ -6,6 +6,20 @@ export const config = {
 };
 
 export default async function handler(req, res) {
+  // Route spéciale pour télécharger le fichier directement
+  if (req.method === "GET" && req.url.endsWith("/file")) {
+    if (!lastFile) {
+      return res.status(404).send("Aucun fichier stocké");
+    }
+
+    const buffer = Buffer.from(lastFile.base64, "base64");
+
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Content-Disposition", `attachment; filename="${lastFile.filename}"`);
+    return res.send(buffer);
+  }
+
+  // Route GET normale
   if (req.method === "GET") {
     return res.status(200).json({
       status: "Disponible",
@@ -14,25 +28,21 @@ export default async function handler(req, res) {
     });
   }
 
+  // Route POST pour recevoir message + fichier
   if (req.method === "POST") {
     try {
       const contentType = req.headers["content-type"] || "";
-
       if (!contentType.includes("multipart/form-data")) {
         return res.status(400).json({ error: "Format non supporté" });
       }
 
-      // Lire tout le flux brut
+      // Lire flux brut
       const chunks = [];
       for await (const chunk of req) chunks.push(chunk);
       const buffer = Buffer.concat(chunks);
 
-      // Extraire boundary
+      // Boundary
       const boundary = contentType.split("boundary=")[1];
-      if (!boundary) {
-        return res.status(400).json({ error: "Boundary manquant" });
-      }
-
       const delimiter = "--" + boundary;
       const parts = buffer.toString("latin1").split(delimiter);
 
@@ -54,7 +64,6 @@ export default async function handler(req, res) {
           const filenameMatch = rawHeaders.match(/filename="(.+?)"/);
           const filename = filenameMatch ? filenameMatch[1] : "fichier.bin";
 
-          // Convertir en base64 sans casser le binaire
           const binaryBuffer = Buffer.from(body, "latin1");
 
           lastFile = {
