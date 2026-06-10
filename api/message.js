@@ -6,17 +6,22 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  // Télécharger le fichier
-  if (req.method === "GET" && req.url.endsWith("/file")) {
-    if (!lastFile) return res.status(404).send("Aucun fichier stocké");
 
+  // --- ROUTE DE TÉLÉCHARGEMENT ---
+  if (req.method === "GET" && req.url.endsWith("/file")) {
+    if (!lastFile) {
+      return res.status(404).send("Aucun fichier stocké");
+    }
+
+    // Reconstruire le fichier AVANT de l'envoyer
     const buffer = Buffer.from(lastFile.base64, "base64");
+
     res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Disposition", `attachment; filename="${lastFile.filename}"`);
     return res.send(buffer);
   }
 
-  // GET normal
+  // --- ROUTE GET NORMALE ---
   if (req.method === "GET") {
     return res.status(200).json({
       status: "Disponible",
@@ -25,7 +30,7 @@ export default async function handler(req, res) {
     });
   }
 
-  // POST JSON
+  // --- ROUTE POST (ENVOI EN BASE64) ---
   if (req.method === "POST") {
     const { message, filename, base64 } = req.body;
 
