@@ -1,25 +1,53 @@
+import formidable from "formidable";
+import fs from "fs";
+
+export const config = {
+  api: { bodyParser: false }
+};
+
 let lastMessage = "Aucun message pour le moment";
+let lastFile = null;
 
 export default function handler(req, res) {
   if (req.method === "GET") {
     return res.status(200).json({
       status: "Disponible",
-      message: lastMessage
+      message: lastMessage,
+      file: lastFile ? {
+        filename: lastFile.filename,
+        mimetype: lastFile.mimetype,
+        size: lastFile.size,
+        base64: lastFile.base64
+      } : null
     });
   }
 
   if (req.method === "POST") {
-    const { message } = req.body || {};
+    const form = formidable({ multiples: false });
 
-    if (!message) {
-      return res.status(400).json({ error: "Aucun message..." });
-    }
+    form.parse(req, (err, fields, files) => {
+      if (err) return res.status(500).json({ error: "Erreur parsing" });
+      if (fields.message) {
+        lastMessage = fields.message;
+      }
 
-    lastMessage = message;
+      if (files.file) {
+        const file = files.file;
+        const data = fs.readFileSync(file.filepath);
 
-    return res.status(200).json({
-      status: "Disponible",
-      received: message
+        lastFile = {
+          filename: file.originalFilename,
+          mimetype: file.mimetype,
+          size: file.size,
+          base64: data.toString("base64")
+        };
+      }
+
+      return res.status(200).json({
+        status: "OK",
+        receivedMessage: lastMessage,
+        receivedFile: lastFile ? lastFile.filename : null
+      });
     });
   }
 
