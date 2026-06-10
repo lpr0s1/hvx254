@@ -2,6 +2,7 @@ let lastMessage = "";
 export const config = {
   api: { bodyParser: true }
 };
+
 export default async function handler(req, res) {
   if (req.method === "GET") {
     return res.status(200).json({
@@ -11,13 +12,12 @@ export default async function handler(req, res) {
   }
   if (req.method === "POST") {
     try {
-      const { message } = req.body;
-
-      if (!message || typeof message !== "string") {
-        return res.status(400).json({ error: "" });
+      if (!req.body || typeof req.body.message !== "string") {
+        return res.status(400).json({ error: "Invalid body" });
       }
+      const message = req.body.message.trim();
       lastMessage = message;
-      await fetch(
+      const iftttResponse = await fetch(
         "https://maker.ifttt.com/trigger/api_message/with/key/tVEGob3-rpwoFAzaJA4gW",
         {
           method: "POST",
@@ -25,13 +25,20 @@ export default async function handler(req, res) {
           body: JSON.stringify({ value1: message })
         }
       );
+
+      if (!iftttResponse.ok) {
+        return res.status(500).json({ error: "IFTTT error" });
+      }
+
       return res.status(200).json({
         status: "OK",
         receivedMessage: lastMessage
       });
+
     } catch (e) {
-      return res.status(500).json({ error: "" });
+      return res.status(500).json({ error: "Server error" });
     }
   }
-  return res.status(405).json({ error: "" });
+
+  return res.status(405).json({ error: "Method not allowed" });
 }
