@@ -2,51 +2,54 @@ let lastMessage = "Aucun message pour le moment";
 let lastFile = null;
 
 export const config = {
-  api: { bodyParser: true }
+  api: { bodyParser: false }
 };
 
 export default async function handler(req, res) {
-
-  // --- ROUTE DE TÉLÉCHARGEMENT ---
+  // Télécharger le fichier
   if (req.method === "GET" && req.url.endsWith("/file")) {
     if (!lastFile) {
       return res.status(404).send("Aucun fichier stocké");
     }
 
-    // Reconstruire le fichier AVANT de l'envoyer
     const buffer = Buffer.from(lastFile.base64, "base64");
-
     res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Disposition", `attachment; filename="${lastFile.filename}"`);
     return res.send(buffer);
   }
 
-  // --- ROUTE GET NORMALE ---
+  // GET info
   if (req.method === "GET") {
     return res.status(200).json({
       status: "Disponible",
       message: lastMessage,
-      file: lastFile
+      file: lastFile ? { filename: lastFile.filename } : null
     });
   }
 
-  // --- ROUTE POST (ENVOI EN BASE64) ---
-  if (req.method === "POST") {
-    const { message, filename, base64 } = req.body;
+  // PUT = envoi du fichier brut
+  if (req.method === "PUT") {
+    try {
+      const filename = req.headers["x-filename"] || "fichier.bin";
 
-    if (message) lastMessage = message;
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      const buffer = Buffer.concat(chunks);
 
-    if (filename && base64) {
-      lastFile = { filename, base64 };
+      lastFile = {
+        filename,
+        base64: buffer.toString("base64")
+      };
+
+      return res.status(200).json({
+        status: "OK",
+        receivedFile: lastFile.filename,
+        size: buffer.length
+      });
+    } catch (e) {
+      return res.status(500).json({ error: "Erreur interne", details: e.message });
     }
-
-    return res.status(200).json({
-      status: "OK",
-      receivedMessage: lastMessage,
-      receivedFile: lastFile ? lastFile.filename : null
-    });
   }
 
   return res.status(405).json({ error: "405" });
 }
-
