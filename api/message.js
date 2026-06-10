@@ -6,11 +6,10 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  // Route spéciale pour télécharger le fichier directement
+
+  // Route de téléchargement direct
   if (req.method === "GET" && req.url.endsWith("/file")) {
-    if (!lastFile) {
-      return res.status(404).send("Aucun fichier stocké");
-    }
+    if (!lastFile) return res.status(404).send("Aucun fichier stocké");
 
     const buffer = Buffer.from(lastFile.base64, "base64");
 
@@ -28,47 +27,42 @@ export default async function handler(req, res) {
     });
   }
 
-  // Route POST pour recevoir message + fichier
+  // Route POST
   if (req.method === "POST") {
     try {
       const contentType = req.headers["content-type"] || "";
-      if (!contentType.includes("multipart/form-data")) {
+      if (!contentType.includes("multipart/form-data"))
         return res.status(400).json({ error: "Format non supporté" });
-      }
+
+      const boundary = "--" + contentType.split("boundary=")[1];
 
       // Lire flux brut
       const chunks = [];
       for await (const chunk of req) chunks.push(chunk);
       const buffer = Buffer.concat(chunks);
 
-      // Boundary
-      const boundary = contentType.split("boundary=")[1];
-      const delimiter = "--" + boundary;
-      const parts = buffer.toString("latin1").split(delimiter);
+      // Découper en binaire
+      const parts = buffer.split(Buffer.from(boundary));
 
       for (const part of parts) {
-        if (!part.includes("Content-Disposition")) continue;
+        const headerEnd = part.indexOf("\r\n\r\n");
+        if (headerEnd === -1) continue;
 
-        const [rawHeaders, rawBody] = part.split("\r\n\r\n");
-        if (!rawBody) continue;
-
-        const body = rawBody.replace(/\r\n--$/, "");
+        const header = part.slice(0, headerEnd).toString();
+        const body = part.slice(headerEnd + 4, part.length - 2); // retirer \r\n
 
         // Message texte
-        if (rawHeaders.includes('name="message"')) {
-          lastMessage = body;
+        if (header.includes('name="message"')) {
+          lastMessage = body.toString();
         }
 
         // Fichier
-        if (rawHeaders.includes("filename=")) {
-          const filenameMatch = rawHeaders.match(/filename="(.+?)"/);
-          const filename = filenameMatch ? filenameMatch[1] : "fichier.bin";
-
-          const binaryBuffer = Buffer.from(body, "latin1");
+        if (header.includes("filename=")) {
+          const filename = header.match(/filename="(.+?)"/)?.[1] || "fichier.bin";
 
           lastFile = {
             filename,
-            base64: binaryBuffer.toString("base64")
+            base64: body.toString("base64")
           };
         }
       }
@@ -76,16 +70,13 @@ export default async function handler(req, res) {
       return res.status(200).json({
         status: "OK",
         receivedMessage: lastMessage,
-        receivedFile: lastFile ? lastFile.filename : null
+        receivedFile: lastFile?.filename || null
       });
 
     } catch (err) {
-      return res.status(500).json({
-        error: "Erreur interne",
-        details: err.message
-      });
+      return res.status(500).json({ error: "Erreur interne", details: err.message });
     }
   }
 
   return res.status(405).json({ error: "405" });
-}
+};
