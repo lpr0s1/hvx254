@@ -13,12 +13,7 @@ export default function handler(req, res) {
     return res.status(200).json({
       status: "Disponible",
       message: lastMessage,
-      file: lastFile ? {
-        filename: lastFile.filename,
-        mimetype: lastFile.mimetype,
-        size: lastFile.size,
-        base64: lastFile.base64
-      } : null
+      file: lastFile
     });
   }
 
@@ -27,6 +22,7 @@ export default function handler(req, res) {
 
     form.parse(req, (err, fields, files) => {
       if (err) return res.status(500).json({ error: "Erreur parsing" });
+
       if (fields.message) {
         lastMessage = fields.message;
       }
