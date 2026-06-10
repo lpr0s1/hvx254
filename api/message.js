@@ -17,37 +17,38 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    const chunks = [];
-    for await (const chunk of req) {
-      chunks.push(chunk);
-    }
-
-    const buffer = Buffer.concat(chunks);
-
-    // Vérifier si c'est un multipart/form-data
     const contentType = req.headers["content-type"] || "";
 
+    // Lire tout le flux brut
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const buffer = Buffer.concat(chunks);
+
+    // Si c'est un multipart/form-data
     if (contentType.includes("multipart/form-data")) {
-      const boundary = contentType.split("boundary=")[1];
-      const parts = buffer.toString().split(`--${boundary}`);
+      const boundary = "--" + contentType.split("boundary=")[1];
+      const parts = buffer.toString("binary").split(boundary);
 
       for (const part of parts) {
         if (part.includes("Content-Disposition")) {
-          // Fichier
-          if (part.includes("filename=")) {
-            const filename = part.match(/filename="(.+?)"/)[1];
-            const fileContent = part.split("\r\n\r\n")[1].split("\r\n")[0];
-
-            lastFile = {
-              filename,
-              base64: Buffer.from(fileContent, "binary").toString("base64")
-            };
-          }
-
           // Message texte
           if (part.includes('name="message"')) {
-            const msg = part.split("\r\n\r\n")[1].split("\r\n")[0];
-            lastMessage = msg;
+            const value = part.split("\r\n\r\n")[1]?.split("\r\n")[0];
+            if (value) lastMessage = value;
+          }
+
+          // Fichier
+          if (part.includes("filename=")) {
+            const filename = part.match(/filename="(.+?)"/)?.[1];
+            const fileContent = part.split("\r\n\r\n")[1];
+            const binary = fileContent?.split("\r\n")[0];
+
+            if (filename && binary) {
+              lastFile = {
+                filename,
+                base64: Buffer.from(binary, "binary").toString("base64")
+              };
+            }
           }
         }
       }
