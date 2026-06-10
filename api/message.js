@@ -21,21 +21,25 @@ export default function handler(req, res) {
     const form = formidable({ multiples: false });
 
     form.parse(req, (err, fields, files) => {
-      if (err) return res.status(500).json({ error: "Erreur parsing" });
+      if (err) {
+        return res.status(500).json({ error: "Erreur lors du parsing du fichier" });
+      }
 
+      // Message texte
       if (fields.message) {
         lastMessage = fields.message;
       }
 
+      // Fichier
       if (files.file) {
         const file = files.file;
-        const data = fs.readFileSync(file.filepath);
+        const buffer = fs.readFileSync(file.filepath);
 
         lastFile = {
           filename: file.originalFilename,
           mimetype: file.mimetype,
           size: file.size,
-          base64: data.toString("base64")
+          base64: buffer.toString("base64")
         };
       }
 
