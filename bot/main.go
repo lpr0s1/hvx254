@@ -111,7 +111,7 @@ func startBot(logFn func(string), statusFn func(bool), targetStatusFn func(strin
 		token := strings.TrimSpace(cfg.Token)
 		if token == "" {
 			state.Mutex.Unlock()
-			logFn("Token manquant.")
+			logFn("Erreur : Token manquant.")
 			return
 		}
 		s, err := discordgo.New("Bot " + token)
@@ -121,6 +121,7 @@ func startBot(logFn func(string), statusFn func(bool), targetStatusFn func(strin
 			return
 		}
 		
+		// Definition des intentions requises (A activer aussi sur le Discord Developer Portal)
 		s.Identify.Intents = discordgo.IntentsGuilds |
 			discordgo.IntentsGuildMessages |
 			discordgo.IntentsGuildMembers |
@@ -135,19 +136,24 @@ func startBot(logFn func(string), statusFn func(bool), targetStatusFn func(strin
 			statusFn(true)
 			setPresence(ses, logFn)
 
-			// Verifications asynchrones apres connexion (Admin + Utilisateur cible)
 			go checkAdminPerms(ses, logFn)
 			go checkTargetUser(ses, cfg.TargetUserTag, targetStatusFn, logFn)
 		})
 
+		// Gestionnaire pour les messages (Commandes, Moderation, Auto-reaction)
 		s.AddHandler(func(ses *discordgo.Session, m *discordgo.MessageCreate) {
 			handleMessage(ses, m, logFn)
+		})
+
+		// Gestionnaire pour les nouveaux membres (Bienvenue et DM)
+		s.AddHandler(func(ses *discordgo.Session, h *discordgo.GuildMemberAdd) {
+			handleNewMember(ses, h, logFn)
 		})
 
 		err = s.Open()
 		if err != nil {
 			state.Mutex.Unlock()
-			logFn("Impossible de connecter le bot au serveur Discord.")
+			logFn("Impossible de connecter le bot au serveur Discord. Verifie tes Privileged Intents sur le portail developpeur.")
 			return
 		}
 
@@ -155,14 +161,13 @@ func startBot(logFn func(string), statusFn func(bool), targetStatusFn func(strin
 		state.Running = true
 		state.StartTime = time.Now()
 		state.Mutex.Unlock()
-		logFn("Lancement du processus principal...")
+		logFn("Lancement du processus principal reussi.")
 		statusFn(true)
 	})
 }
 
-// Verifie si le bot possede la permission ADMINISTRATEUR dans au moins un de ses serveurs
 func checkAdminPerms(s *discordgo.Session, logFn func(string)) {
-	time.Sleep(3 * time.Second) // On attend un peu que le cache se remplisse
+	time.Sleep(3 * time.Second)
 	hasAdmin := false
 
 	for _, g := range s.State.Guilds {
@@ -183,13 +188,12 @@ func checkAdminPerms(s *discordgo.Session, logFn func(string)) {
 	}
 
 	if hasAdmin {
-		logFn("Info: Permission ADMINISTRATEUR detectee. Le bot a tous les droits !")
+		logFn("Info: Permission ADMINISTRATEUR detectee.")
 	} else {
-		logFn("Info: Le bot n'a pas la permission Administrateur. Certaines options peuvent bloquer.")
+		logFn("Info: Le bot n'a pas la permission Administrateur sur les serveurs actuels.")
 	}
 }
 
-// Cherche l'utilisateur cible dans le cache
 func checkTargetUser(s *discordgo.Session, targetTag string, statusFn func(string), logFn func(string)) {
 	if targetTag == "" {
 		statusFn("Non renseigne")
@@ -215,8 +219,8 @@ func checkTargetUser(s *discordgo.Session, targetTag string, statusFn func(strin
 		statusFn("Utilisateur detecte !")
 		logFn("Utilisateur cible (" + targetTag + ") trouve sur les serveurs.")
 	} else {
-		statusFn("Introuvable (mais le bot continue)")
-		logFn("Utilisateur cible non trouve, mais le bot continue de tourner.")
+		statusFn("Introuvable")
+		logFn("Utilisateur cible non trouve, le bot continue de tourner.")
 	}
 }
 
@@ -276,6 +280,33 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate, logFn func(
 		logFn("Message de " + m.Author.Username + " : " + m.Content)
 	}
 
+	// 1. Fonctionnalite Moderation Simple
+	if cfg.Features.SimpleModeration {
+		insultes := []string{"merde", "con", "salaud", "connard"}
+		contenu := strings.ToLower(m.Content)
+		pour Supprimer := false
+		for _, mot := range insultes {
+			if strings.Contains(contenu, mot) {
+				pour Supprimer = true
+				break
+			}
+		}
+		if pour Supprimer {
+			s.ChannelMessageDelete(m.ChannelID, m.ID)
+			logFn("Moderation : Message supprime de " + m.Author.Username)
+			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", merci de rester poli.")
+			return
+		}
+	}
+
+	// 2. Fonctionnalite Auto-Reaction / Reponse automatique
+	if cfg.Features.AutoReaction {
+		if strings.ToLower(m.Content) == "salut" || strings.ToLower(m.Content) == "bonjour" {
+			s.ChannelMessageSend(m.ChannelID, "Bonjour "+m.Author.Mention()+" ! Heureux de te voir ici.")
+		}
+	}
+
+	// 3. Commandes avec Prefixe
 	if cfg.Features.PrefixCommands && strings.HasPrefix(m.Content, cfg.Prefix) {
 		content := strings.TrimPrefix(m.Content, cfg.Prefix)
 		parts := strings.Fields(content)
@@ -290,10 +321,44 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate, logFn func(
 		if cfg.Features.Help && cmd == "help" {
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, "Voici les commandes actives :\n"+listCommands(), m.Reference())
 		}
+		
+		// Verification des commandes personnalisees ajoutees via l'UI
 		for _, c := range cfg.Commands {
-			if m.Content == c.Trigger {
+			if m.Content == c.Trigger || cmd == strings.ToLower(strings.TrimPrefix(c.Trigger, cfg.Prefix)) {
 				_, _ = s.ChannelMessageSendReply(m.ChannelID, c.Reply, m.Reference())
 			}
+		}
+	}
+}
+
+func handleNewMember(s *discordgo.Session, h *discordgo.GuildMemberAdd, logFn func(string)) {
+	// Message de bienvenue public
+	if cfg.Features.Welcome {
+		guild, err := s.State.Guild(h.GuildID)
+		if err == nil {
+			txtChannelID := guild.SystemChannelID
+			if txtChannelID == "" {
+				channels, _ := s.GuildChannels(h.GuildID)
+				for _, ch := range channels {
+					if ch.Type == discordgo.ChannelTypeGuildText {
+						txtChannelID = ch.ID
+						break
+					}
+				}
+			}
+			if txtChannelID != "" {
+				s.ChannelMessageSend(txtChannelID, "Bienvenue sur le serveur " + h.User.Mention() + " !")
+				logFn("Bienvenue envoyee pour " + h.User.Username)
+			}
+		}
+	}
+
+	// Message de bienvenue en DM prive
+	if cfg.Features.DmWelcome {
+		channel, err := s.UserChannelCreate(h.User.ID)
+		if err == nil {
+			s.ChannelMessageSend(channel.ID, "Bienvenue ! Merci de rejoindre notre serveur public.")
+			logFn("DM de bienvenue envoye a " + h.User.Username)
 		}
 	}
 }
@@ -312,7 +377,6 @@ func listCommands() string {
 	return strings.Join(list, "\n")
 }
 
-// checkToken renvoie si le token est valide, et le nom du bot si recuperable
 func checkToken(token string) (bool, string) {
 	token = strings.TrimSpace(token)
 	if token == "" {
@@ -322,14 +386,11 @@ func checkToken(token string) (bool, string) {
 	if err != nil {
 		return false, ""
 	}
-	
-	// Utilisation de l'API REST pour recuperer le compte utilisateur du bot sans ouvrir de session WSS
 	u, err := s.User("@me")
 	if err == nil && u != nil {
 		return true, u.Username
 	}
-	
-	return true, ""
+	return false, ""
 }
 
 func main() {
@@ -337,14 +398,14 @@ func main() {
 
 	a := app.NewWithID("bot.discord.creator")
 	a.Settings().SetTheme(theme.DarkTheme())
-	w := a.NewWindow("Createur de Bot Discord Simplifie")
+	w := a.NewWindow("Createur de Bot Discord reel")
 	w.Resize(fyne.NewSize(1200, 800))
 
 	logBuffer := ""
 	logMutex := sync.Mutex{}
 
 	logsWidget := widget.NewMultiLineEntry()
-	logsWidget.SetPlaceHolder("Les evenements de ton bot apparaitront ici...")
+	logsWidget.SetPlaceHolder("Les evenements reels de ton bot apparaitront ici lors des actions des utilisateurs...")
 	logsWidget.Disable()
 
 	appendLog := func(s string) {
@@ -377,105 +438,101 @@ func main() {
 		statusDot.Refresh()
 	}
 
-	// === CHAMPS DE TEXTE ===
 	tokenEntry := widget.NewPasswordEntry()
-	tokenEntry.SetPlaceHolder("Colle ici le token de ton bot (trouve sur Discord Developer Portal)")
+	tokenEntry.SetPlaceHolder("Colle ton token Discord valide ici")
 
 	nameEntry := widget.NewEntry()
-	nameEntry.SetPlaceHolder("Ex: Mon Super Bot (Auto-rempli si token valide)")
+	nameEntry.SetPlaceHolder("Nom du bot charge automatiquement")
 
 	prefixEntry := widget.NewEntry()
 	prefixEntry.SetText("!")
 
 	targetUserEntry := widget.NewEntry()
-	targetUserEntry.SetPlaceHolder("Ex: MonPseudo#1234 ou justemonpseudo")
+	targetUserEntry.SetPlaceHolder("Ex: MonPseudo")
 	
 	targetStatusLabel := widget.NewLabel("En attente du lancement")
 
 	rssEntry := widget.NewEntry()
-	rssEntry.SetPlaceHolder("Ex: https://mon-site.com/rss.xml (Optionnel)")
+	rssEntry.SetPlaceHolder("Flux RSS optionnel")
 
 	statusTextEntry := widget.NewEntry()
-	statusTextEntry.SetText("Pret a l'action !")
+	statusTextEntry.SetText("Actif et connecte !")
 
 	statusTypeSelect := widget.NewSelect([]string{"PLAYING", "WATCHING", "LISTENING", "COMPETING"}, func(string) {})
 	statusTypeSelect.SetSelected("PLAYING")
 
-	// === ACTIONS ===
 	tokenStatusLabel := widget.NewLabel("Aucun token verifie")
-	checkTokenBtn := widget.NewButton("1. Verifier le token", func() {
+	checkTokenBtn := widget.NewButton("1. Verifier le token via requete REST", func() {
 		t := strings.TrimSpace(tokenEntry.Text)
 		if t == "" {
 			tokenStatusLabel.SetText("Token vide")
 			return
 		}
-		tokenStatusLabel.SetText("Verification en cours...")
+		tokenStatusLabel.SetText("Verification reelle sur l'API Discord...")
 		go func() {
 			ok, botName := checkToken(t)
 			if ok {
-				tokenStatusLabel.SetText("Token valide ! Le bot peut demarrer.")
+				tokenStatusLabel.SetText("Token valide ! Pret a l'action.")
 				if botName != "" {
-					nameEntry.SetText(botName) // Remplissage automatique
+					nameEntry.SetText(botName)
 				}
 			} else {
-				tokenStatusLabel.SetText("Token invalide.")
+				tokenStatusLabel.SetText("Token invalide ou rejeté par Discord.")
 			}
 		}()
 	})
 
-	// === POPUP DES FONCTIONNALITES ===
 	featureCheck := func(label string, get func() bool, set func(bool)) *widget.Check {
 		c := widget.NewCheck(label, set)
 		c.SetChecked(get())
 		return c
 	}
 
-	featuresBtn := widget.NewButtonWithIcon("Configurer les fonctionnalites du Bot", theme.SettingsIcon(), func() {
-		// Construction de la liste des fonctionnalites
+	featuresBtn := widget.NewButtonWithIcon("Configurer les fonctionnalites actives", theme.SettingsIcon(), func() {
 		contentBox := container.NewVBox(
 			widget.NewLabelWithStyle("Options generales", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 			featureCheck("Repondre aux commandes avec prefixe (ex: !aide)", func() bool { return cfg.Features.PrefixCommands }, func(b bool) { cfg.Features.PrefixCommands = b }),
-			featureCheck("Activer les logs (Voir tout ce qui se passe)", func() bool { return cfg.Features.Logs }, func(b bool) { cfg.Features.Logs = b }),
-			featureCheck("Activer l'Auto-Reaction (Dire bonjour)", func() bool { return cfg.Features.AutoReaction }, func(b bool) { cfg.Features.AutoReaction = b }),
-			featureCheck("Moderation Simple (Supprimer les insultes basiques)", func() bool { return cfg.Features.SimpleModeration }, func(b bool) { cfg.Features.SimpleModeration = b }),
-			featureCheck("Envoyer un message de bienvenue", func() bool { return cfg.Features.Welcome }, func(b bool) { cfg.Features.Welcome = b }),
-			featureCheck("Envoyer un DM (Message prive) de bienvenue", func() bool { return cfg.Features.DmWelcome }, func(b bool) { cfg.Features.DmWelcome = b }),
-			featureCheck("Commande 'ping' active", func() bool { return cfg.Features.Ping }, func(b bool) { cfg.Features.Ping = b }),
-			featureCheck("Commande 'help' (aide) active", func() bool { return cfg.Features.Help }, func(b bool) { cfg.Features.Help = b }),
+			featureCheck("Activer les logs dans la console", func() bool { return cfg.Features.Logs }, func(b bool) { cfg.Features.Logs = b }),
+			featureCheck("Activer l'Auto-Reaction (Repondre a bonjour)", func() bool { return cfg.Features.AutoReaction }, func(b bool) { cfg.Features.AutoReaction = b }),
+			featureCheck("Moderation Simple (Supprime les gros mots automatiquement)", func() bool { return cfg.Features.SimpleModeration }, func(b bool) { cfg.Features.SimpleModeration = b }),
+			featureCheck("Envoyer un message de bienvenue sur le serveur", func() bool { return cfg.Features.Welcome }, func(b bool) { cfg.Features.Welcome = b }),
+			featureCheck("Envoyer un DM prive de bienvenue aux nouveaux", func() bool { return cfg.Features.DmWelcome }, func(b bool) { cfg.Features.DmWelcome = b }),
+			featureCheck("Commande !ping active", func() bool { return cfg.Features.Ping }, func(b bool) { cfg.Features.Ping = b }),
+			featureCheck("Commande !help active", func() bool { return cfg.Features.Help }, func(b bool) { cfg.Features.Help = b }),
 		)
 
 		scrollContent := container.NewVScroll(contentBox)
-		scrollContent.SetMinSize(fyne.NewSize(500, 400)) // Taille fixe du popup
+		scrollContent.SetMinSize(fyne.NewSize(500, 400))
 
-		dialog.ShowCustom("Gerer les Fonctionnalites", "Fermer et Sauvegarder", scrollContent, w)
+		dialog.ShowCustom("Gerer les Fonctionnalites", "Sauvegarder et Fermer", scrollContent, w)
 	})
 
-	// On active des fonctionnalites par defaut
 	cfg.Features.Ping = true
 	cfg.Features.Help = true
 	cfg.Features.Logs = true
 	cfg.Features.PrefixCommands = true
+	cfg.Features.SimpleModeration = true
+	cfg.Features.AutoReaction = true
 
-	// === COMMANDES PERSONNALISEES ===
 	cmdNameEntry := widget.NewEntry()
 	cmdNameEntry.SetPlaceHolder("Ex: Dire Bonjour")
 	cmdTriggerEntry := widget.NewEntry()
-	cmdTriggerEntry.SetPlaceHolder("Texte a ecrire (ex: !bonjour)")
+	cmdTriggerEntry.SetPlaceHolder("Ex: !bonjour")
 	cmdReplyEntry := widget.NewMultiLineEntry()
-	cmdReplyEntry.SetPlaceHolder("La reponse du bot (ex: Salut a toi !)")
+	cmdReplyEntry.SetPlaceHolder("La reponse automatique")
 
 	commandsList := widget.NewMultiLineEntry()
 	commandsList.Disable()
-	commandsList.SetPlaceHolder("Aucune commande personnalisee ajoutee.")
+	commandsList.SetPlaceHolder("Aucune commande personnalisee.")
 
 	refreshCommandsView := func() {
 		if len(cfg.Commands) == 0 {
-			commandsList.SetText("Aucune commande personnalisee ajoutee.")
+			commandsList.SetText("Aucune commande personnalisee.")
 			return
 		}
 		var lines []string
 		for i, c := range cfg.Commands {
-			lines = append(lines, fmt.Sprintf("%d. %s : Taper '%s' -> Bot repondra '%s'", i+1, c.Name, c.Trigger, c.Reply))
+			lines = append(lines, fmt.Sprintf("%d. %s : Taper '%s' -> '%s'", i+1, c.Name, c.Trigger, c.Reply))
 		}
 		commandsList.SetText(strings.Join(lines, "\n"))
 	}
@@ -494,7 +551,6 @@ func main() {
 		refreshCommandsView()
 	})
 
-	// === BOUTONS PRINCIPAUX ===
 	startBtn := widget.NewButtonWithIcon("DEMARRER LE BOT", theme.MediaPlayIcon(), func() {
 		cfg.Token = tokenEntry.Text
 		cfg.Name = nameEntry.Text
@@ -512,68 +568,61 @@ func main() {
 			targetStatusLabel.SetText(status)
 		})
 	})
-	startBtn.Importance = widget.HighImportance // Rend le bouton tres visible
+	startBtn.Importance = widget.HighImportance
 
 	stopBtn := widget.NewButtonWithIcon("ARRETER", theme.MediaStopIcon(), func() {
 		go stopBot(appendLog, setOnline)
 	})
-	stopBtn.Importance = widget.DangerImportance // Rend le bouton rouge (selon le theme)
-
-	// === MISE EN PAGE UI ===
+	stopBtn.Importance = widget.DangerImportance
 
 	topBar := container.NewHBox(
 		statusDot,
 		statusLabel,
 		layout.NewSpacer(),
-		widget.NewLabel("Createur de Bot Discord par interface"),
+		widget.NewLabel("Gestionnaire Reel de Bot Discord"),
 	)
 
-	// Colonne de gauche (Configuration)
 	leftColBox := container.NewVBox(
-		widget.NewLabelWithStyle("1. Identifiants du Bot", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("1. Connexion au Bot", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		tokenEntry,
 		container.NewHBox(checkTokenBtn, tokenStatusLabel),
 		widget.NewSeparator(),
 
-		widget.NewLabelWithStyle("2. Informations et Ciblage", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("2. Parametres de ciblage", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		container.NewGridWithColumns(2,
 			container.NewVBox(widget.NewLabel("Nom du bot"), nameEntry),
-			container.NewVBox(widget.NewLabel("Prefixe des commandes"), prefixEntry),
+			container.NewVBox(widget.NewLabel("Prefixe general"), prefixEntry),
 		),
 		
-		widget.NewLabel("Cibler un utilisateur (Message Prive / Auto)"),
+		widget.NewLabel("Cibler un utilisateur par son pseudo"),
 		container.NewGridWithColumns(2, targetUserEntry, targetStatusLabel),
-
-		widget.NewLabel("Lien d'un Flux RSS (Optionnel)"),
-		rssEntry,
 		widget.NewSeparator(),
 
-		widget.NewLabelWithStyle("3. Apparence sur Discord", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("3. Presence", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		container.NewGridWithColumns(2,
 			container.NewVBox(widget.NewLabel("Texte d'activite"), statusTextEntry),
-			container.NewVBox(widget.NewLabel("Type d'activite"), statusTypeSelect),
+			container.NewVBox(widget.NewLabel("Type"), statusTypeSelect),
 		),
 		widget.NewSeparator(),
 
-		widget.NewLabelWithStyle("4. Fonctionnalites", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		container.NewPadded(featuresBtn), // Bouton plus gros grace au padding
+		widget.NewLabelWithStyle("4. Gestion du moteur", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		container.NewPadded(featuresBtn),
 	)
 	leftCol := container.NewVScroll(leftColBox)
 
-	// Colonne de droite (Logs & Custom Commands)
 	rightColBox := container.NewVBox(
-		widget.NewLabelWithStyle("Creer une commande personnalisee", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("Creer une commande reelle", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		container.NewGridWithColumns(2,
-			container.NewVBox(widget.NewLabel("Nom (Repere)"), cmdNameEntry),
-			container.NewVBox(widget.NewLabel("Declencheur (Texte)"), cmdTriggerEntry),
+			container.NewVBox(widget.NewLabel("Nom repere"), cmdNameEntry),
+			container.NewVBox(widget.NewLabel("Texte declencheur"), cmdTriggerEntry),
 		),
-		widget.NewLabel("Que doit repondre le bot ?"),
+		widget.NewLabel("Reponse du bot"),
 		cmdReplyEntry,
 		container.NewPadded(addCmdBtn),
 		commandsList,
 		widget.NewSeparator(),
 		
-		widget.NewLabelWithStyle("Console et Logs d'activite", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("Console d'evenements en direct", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
 		logsWidget,
 		widget.NewSeparator(),
 		container.NewGridWithColumns(2, stopBtn, startBtn),
@@ -581,7 +630,7 @@ func main() {
 	rightCol := container.NewVScroll(rightColBox)
 
 	mainSplit := container.NewHSplit(leftCol, rightCol)
-	mainSplit.Offset = 0.5 // Moitie-moitie pour l'ecran
+	mainSplit.Offset = 0.5
 
 	root := container.NewBorder(topBar, nil, nil, nil, mainSplit)
 	w.SetContent(root)
