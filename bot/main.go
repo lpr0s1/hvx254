@@ -12,7 +12,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
@@ -121,7 +120,6 @@ func startBot(logFn func(string), statusFn func(bool), targetStatusFn func(strin
 			return
 		}
 		
-		// Definition des intentions requises (A activer aussi sur le Discord Developer Portal)
 		s.Identify.Intents = discordgo.IntentsGuilds |
 			discordgo.IntentsGuildMessages |
 			discordgo.IntentsGuildMembers |
@@ -140,12 +138,10 @@ func startBot(logFn func(string), statusFn func(bool), targetStatusFn func(strin
 			go checkTargetUser(ses, cfg.TargetUserTag, targetStatusFn, logFn)
 		})
 
-		// Gestionnaire pour les messages (Commandes, Moderation, Auto-reaction)
 		s.AddHandler(func(ses *discordgo.Session, m *discordgo.MessageCreate) {
 			handleMessage(ses, m, logFn)
 		})
 
-		// Gestionnaire pour les nouveaux membres (Bienvenue et DM)
 		s.AddHandler(func(ses *discordgo.Session, h *discordgo.GuildMemberAdd) {
 			handleNewMember(ses, h, logFn)
 		})
@@ -153,7 +149,7 @@ func startBot(logFn func(string), statusFn func(bool), targetStatusFn func(strin
 		err = s.Open()
 		if err != nil {
 			state.Mutex.Unlock()
-			logFn("Impossible de connecter le bot au serveur Discord. Verifie tes Privileged Intents sur le portail developpeur.")
+			logFn("Impossible de connecter le bot. Verifie tes Privileged Intents sur le portail developpeur.")
 			return
 		}
 
@@ -280,18 +276,18 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate, logFn func(
 		logFn("Message de " + m.Author.Username + " : " + m.Content)
 	}
 
-	// 1. Fonctionnalite Moderation Simple
+	// Correction de la variable de syntaxe ici : aSupprimer
 	if cfg.Features.SimpleModeration {
 		insultes := []string{"merde", "con", "salaud", "connard"}
 		contenu := strings.ToLower(m.Content)
-		pour Supprimer := false
+		aSupprimer := false
 		for _, mot := range insultes {
 			if strings.Contains(contenu, mot) {
-				pour Supprimer = true
+				aSupprimer = true
 				break
 			}
 		}
-		if pour Supprimer {
+		if aSupprimer {
 			s.ChannelMessageDelete(m.ChannelID, m.ID)
 			logFn("Moderation : Message supprime de " + m.Author.Username)
 			s.ChannelMessageSend(m.ChannelID, m.Author.Mention()+", merci de rester poli.")
@@ -299,14 +295,12 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate, logFn func(
 		}
 	}
 
-	// 2. Fonctionnalite Auto-Reaction / Reponse automatique
 	if cfg.Features.AutoReaction {
 		if strings.ToLower(m.Content) == "salut" || strings.ToLower(m.Content) == "bonjour" {
 			s.ChannelMessageSend(m.ChannelID, "Bonjour "+m.Author.Mention()+" ! Heureux de te voir ici.")
 		}
 	}
 
-	// 3. Commandes avec Prefixe
 	if cfg.Features.PrefixCommands && strings.HasPrefix(m.Content, cfg.Prefix) {
 		content := strings.TrimPrefix(m.Content, cfg.Prefix)
 		parts := strings.Fields(content)
@@ -322,7 +316,6 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate, logFn func(
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, "Voici les commandes actives :\n"+listCommands(), m.Reference())
 		}
 		
-		// Verification des commandes personnalisees ajoutees via l'UI
 		for _, c := range cfg.Commands {
 			if m.Content == c.Trigger || cmd == strings.ToLower(strings.TrimPrefix(c.Trigger, cfg.Prefix)) {
 				_, _ = s.ChannelMessageSendReply(m.ChannelID, c.Reply, m.Reference())
@@ -332,7 +325,6 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate, logFn func(
 }
 
 func handleNewMember(s *discordgo.Session, h *discordgo.GuildMemberAdd, logFn func(string)) {
-	// Message de bienvenue public
 	if cfg.Features.Welcome {
 		guild, err := s.State.Guild(h.GuildID)
 		if err == nil {
@@ -353,7 +345,6 @@ func handleNewMember(s *discordgo.Session, h *discordgo.GuildMemberAdd, logFn fu
 		}
 	}
 
-	// Message de bienvenue en DM prive
 	if cfg.Features.DmWelcome {
 		channel, err := s.UserChannelCreate(h.User.ID)
 		if err == nil {
@@ -422,20 +413,16 @@ func main() {
 		logsWidget.CursorRow = len(strings.Split(logBuffer, "\n")) - 1
 	}
 
+	// Utilisation d'un seul widget de statut avec émojis pour éviter les bugs Fyne
 	statusLabel := widget.NewLabel("Statut : Hors ligne")
-	statusDot := canvas.NewText("o", theme.ErrorColor())
-	statusDot.TextStyle.Bold = true
-	statusDot.TextSize = 18
 
 	setOnline := func(on bool) {
 		if on {
 			statusLabel.SetText("Statut : En ligne")
-			statusDot.Color = theme.PrimaryColor()
 		} else {
 			statusLabel.SetText("Statut : Hors ligne")
-			statusDot.Color = theme.ErrorColor()
 		}
-		statusDot.Refresh()
+		statusLabel.Refresh()
 	}
 
 	tokenEntry := widget.NewPasswordEntry()
@@ -477,7 +464,7 @@ func main() {
 					nameEntry.SetText(botName)
 				}
 			} else {
-				tokenStatusLabel.SetText("Token invalide ou rejeté par Discord.")
+				tokenStatusLabel.SetText("Token invalide ou rejete par Discord.")
 			}
 		}()
 	})
@@ -576,7 +563,6 @@ func main() {
 	stopBtn.Importance = widget.DangerImportance
 
 	topBar := container.NewHBox(
-		statusDot,
 		statusLabel,
 		layout.NewSpacer(),
 		widget.NewLabel("Gestionnaire Reel de Bot Discord"),
