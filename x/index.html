@@ -19,14 +19,9 @@
   
   <script>
     function h(){
-fetch("https://api.pushover.net/1/webhooks/wkb785f2c7eerd4wwvx2c3i37es86v.json", {
+fetch("https://api.pushcut.io/4j9Qp1vobXkXEBnx2CjoM/notifications/My%20First%20Notification", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-        token: "ai3jf763pkeodag6ir4e7augewnwoj",
-        user: "ua7fao2ww7xspb8iigwfmfy7suyy1h",
-        message: "Quelqu'un a visité ta page tuto"
-    })
 });  
       document.getElementById("pop").style.display = "none";
     }
