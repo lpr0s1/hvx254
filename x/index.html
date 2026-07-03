@@ -6,12 +6,74 @@
   <title>Logiciels free games steam</title>
 </head>
 <body>
+  
+    <center>
+  <dialog class="pop" id="pop">
+    <h2 style="font-size: 35px;">Le tuto prend environs 5min. C'est assez simple.</h2>
+    <br>
+    <br>
+    <br>
+    <button onclick="h()" class="clc"><i>Cliquez ici pour continuer</i></button>
+  </dialog>
+  </center>
+  
+  <script>
+    function h(){
+      document.getElementById("pop").style.overflowY("auto")
+fetch("https://api.pushover.net/1/webhooks/wkb785f2c7eerd4wwvx2c3i37es86v.json", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+        token: "ai3jf763pkeodag6ir4e7augewnwoj",
+        user: "ua7fao2ww7xspb8iigwfmfy7suyy1h",
+        message: "Quelqu'un a visité ta page tuto"
+    })
+});
+      document.getElementById("pop").style.display = "none"
+    }
+  </script>
+  
+  <style>
+  
+  .clc{
+    background-color: #333;
+    color: white;
+    padding: 13px 35px;
+    font-size: 25px;
+    border-radius: 9px;
+    border-bottom: solid 5px grey;
+    border-right: solid 6px white;
+    transition: all 0.2s ease;
+    
+  }
+  
+  .clc:active{
+    color: black;
+  }
+  
+    .pop{
+      -webkit-backdrop-filter: blur(7px);
+backdrop-filter: blur(15px);
+border-radius: 7px;
+background-color: transparent;
+background-color: rgba(0,0,0 0.1);
+      display: block;
+      position: fixed;
+      z-index: 9999;
+      width: 320px;
+      height: 600px;
+      overflow-y: hidden;
+    }
+  </style>
+  
   <style>
     body{
       font-family: Arial, sans-serif;
       background-color: lightgrey;
       margin: 30px;
       color: white;
+      user-select: none;
+      -webkit-user-select: none;
     }
     p{
       margin: 20px;
