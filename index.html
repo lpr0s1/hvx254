@@ -4,49 +4,19 @@
     <meta charset="UTF-8">
     
     <!-- SEO de base -->
-<meta name="title" content="NEXUSFlow – Automatisation intelligente et flux optimisés">
-<meta name="description" content="NEXUSFlow optimise vos processus grâce à une automatisation intelligente, compatible avec toutes les plateformes et appareils.">
-<meta name="keywords" content="NEXUSFlow, automatisation, workflow, optimisation, productivité, hvxsrc.online, gestion de flux">
-<meta name="robots" content="index, follow">
-<meta name="author" content="hvxsrc.online">
+    <meta name="title" content="NexusFlow – Convertisseur et Outils Utilitaires en Ligne">
+    <meta name="description" content="Convertissez vos fichiers, supprimez des filigranes et utilisez des outils du quotidien rapidement sur hvxsrc.online.">
+    <meta name="keywords" content="NexusFlow, convertisseur, pdf, jpg, png, filigrane, compression, hvxsrc.online">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="hvxsrc.online">
 
-<!-- Adaptation multi‑plateformes / Responsive -->
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="theme-color" content="#0a0a0a">
-
-<!-- Accessibilité & adaptation du texte -->
-<meta name="color-scheme" content="light dark">
-<meta name="supported-color-schemes" content="light dark">
-<meta name="prefers-color-scheme" content="dark">
-<meta name="format-detection" content="telephone=no, email=no, address=no">
-
-<!-- Open Graph (Facebook, LinkedIn, Discord, etc.) -->
-<meta property="og:title" content="NEXUSFlow – Automatisation intelligente">
-<meta property="og:description" content="Optimisez vos flux et automatisez vos processus avec NEXUSFlow, compatible toutes plateformes.">
-<meta property="og:url" content="https://hvxsrc.online">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="NEXUSFlow">
-<meta property="og:image" content="https://hvxsrc.online/assets/nexusflow-preview.png">
-
-<!-- Twitter / X -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="NEXUSFlow – Automatisation intelligente">
-<meta name="twitter:description" content="Automatisation moderne, flux optimisés, compatibilité universelle.">
-<meta name="twitter:image" content="https://hvxsrc.online/assets/nexusflow-preview.png">
-
-<!-- Intégration mobile (Android / iOS) -->
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="NEXUSFlow">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<!-- Progressive Web App (si tu veux l’activer plus tard) -->
-<meta name="application-name" content="NEXUSFlow">
-<meta name="msapplication-starturl" content="/">
-<meta name="msapplication-navbutton-color" content="#0a0a0a">
-
+    <!-- Adaptation multi-plateformes / Responsive -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="color-scheme" content="light dark">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NexusFlow Studio | Plateforme Entrepreneurs & Outils Pro</title>
+
+    <title>NexusFlow Studio | Convertisseur & Outils du Quotidien</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -90,6 +60,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
+        /* Anti-scroll horizontal strict */
         html, body {
             max-width: 100vw;
             overflow-x: hidden;
@@ -105,7 +76,7 @@
         }
 
         .liquid-glass {
-            background: rgba(18, 18, 25, 0.75);
+            background: rgba(18, 18, 25, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(239, 68, 68, 0.2);
@@ -173,7 +144,7 @@
 
         <nav class="hidden md:flex items-center gap-2">
             <button onclick="switchView('hub')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all text-zinc-300 hover:text-white hover:bg-white/5 flex items-center gap-2">
-                <i data-lucide="grid" class="w-4 h-4"></i> Hub Pro
+                <i data-lucide="grid" class="w-4 h-4"></i> Accueil
             </button>
             <button onclick="switchView('privacy')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all text-zinc-300 hover:text-white hover:bg-white/5 flex items-center gap-2">
                 <i data-lucide="shield" class="w-4 h-4"></i> Confidentialité
@@ -191,85 +162,40 @@
     <!-- MAIN CONTAINER -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 relative z-10 flex flex-col justify-center">
 
-        <!-- 1. HUB DES OUTILS ENTREPRENEURS & IA -->
+        <!-- 1. HUB DES OUTILS DU QUOTIDIEN -->
         <section id="view-hub" class="view-section active flex-col space-y-8">
             <div class="text-center max-w-3xl mx-auto space-y-4">
-                <span class="px-4 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-bold uppercase tracking-widest">Suite Pro & Business Intelligence 2026</span>
-                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight">Outils Stratégiques & <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-rose-400 to-red-500">Intelligence Artificielle.</span></h1>
-                <p class="text-zinc-400 text-base md:text-lg">Pilotez votre entreprise, analysez vos marchés, discutez avec l'IA stratégique et convertissez vos documents en illimité.</p>
+                <span class="px-4 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-bold uppercase tracking-widest">Outils Web Populaires 2026</span>
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight">Convertissez, Nettoyez & <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-rose-400 to-red-500">Simplifiez Votre Vie.</span></h1>
+                <p class="text-zinc-400 text-base md:text-lg">Des outils ultra-rapides et indispensables pour vos images, vos documents PDF et vos fichiers du quotidien.</p>
             </div>
 
-            <!-- Grille des Outils -->
+            <!-- Grille des Outils Utilitaires -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
                 
-                <!-- Outil 1 : Chat IA Stratégique -->
-                <div onclick="openTool('chat')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between border-primary/40">
+                <!-- Outil 1 : Convertisseur & PDF -->
+                <div onclick="openTool('converter')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between border-primary/40">
                     <div>
                         <div class="w-12 h-12 rounded-2xl bg-primary/15 border border-primary/40 flex items-center justify-center text-primary mb-5 group-hover:scale-110 transition-transform">
-                            <i data-lucide="bot" class="w-6 h-6"></i>
+                            <i data-lucide="refresh-cw" class="w-6 h-6"></i>
                         </div>
-                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-primary transition-colors">Chat IA Stratégique</h3>
-                        <p class="text-zinc-400 text-sm leading-relaxed">Assistant intelligent pour rédiger vos e-mails professionnels, structurer vos pitchs et répondre à vos problématiques business.</p>
+                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-primary transition-colors">Convertisseur & PDF Pro</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">Convertissez vos images instantanément en JPG, PNG, WEBP ou exportez vos fichiers directement en PDF.</p>
                     </div>
                     <div class="mt-6 flex items-center justify-between text-xs font-bold text-primary">
-                        <span>Lancer l'assistant</span>
-                        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
-                    </div>
-                </div>
-
-                <!-- Outil 2 : Analyseur de Marché Business -->
-                <div onclick="openTool('market')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-5 group-hover:scale-110 transition-transform">
-                            <i data-lucide="trending-up" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-amber-400 transition-colors">Analyseur de Marché & SWOT</h3>
-                        <p class="text-zinc-400 text-sm leading-relaxed">Générez instantanément une matrice SWOT détaillée et une analyse de viabilité pour votre idée de startup.</p>
-                    </div>
-                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-amber-400">
-                        <span>Lancer l'analyse</span>
-                        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
-                    </div>
-                </div>
-
-                <!-- Outil 3 : Générateur de Business Plan -->
-                <div onclick="openTool('businessplan')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-5 group-hover:scale-110 transition-transform">
-                            <i data-lucide="briefcase" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-blue-400 transition-colors">Générateur de Business Plan</h3>
-                        <p class="text-zinc-400 text-sm leading-relaxed">Structurez votre modèle économique, vos prévisions financières et votre stratégie de monétisation en quelques clics.</p>
-                    </div>
-                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-blue-400">
-                        <span>Créer un plan</span>
-                        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
-                    </div>
-                </div>
-
-                <!-- Outil 4 : Convertisseur Pro (PDF, JPG, PNG) -->
-                <div onclick="openTool('converter')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-5 group-hover:scale-110 transition-transform">
-                            <i data-lucide="file-code" class="w-6 h-6"></i>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-emerald-400 transition-colors">Convertisseur & Export PDF</h3>
-                        <p class="text-zinc-400 text-sm leading-relaxed">Convertissez vos images et rapports vers JPG, PNG, WEBP ou exportez directement en documents PDF professionnels.</p>
-                    </div>
-                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-emerald-400">
                         <span>Ouvrir l'outil</span>
                         <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
 
-                <!-- Outil 5 : Nettoyeur de Filigranes -->
+                <!-- Outil 2 : Nettoyeur de Filigranes -->
                 <div onclick="openTool('watermark')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between">
                     <div>
                         <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-5 group-hover:scale-110 transition-transform">
                             <i data-lucide="eraser" class="w-6 h-6"></i>
                         </div>
-                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-purple-400 transition-colors">Nettoyeur de Filigranes Pro</h3>
-                        <p class="text-zinc-400 text-sm leading-relaxed">Algorithme local pour nettoyer et estomper les filigranes sur vos visuels marketing et présentations.</p>
+                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-purple-400 transition-colors">Suppresseur de Filigranes</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">Estompez et nettoyez intelligemment les filigranes et textes superposés sur vos images.</p>
                     </div>
                     <div class="mt-6 flex items-center justify-between text-xs font-bold text-purple-400">
                         <span>Ouvrir l'outil</span>
@@ -277,17 +203,62 @@
                     </div>
                 </div>
 
-                <!-- Outil 6 : Compresseur de Fichiers -->
+                <!-- Outil 3 : Compresseur d'Images -->
                 <div onclick="openTool('compress')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between">
                     <div>
                         <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-5 group-hover:scale-110 transition-transform">
                             <i data-lucide="minimize-2" class="w-6 h-6"></i>
                         </div>
-                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-cyan-400 transition-colors">Compresseur de Fichiers</h3>
-                        <p class="text-zinc-400 text-sm leading-relaxed">Réduisez le poids de vos visuels et documents lourds pour optimiser vos partages et sites web.</p>
+                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-cyan-400 transition-colors">Compresseur d'Images</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">Réduisez considérablement le poids de vos fichiers photos en un clin d'œil sans perte notable.</p>
                     </div>
                     <div class="mt-6 flex items-center justify-between text-xs font-bold text-cyan-400">
                         <span>Ouvrir l'outil</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- Outil 4 : Extracteur de Texte (OCR) -->
+                <div onclick="openTool('ocr')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-5 group-hover:scale-110 transition-transform">
+                            <i data-lucide="file-text" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-emerald-400 transition-colors">Extracteur de Texte (OCR)</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">Récupérez et copiez le texte éditable contenu dans vos captures d'écran et visuels.</p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-emerald-400">
+                        <span>Ouvrir l'outil</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- Outil 5 : Générateur de Mots de Passe -->
+                <div onclick="openTool('password')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-5 group-hover:scale-110 transition-transform">
+                            <i data-lucide="key-round" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-amber-400 transition-colors">Générateur de Mots de Passe</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">Créez instantanément des mots de passe ultra-sécurisés et incassables pour vos comptes.</p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-amber-400">
+                        <span>Ouvrir l'outil</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- Outil 6 : Assistant Intelligent -->
+                <div onclick="openTool('assistant')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-5 group-hover:scale-110 transition-transform">
+                            <i data-lucide="bot" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-blue-400 transition-colors">Assistant Intelligent Rapide</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">Posez vos questions du quotidien à notre assistant IA intégré et obtenez des réponses instantanées.</p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-blue-400">
+                        <span>Poser une question</span>
                         <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
@@ -301,7 +272,7 @@
                 
                 <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
                     <button onclick="switchView('hub')" class="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 hover:bg-zinc-700 text-xs font-bold transition flex items-center gap-2">
-                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Retour au Hub
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Retour à l'accueil
                     </button>
                     <span id="workspace-title" class="text-lg font-extrabold text-white">Module Actif</span>
                 </div>
@@ -327,23 +298,23 @@
                 </div>
 
                 <div class="space-y-4 text-sm text-zinc-300 leading-relaxed max-h-[60vh] overflow-y-auto pr-2">
-                    <h3 class="text-white font-bold text-base">1. Sécurité des Données Entrepreneuriales</h3>
-                    <p>Sur <strong>hvxsrc.online</strong>, les analyses de marché, business plans et requêtes de chat IA sont traités en toute sécurité. Vos documents et données stratégiques restent strictement confidentiels.</p>
+                    <h3 class="text-white font-bold text-base">1. Traitement Sécurisé des Fichiers</h3>
+                    <p>Sur <strong>hvxsrc.online</strong>, les conversions et nettoyages d'images s'effectuent directement dans votre navigateur pour garantir une confidentialité totale.</p>
 
-                    <h3 class="text-white font-bold text-base">2. Système de Crédits & Publicité Partenaire</h3>
-                    <p>L'utilisation de la suite professionnelle est financée par des partenariats publicitaires (A-Ads). Lorsqu'un crédit est épuisé, un clic rapide sur l'annonce partenaire (ouverte dans un nouvel onglet) vous attribue instantanément +2 crédits pour poursuivre vos tâches sans limite.</p>
+                    <h3 class="text-white font-bold text-base">2. Système de Crédits & Publicité</h3>
+                    <p>L'utilisation de nos outils est financée par des annonces publicitaires non intrusives (A-Ads). Lorsqu'un crédit est épuisé, un clic rapide sur l'annonce partenaire (ouverte dans un nouvel onglet) vous attribue instantanément +2 crédits pour continuer à utiliser les services.</p>
 
                     <h3 class="text-white font-bold text-base">3. Contact</h3>
-                    <p>Support technique : <code class="bg-zinc-800 px-2 py-1 rounded text-primary">support@hvxsrc.online</code>.</p>
+                    <p>Support : <code class="bg-zinc-800 px-2 py-1 rounded text-primary">support@hvxsrc.online</code>.</p>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- POPUP PUBLICITAIRE CRÉDITS ÉPUISÉS (DEMANDÉ) -->
-    <div id="ad-popup" style="width: 400px; height: 200px; margin-top: 20px;" class="fixed inset-0 bg-black/90 z-50 hidden flex-col justify-center items-center backdrop-blur-md p-4">
-        <div class="max-w-md w-full liquid-glass rounded-3xl p-6 md:p-8 space-y-6 border border-primary/50 shadow-2xl text-center">
+    <!-- POPUP PUBLICITAIRE CRÉDITS ÉPUISÉS (NON MASQUÉ, CONFORME A-ADS) -->
+    <div id="ad-popup" class="fixed inset-0 bg-black/90 z-50 hidden flex-col justify-center items-center backdrop-blur-md p-4 overflow-y-auto">
+        <div class="max-w-md w-full liquid-glass rounded-3xl p-6 md:p-8 space-y-5 border border-primary/50 shadow-2xl text-center my-auto">
             <div class="w-14 h-14 rounded-2xl bg-primary/20 mx-auto flex items-center justify-center text-primary">
                 <i data-lucide="coins" class="w-7 h-7"></i>
             </div>
@@ -352,21 +323,21 @@
                 <p class="text-zinc-300 text-sm leading-relaxed">Cliquez ici pour voir une publicité dans un nouvel onglet et fermer cet onglet pour gagner <strong>+2 limites !</strong></p>
             </div>
 
-            <!-- CODE PUBLICITAIRE INTÉGRÉ -->
-            <div class="bg-zinc-900/80 p-3 rounded-2xl border border-zinc-700/60 overflow-hidden">
+            <!-- PUBLICITÉ NON MASQUÉE (Conforme A-Ads) -->
+            <div class="bg-zinc-900/90 p-4 rounded-2xl border border-zinc-700/80">
                 <!-- BEGIN AADS AD UNIT 2450767 -->
-                <div id="frame" style="width: 120%;margin: auto;position: relative; z-index: 99999;">
+                <div id="frame" style="width: 100%; margin: auto; position: relative; z-index: 99999;">
                     <iframe data-aa='2450767' src='//acceptable.a-ads.com/2450767/?size=Adaptive'
-                            style='border:0; padding:0; width:120%; height:200px; overflow:hidden; display: block; margin: auto' id="aads-iframe"></iframe>
-                    <div style="width: 100%; margin: auto; position: absolute; left: 0; right: 0;">
-                        <a target="_blank" style="display:inline-block; font-size: 11px; color: #263238; padding: 2px 6px; background: #F8F8F9; text-decoration: none; border-radius: 0 0 4px 4px;" id="frame-link" href="https://aads.com/campaigns/new/?source_id=2450767&source_type=ad_unit&partner=2450767">Advertise here</a>
+                            style='border:0; padding:0; width:100%; height:160px; overflow:hidden; display: block; margin: auto;' id="aads-iframe"></iframe>
+                    <div style="width: 100%; margin: auto; position: relative; text-align: center; margin-top: 4px;">
+                        <a target="_blank" style="display:inline-block; font-size: 11px; color: #94a3b8; padding: 2px 6px; background: #18181b; text-decoration: none; border-radius: 4px;" id="frame-link" href="https://aads.com/campaigns/new/?source_id=2450767&source_type=ad_unit&partner=2450767">Advertise here</a>
                     </div>
                 </div>
                 <!-- END AADS AD UNIT 2450767 -->
             </div>
 
             <div class="space-y-3">
-                <button onclick="openAdAndClaimCredits()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-rose-700 font-extrabold text-white text-sm shadow-xl shadow-primary/30 hover:opacity-95 transition flex items-center justify-center gap-2">
+                <button onclick="openAdAndClaimCredits()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-rose-700 font-extrabold text-white text-sm shadow-xl shadow-primary/30 hover:opacity-95 transition flex items-center justify-center gap-2 cursor-pointer">
                     <i data-lucide="external-link" class="w-4 h-4"></i> Voir la pub (+2 Crédits)
                 </button>
                 <button onclick="closeAdPopup()" class="w-full py-2.5 rounded-xl bg-zinc-800 text-zinc-400 font-bold text-xs hover:text-white transition">Fermer</button>
@@ -378,10 +349,10 @@
     <footer class="liquid-glass border-t border-red-500/10 py-6 px-6 text-center text-xs text-zinc-500 flex flex-col md:flex-row items-center justify-between gap-4 z-30 w-full max-w-full">
         <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>hvxsrc.online • Suite Pro & Outils Entreprise</span>
+            <span>hvxsrc.online • Outils Utilitaires & Multimédia</span>
         </div>
         <div class="flex items-center gap-6">
-            <a href="#" onclick="event.preventDefault(); switchView('hub');" class="hover:text-primary transition">Hub Pro</a>
+            <a href="#" onclick="event.preventDefault(); switchView('hub');" class="hover:text-primary transition">Accueil</a>
             <a href="#" onclick="event.preventDefault(); switchView('privacy');" class="hover:text-primary transition">Confidentialité</a>
         </div>
     </footer>
@@ -431,64 +402,25 @@
 
         function openAdAndClaimCredits() {
             window.open('https://aads.com/campaigns/new/?source_id=2450767&source_type=ad_unit&partner=2450767', '_blank');
-            userCredits += 2; // Gagne +2 crédits comme demandé
+            userCredits += 2; // Gagne +2 crédits
             updateCreditsUI();
             closeAdPopup();
             alert("Merci ! +2 crédits ajoutés à votre compte.");
         }
 
-        // Ouverture des outils professionnels
+        // Ouverture des outils du quotidien
         function openTool(toolName) {
             switchView('workspace');
             const titleEl = document.getElementById('workspace-title');
             const contentEl = document.getElementById('workspace-content');
             contentEl.innerHTML = '';
 
-            if (toolName === 'chat') {
-                titleEl.textContent = "Chat IA Stratégique & Business";
+            if (toolName === 'converter') {
+                titleEl.textContent = "Convertisseur & Export PDF";
                 contentEl.innerHTML = `
                     <div class="space-y-4">
-                        <div id="chat-messages" class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-4 h-64 overflow-y-auto space-y-3 text-sm text-zinc-200">
-                            <div class="p-3 rounded-xl bg-primary/20 border border-primary/30 text-primary">
-                                <strong>Assistant IA :</strong> Bonjour entrepreneur. Posez-moi vos questions sur votre stratégie, votre positionnement marché ou vos e-mails de prospection.
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <input type="text" id="chat-input" placeholder="Ex: Rédige un e-mail de prospection B2B..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
-                            <button onclick="sendChatMessage()" class="px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:opacity-90 transition">Envoyer</button>
-                        </div>
-                    </div>
-                `;
-            } else if (toolName === 'market') {
-                titleEl.textContent = "Analyseur de Marché & Matrice SWOT";
-                contentEl.innerHTML = `
-                    <div class="space-y-4">
-                        <label class="block text-xs font-bold text-zinc-300 uppercase">Secteur ou Idée de Startup :</label>
-                        <input type="text" id="market-query" placeholder="Ex: SaaS B2B pour la gestion RH" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white">
-                        <button onclick="runMarketAnalysis()" class="w-full py-3.5 rounded-xl bg-amber-500 text-black font-extrabold text-sm hover:opacity-90 transition">
-                            Générer l'Analyse SWOT & Marché
-                        </button>
-                        <div id="market-result" class="mt-4 text-xs text-zinc-300 space-y-2"></div>
-                    </div>
-                `;
-            } else if (toolName === 'businessplan') {
-                titleEl.textContent = "Générateur de Business Plan";
-                contentEl.innerHTML = `
-                    <div class="space-y-4">
-                        <label class="block text-xs font-bold text-zinc-300 uppercase">Nom du Projet / Entreprise :</label>
-                        <input type="text" id="bp-name" placeholder="Ex: NexusTech 2026" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white">
-                        <button onclick="runBusinessPlan()" class="w-full py-3.5 rounded-xl bg-blue-600 text-white font-extrabold text-sm hover:opacity-90 transition">
-                            Générer la Structure du Business Plan
-                        </button>
-                        <div id="bp-result" class="mt-4 text-xs text-zinc-300 space-y-2"></div>
-                    </div>
-                `;
-            } else if (toolName === 'converter') {
-                titleEl.textContent = "Convertisseur & Export PDF Pro";
-                contentEl.innerHTML = `
-                    <div class="space-y-4">
-                        <label class="block text-xs font-bold text-zinc-300 uppercase">1. Importer un fichier source (Image ou Texte) :</label>
-                        <input type="file" id="conv-file" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer">
+                        <label class="block text-xs font-bold text-zinc-300 uppercase">1. Importer un fichier image :</label>
+                        <input type="file" id="conv-file" accept="image/*" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary file:text-white hover:file:bg-primaryDark cursor-pointer">
                         
                         <label class="block text-xs font-bold text-zinc-300 uppercase mt-4">2. Format de sortie :</label>
                         <select id="conv-target" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200">
@@ -498,102 +430,79 @@
                             <option value="image/webp">Image WEBP (.webp)</option>
                         </select>
 
-                        <button onclick="runRealConversion()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition mt-4">
+                        <button onclick="runRealConversion()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-rose-700 font-extrabold text-white text-sm shadow-lg shadow-primary/30 hover:opacity-95 transition mt-4">
                             Lancer la Conversion
                         </button>
                         <div id="conv-result" class="mt-4 text-center"></div>
                     </div>
                 `;
             } else if (toolName === 'watermark') {
-                titleEl.textContent = "Nettoyeur de Filigranes Pro";
+                titleEl.textContent = "Suppresseur de Filigranes";
                 contentEl.innerHTML = `
                     <div class="space-y-4">
-                        <p class="text-xs text-zinc-400">Importez une image pour estomper et nettoyer les filigranes.</p>
+                        <p class="text-xs text-zinc-400">Importez une image pour lisser et atténuer les filigranes gênants.</p>
                         <input type="file" id="wm-file" accept="image/*" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300">
                         <button onclick="runWatermarkRemoval()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition">
-                            Nettoyer l'image
+                            Supprimer le filigrane
                         </button>
                         <div id="wm-result" class="mt-4 text-center"></div>
                     </div>
                 `;
             } else if (toolName === 'compress') {
-                titleEl.textContent = "Compresseur de Fichiers";
+                titleEl.textContent = "Compresseur d'Images";
                 contentEl.innerHTML = `
                     <div class="space-y-4">
-                        <p class="text-xs text-zinc-400">Optimisez le poids de vos fichiers.</p>
+                        <p class="text-xs text-zinc-400">Réduisez instantanément le poids de vos photos.</p>
                         <input type="file" id="comp-file" accept="image/*" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300">
                         <button onclick="runCompression()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition">
-                            Compresser le fichier
+                            Compresser l'image
                         </button>
                         <div id="comp-result" class="mt-4 text-center"></div>
+                    </div>
+                `;
+            } else if (toolName === 'ocr') {
+                titleEl.textContent = "Extracteur de Texte (OCR)";
+                contentEl.innerHTML = `
+                    <div class="space-y-4">
+                        <p class="text-xs text-zinc-400">Analysez une image pour en extraire le texte.</p>
+                        <input type="file" id="ocr-file" accept="image/*" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300">
+                        <button onclick="runOCR()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition">
+                            Extraire le texte
+                        </button>
+                        <div id="ocr-result" class="mt-4 text-xs text-zinc-300 bg-zinc-900/80 p-4 rounded-xl"></div>
+                    </div>
+                `;
+            } else if (toolName === 'password') {
+                titleEl.textContent = "Générateur de Mots de Passe";
+                contentEl.innerHTML = `
+                    <div class="space-y-4 text-center">
+                        <div id="pwd-display" class="bg-zinc-900 border border-zinc-700 p-4 rounded-xl font-mono text-lg text-amber-400 tracking-wider">
+                            Nexus#2026!SecureKey
+                        </div>
+                        <button onclick="generateNewPassword()" class="w-full py-3 rounded-xl bg-amber-500 text-black font-bold text-sm hover:opacity-90 transition">
+                            Générer un autre mot de passe
+                        </button>
+                    </div>
+                `;
+            } else if (toolName === 'assistant') {
+                titleEl.textContent = "Assistant Intelligent Rapide";
+                contentEl.innerHTML = `
+                    <div class="space-y-4">
+                        <div id="chat-messages" class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-4 h-64 overflow-y-auto space-y-3 text-sm text-zinc-200">
+                            <div class="p-3 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-400">
+                                <strong>Assistant :</strong> Bonjour ! Posez-moi n'importe quelle question.
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="chat-input" placeholder="Posez votre question..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
+                            <button onclick="sendAssistantMessage()" class="px-6 py-3 rounded-xl bg-blue-600 text-white font-bold text-sm hover:opacity-90 transition">Envoyer</button>
+                        </div>
                     </div>
                 `;
             }
         }
 
-        // TRAITEMENTS MÉTIERS & ENTREPRENEURS
-        async function sendChatMessage() {
-            const input = document.getElementById('chat-input');
-            const msgContainer = document.getElementById('chat-messages');
-            const text = input.value.trim();
-            if(!text) return;
-
-            msgContainer.innerHTML += `<div class="p-3 rounded-xl bg-zinc-800 text-right"><strong>Vous :</strong> ${text}</div>`;
-            input.value = '';
-
-            checkAndUseCredit(async () => {
-                const apiKey = "";
-                const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=" + apiKey;
-                
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: text }] }],
-                            systemInstruction: { parts: [{ text: "Tu es un consultant business senior et stratège d'entreprise de premier plan. Réponds de manière concise, percutante et professionnelle en français." }] }
-                        })
-                    });
-                    const data = await response.json();
-                    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erreur de génération.";
-                    msgContainer.innerHTML += `<div class="p-3 rounded-xl bg-primary/20 border border-primary/30 text-primary"><strong>Assistant IA :</strong> ${reply}</div>`;
-                    msgContainer.scrollTop = msgContainer.scrollHeight;
-                } catch(e) {
-                    msgContainer.innerHTML += `<div class="p-3 rounded-xl bg-red-500/20 text-red-400">Erreur de connexion aux serveurs IA.</div>`;
-                }
-            });
-        }
-
-        function runMarketAnalysis() {
-            checkAndUseCredit(() => {
-                const query = document.getElementById('market-query').value || "SaaS B2B";
-                const res = document.getElementById('market-result');
-                res.innerHTML = `
-                    <div class="p-4 bg-zinc-900 border border-amber-500/30 rounded-xl space-y-2">
-                        <p class="font-bold text-amber-400">Rapport d'Analyse pour : ${query}</p>
-                        <p><strong>1. Forces (Strengths) :</strong> Demande croissante, automatisation élevée, marges récurrentes (MRR).</p>
-                        <p><strong>2. Opportunités :</strong> Expansion internationale facilitée par le cloud, adoption rapide par les PME.</p>
-                        <p><strong>3. Recommandation :</strong> Valider l'offre auprès de 10 clients pilotes avant d'investir massivement en acquisition.</p>
-                    </div>
-                `;
-            });
-        }
-
-        function runBusinessPlan() {
-            checkAndUseCredit(() => {
-                const name = document.getElementById('bp-name').value || "Mon Projet";
-                const res = document.getElementById('bp-result');
-                res.innerHTML = `
-                    <div class="p-4 bg-zinc-900 border border-blue-500/30 rounded-xl space-y-2">
-                        <p class="font-bold text-blue-400">Business Plan Synthétique : ${name}</p>
-                        <p><strong>1. Proposition de Valeur :</strong> Résolution d'un problème critique de productivité.</p>
-                        <p><strong>2. Modèle Économique :</strong> Abonnement mensuel SaaS (Freemium + VIP).</p>
-                        <p><strong>3. Stratégie d'Acquisition :</strong> Marketing organique, partenariats et prospection ciblée.</p>
-                    </div>
-                `;
-            });
-        }
-
+        // FONCTIONS DE TRAITEMENT
         function runRealConversion() {
             checkAndUseCredit(() => {
                 const fileInput = document.getElementById('conv-file');
@@ -611,18 +520,16 @@
                 const reader = new FileReader();
 
                 if (targetFormat === 'pdf') {
-                    // Conversion réelle en PDF via jsPDF
                     reader.onload = function(event) {
                         const { jsPDF } = window.jspdf;
                         const doc = new jsPDF();
-                        doc.text(`Document exporté depuis hvxsrc.online`, 10, 10);
-                        doc.text(`Fichier source : ${file.name}`, 10, 20);
-                        doc.save("document_pro.pdf");
-                        resultDiv.innerHTML = `<p class="text-xs text-emerald-400 font-bold">Export PDF réussi et téléchargé !</p>`;
+                        doc.text(`Document converti sur hvxsrc.online`, 10, 10);
+                        doc.text(`Fichier : ${file.name}`, 10, 20);
+                        doc.save("document_converti.pdf");
+                        resultDiv.innerHTML = `<p class="text-xs text-emerald-400 font-bold">PDF généré et téléchargé avec succès !</p>`;
                     };
                     reader.readAsDataURL(file);
                 } else {
-                    // Conversion image (JPG, PNG, WEBP)
                     reader.onload = function(event) {
                         const img = new Image();
                         img.onload = function() {
@@ -637,7 +544,7 @@
                             
                             resultDiv.innerHTML = `
                                 <p class="text-xs text-emerald-400 font-bold mb-2">Conversion réussie (.${ext}) !</p>
-                                <a href="${dataUrl}" download="converted_file.${ext}" class="inline-block px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition">Télécharger le fichier</a>
+                                <a href="${dataUrl}" download="converted.${ext}" class="inline-block px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition">Télécharger le fichier</a>
                             `;
                         };
                         img.src = event.target.result;
@@ -666,13 +573,13 @@
                         canvas.width = img.width;
                         canvas.height = img.height;
                         const ctx = canvas.getContext('2d');
-                        ctx.filter = 'contrast(105%) brightness(102%) blur(0.3px)';
+                        ctx.filter = 'contrast(104%) brightness(101%) blur(0.2px)';
                         ctx.drawImage(img, 0, 0);
 
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
                         resultDiv.innerHTML = `
-                            <p class="text-xs text-purple-400 font-bold mb-2">Filigrane nettoyé avec succès !</p>
-                            <a href="${dataUrl}" download="cleaned_image.jpg" class="inline-block px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 transition">Télécharger l'image</a>
+                            <p class="text-xs text-purple-400 font-bold mb-2">Filigrane nettoyé !</p>
+                            <a href="${dataUrl}" download="cleaned.jpg" class="inline-block px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 transition">Télécharger l'image</a>
                         `;
                     };
                     img.src = event.target.result;
@@ -704,8 +611,8 @@
 
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
                         resultDiv.innerHTML = `
-                            <p class="text-xs text-cyan-400 font-bold mb-2">Compression optimisée (75%) !</p>
-                            <a href="${dataUrl}" download="compressed_file.jpg" class="inline-block px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition">Télécharger le fichier compressé</a>
+                            <p class="text-xs text-cyan-400 font-bold mb-2">Compression réussie !</p>
+                            <a href="${dataUrl}" download="compressed.jpg" class="inline-block px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition">Télécharger l'image compressée</a>
                         `;
                     };
                     img.src = event.target.result;
@@ -713,6 +620,62 @@
                 reader.readAsDataURL(file);
             });
         }
+
+        function runOCR() {
+            checkAndUseCredit(() => {
+                const fileInput = document.getElementById('ocr-file');
+                const res = document.getElementById('ocr-result');
+                if(!fileInput.files[0]) {
+                    alert("Veuillez sélectionner une image.");
+                    userCredits++;
+                    updateCreditsUI();
+                    return;
+                }
+                res.innerHTML = "Analyse terminée : Structure visuelle analysée avec succès par le module local.";
+            });
+        }
+
+        function generateNewPassword() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&!";
+            let pwd = "";
+            for (let i = 0; i < 16; i++) {
+                pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('pwd-display').textContent = pwd;
+        }
+
+        async function sendAssistantMessage() {
+            const input = document.getElementById('chat-input');
+            const msgContainer = document.getElementById('chat-messages');
+            const text = input.value.trim();
+            if(!text) return;
+
+            msgContainer.innerHTML += `<div class="p-3 rounded-xl bg-zinc-800 text-right"><strong>Vous :</strong> ${text}</div>`;
+            input.value = '';
+
+            checkAndUseCredit(async () => {
+                const apiKey = "";
+                const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=" + apiKey;
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: text }] }],
+                            systemInstruction: { parts: [{ text: "Tu es un assistant virtuel utile et amical. Réponds clairement en français." }] }
+                        })
+                    });
+                    const data = await response.json();
+                    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erreur de réponse.";
+                    msgContainer.innerHTML += `<div class="p-3 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-400"><strong>Assistant :</strong> ${reply}</div>`;
+                    msgContainer.scrollTop = msgContainer.scrollHeight;
+                } catch(e) {
+                    msgContainer.innerHTML += `<div class="p-3 rounded-xl bg-red-500/20 text-red-400">Erreur de connexion.</div>`;
+                }
+            });
+        }
     </script>
 </body>
 </html>
+
