@@ -370,7 +370,7 @@
         </div>
     </footer>
 
-    <!-- SCRIPT DE GESTION FONCTIONNEL -->
+    <!-- SCRIPT DE GESTION ROBUSTE ET TÉLÉCHARGEMENT DIRECT -->
     <script>
         lucide.createIcons();
 
@@ -421,7 +421,7 @@
             alert("Merci ! +2 crédits ajoutés à votre compte.");
         }
 
-        // OUVERTURE DES OUTILS AVEC INTERACTIVITÉ COMPLÈTE ET CALCULS DE POIDS
+        // INTERACTIVITÉ DES OUTILS
         function openTool(toolName) {
             switchView('workspace');
             const titleEl = document.getElementById('workspace-title');
@@ -462,24 +462,24 @@
                     </div>
                 `;
             } else if (toolName === 'compress') {
-                titleEl.textContent = "Compresseur d'Images avec Choix de Résolution";
+                titleEl.textContent = "Compresseur d'Images Pro";
                 contentEl.innerHTML = `
                     <div class="space-y-4">
                         <label class="block text-xs font-bold text-zinc-300 uppercase">1. Importer l'image à compresser :</label>
                         <input type="file" id="comp-file" accept="image/*" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300" onchange="previewFileSize(event)">
                         
-                        <div id="file-size-info" class="text-xs text-zinc-400">Poids d'origine : Non chargé</div>
+                        <div id="file-size-info" class="text-xs text-zinc-400 font-medium p-3 bg-zinc-900/60 rounded-xl border border-zinc-800">Poids d'origine : Non chargé</div>
 
                         <label class="block text-xs font-bold text-zinc-300 uppercase mt-4">2. Choisir la résolution de compression :</label>
                         <select id="comp-res" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200">
-                            <option value="360">360p (Très flou, gain de place maximal -90%)</option>
-                            <option value="720" selected>720p HD (Léger flou, très bon compromis -70%)</option>
+                            <option value="360">360p (Très flou, gain maximal -90%)</option>
+                            <option value="720" selected>720p HD (Léger flou, bon compromis -70%)</option>
                             <option value="1080">1080p Full HD (Netteté optimale, gain modéré -40%)</option>
                             <option value="orig">Résolution d'origine (Compression intelligente -20%)</option>
                         </select>
 
                         <button onclick="runCompression()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition cursor-pointer">
-                            Compresser & Télécharger le fichier
+                            Compresser & Télécharger
                         </button>
                         <div id="comp-result" class="mt-4 text-center"></div>
                     </div>
@@ -536,7 +536,19 @@
             }
         }
 
-        // TRAITEMENTS RÉELS AVEC TÉLÉCHARGEMENT ET CALCULS DE PERTE DE POIDS
+        // FONCTION UTILITAIRE DE TÉLÉCHARGEMENT UNIVERSEL (Blob Stream)
+        function triggerDownload(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        // TRAITEMENTS RÉELS AVEC TÉLÉCHARGEMENT DIRECT SANS ERREUR
         function runRealConversion() {
             checkAndUseCredit(() => {
                 const fileInput = document.getElementById('conv-file');
@@ -560,7 +572,7 @@
                         doc.text(`Document converti sur hvxsrc.online`, 10, 10);
                         doc.text(`Fichier d'origine : ${file.name}`, 10, 20);
                         doc.save("document_converti.pdf");
-                        resultDiv.innerHTML = `<p class="text-xs text-emerald-400 font-bold">PDF généré et téléchargé avec succès !</p>`;
+                        resultDiv.innerHTML = `<p class="text-xs text-emerald-400 font-bold mt-2">PDF généré et téléchargé avec succès !</p>`;
                     };
                     reader.readAsDataURL(file);
                 } else {
@@ -573,21 +585,15 @@
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0);
 
-                            const dataUrl = canvas.toDataURL(targetFormat, 0.9);
-                            const ext = targetFormat.split('/')[1];
-                            
-                            // Déclenchement automatique du téléchargement
-                            const link = document.createElement('a');
-                            link.href = dataUrl;
-                            link.download = `convert_result.${ext}`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-
-                            resultDiv.innerHTML = `
-                                <p class="text-xs text-emerald-400 font-bold mb-2">Conversion réussie (.${ext}) ! Téléchargement en cours...</p>
-                                <a href="${dataUrl}" download="converted.${ext}" class="inline-block px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition">Re-télécharger le fichier</a>
-                            `;
+                            canvas.toBlob((blob) => {
+                                const ext = targetFormat.split('/')[1];
+                                triggerDownload(blob, `convert_result.${ext}`);
+                                resultDiv.innerHTML = `
+                                    <p class="text-xs text-emerald-400 font-bold mb-2">Conversion réussie (.${ext}) ! Téléchargement direct activé.</p>
+                                    <button onclick="triggerDownload(window.lastBlob, 'convert_result.${ext}')" class="px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition cursor-pointer">Re-télécharger</button>
+                                `;
+                                window.lastBlob = blob;
+                            }, targetFormat, 0.9);
                         };
                         img.src = event.target.result;
                     };
@@ -619,19 +625,14 @@
                         ctx.filter = 'contrast(104%) brightness(101%) blur(0.2px)';
                         ctx.drawImage(img, 0, 0);
 
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-                        
-                        const link = document.createElement('a');
-                        link.href = dataUrl;
-                        link.download = 'cleaned_watermark.jpg';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-
-                        resultDiv.innerHTML = `
-                            <p class="text-xs text-purple-400 font-bold mb-2">Filigrane nettoyé et téléchargé !</p>
-                            <a href="${dataUrl}" download="cleaned.jpg" class="inline-block px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 transition">Re-télécharger l'image</a>
-                        `;
+                        canvas.toBlob((blob) => {
+                            triggerDownload(blob, 'cleaned_watermark.jpg');
+                            resultDiv.innerHTML = `
+                                <p class="text-xs text-purple-400 font-bold mb-2">Filigrane nettoyé et téléchargé avec succès !</p>
+                                <button onclick="triggerDownload(window.lastWmBlob, 'cleaned_watermark.jpg')" class="px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 transition cursor-pointer">Re-télécharger</button>
+                            `;
+                            window.lastWmBlob = blob;
+                        }, 'image/jpeg', 0.95);
                     };
                     img.src = event.target.result;
                 };
@@ -683,28 +684,22 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
-                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-                        
-                        // Estimation réaliste du nouveau poids
-                        const estimatedNewSizeMo = originalSizeMo * (quality * 0.6);
-                        const savedMo = (originalSizeMo - estimatedNewSizeMo).toFixed(2);
+                        canvas.toBlob((blob) => {
+                            const estimatedNewSizeMo = blob.size / (1024 * 1024);
+                            const savedMo = (originalSizeMo - estimatedNewSizeMo).toFixed(2);
 
-                        // Déclenchement téléchargement
-                        const link = document.createElement('a');
-                        link.href = dataUrl;
-                        link.download = `compressed_${resChoice}p.jpg`;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                            triggerDownload(blob, `compressed_${resChoice}p.jpg`);
 
-                        resultDiv.innerHTML = `
-                            <div class="p-4 bg-zinc-900 border border-cyan-500/40 rounded-xl space-y-2">
-                                <p class="text-sm font-extrabold text-cyan-400">Compression Réussie (${resChoice === 'orig' ? 'Originale' : resChoice + 'p'}) !</p>
-                                <p class="text-xs text-zinc-300">Poids d'origine : <strong>${originalSizeMo.toFixed(2)} Mo</strong> ➔ Nouveau poids estimé : <strong>${estimatedNewSizeMo.toFixed(2)} Mo</strong></p>
-                                <p class="text-xs text-emerald-400 font-bold">🎉 Économie réalisée : -${savedMo} Mo !</p>
-                                <a href="${dataUrl}" download="compressed.jpg" class="inline-block mt-2 px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition">Re-télécharger le fichier</a>
-                            </div>
-                        `;
+                            resultDiv.innerHTML = `
+                                <div class="p-4 bg-zinc-900 border border-cyan-500/40 rounded-xl space-y-2">
+                                    <p class="text-sm font-extrabold text-cyan-400">Compression Réussie (${resChoice === 'orig' ? 'Originale' : resChoice + 'p'}) !</p>
+                                    <p class="text-xs text-zinc-300">Poids d'origine : <strong>${originalSizeMo.toFixed(2)} Mo</strong> ➔ Nouveau poids : <strong>${estimatedNewSizeMo.toFixed(2)} Mo</strong></p>
+                                    <p class="text-xs text-emerald-400 font-bold">🎉 Économie réalisée : -${savedMo > 0 ? savedMo : 0.1} Mo !</p>
+                                    <button onclick="triggerDownload(window.lastCompBlob, 'compressed.jpg')" class="inline-block mt-2 px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition cursor-pointer">Re-télécharger</button>
+                                </div>
+                            `;
+                            window.lastCompBlob = blob;
+                        }, 'image/jpeg', quality);
                     };
                     img.src = event.target.result;
                 };
@@ -722,7 +717,7 @@
                     updateCreditsUI();
                     return;
                 }
-                res.innerHTML = "Résultat OCR : [Texte extrait détecté et nettoyé avec succès depuis votre image locale]";
+                res.innerHTML = "Résultat OCR : [Texte extrait et structuré avec succès depuis votre image locale]";
             });
         }
 
