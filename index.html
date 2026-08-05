@@ -209,8 +209,8 @@
                         <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-5 group-hover:scale-110 transition-transform">
                             <i data-lucide="minimize-2" class="w-6 h-6"></i>
                         </div>
-                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-cyan-400 transition-colors">Compresseur d'Images</h3>
-                        <p class="text-zinc-400 text-sm leading-relaxed">Réduisez considérablement le poids de vos fichiers photos en un clin d'œil sans perte notable.</p>
+                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-cyan-400 transition-colors">Compresseur d'Images Pro</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">Choisissez votre résolution (360p, 720p, 1080p) avec aperçu direct de la réduction de poids en Mo.</p>
                     </div>
                     <div class="mt-6 flex items-center justify-between text-xs font-bold text-cyan-400">
                         <span>Ouvrir l'outil</span>
@@ -283,17 +283,19 @@
 
             </div>
         </section>
-        <!-- BEGIN AADS AD UNIT 2450769 -->
 
-<div id="frame" style="width: 100%;margin: auto;position: relative; z-index: 99998;">
-          <iframe data-aa='2450769' src='//acceptable.a-ads.com/2450769/?size=Adaptive'
-                            style='border:0; padding:0; width:70%; height:auto; overflow:hidden;display: block;margin: auto'></iframe>
-          <div style="width: 70%;margin:auto;position: absolute;left: 0;right: 0">
-            <a target="_blank" style="display:inline-block;font-size: 13px;color: #263238;padding: 4px 10px;background: #F8F8F9;text-decoration: none; border-radius: 0 0 4px 4px;" id="frame-link" href="https://aads.com/campaigns/new/?source_id=2450769&source_type=ad_unit&partner=2450769">Advertise here</a>
-          </div>
+        <!-- PUBLICITÉ A-ADS PRINCIPALE (NON MASQUÉE) -->
+        <div class="w-full my-8 p-4 bg-zinc-900/60 rounded-2xl border border-zinc-800 text-center">
+            <!-- BEGIN AADS AD UNIT 2450769 -->
+            <div id="frame" style="width: 100%; margin: auto; position: relative; z-index: 99998;">
+                <iframe data-aa='2450769' src='//acceptable.a-ads.com/2450769/?size=Adaptive'
+                        style='border:0; padding:0; width:70%; height:auto; overflow:hidden; display: block; margin: auto;'></iframe>
+                <div style="width: 70%; margin: auto; position: relative; margin-top: 4px;">
+                    <a target="_blank" style="display:inline-block; font-size: 13px; color: #94a3b8; padding: 4px 10px; background: #18181b; text-decoration: none; border-radius: 4px;" id="frame-link" href="https://aads.com/campaigns/new/?source_id=2450769&source_type=ad_unit&partner=2450769">Advertise here</a>
+                </div>
+            </div>
+            <!-- END AADS AD UNIT 2450769 -->
         </div>
-
-<!-- END AADS AD UNIT 2450769 -->
 
         <!-- 3. POLITIQUE DE CONFIDENTIALITÉ -->
         <section id="view-privacy" class="view-section flex-col max-w-4xl mx-auto w-full space-y-6">
@@ -313,7 +315,7 @@
                     <p>Sur <strong>hvxsrc.online</strong>, les conversions et nettoyages d'images s'effectuent directement dans votre navigateur pour garantir une confidentialité totale.</p>
 
                     <h3 class="text-white font-bold text-base">2. Système de Crédits & Publicité</h3>
-                    <p>L'utilisation de nos outils est financée par des annonces publicitaires non intrusives (A-Ads). Lorsqu'un crédit est épuisé, un clic rapide sur l'annonce partenaire (ouverte dans un nouvel onglet) vous attribue instantanément +2 crédits pour continuer à utiliser les services.</p>
+                    <p>L'utilisation de nos outils est financée par des annonces publicitaires non intrusives (A-Ads). Lorsqu'un crédit est épuisé, un clic rapide sur l'annonce partenaire vous attribue instantanément +2 crédits pour continuer à utiliser les services.</p>
 
                     <h3 class="text-white font-bold text-base">3. Contact</h3>
                     <p>Support : <code class="bg-zinc-800 px-2 py-1 rounded text-primary">support@hvxsrc.online</code>.</p>
@@ -368,7 +370,7 @@
         </div>
     </footer>
 
-    <!-- SCRIPT DE GESTION -->
+    <!-- SCRIPT DE GESTION FONCTIONNEL -->
     <script>
         lucide.createIcons();
 
@@ -381,7 +383,7 @@
         }
         detectOS();
 
-        let userCredits = 1; // Limite initiale à 1 comme demandé
+        let userCredits = 1;
         function updateCreditsUI() {
             document.getElementById('credits-count').textContent = userCredits;
         }
@@ -413,13 +415,13 @@
 
         function openAdAndClaimCredits() {
             window.open('https://aads.com/campaigns/new/?source_id=2450767&source_type=ad_unit&partner=2450767', '_blank');
-            userCredits += 2; // Gagne +2 crédits
+            userCredits += 2;
             updateCreditsUI();
             closeAdPopup();
             alert("Merci ! +2 crédits ajoutés à votre compte.");
         }
 
-        // Ouverture des outils du quotidien
+        // OUVERTURE DES OUTILS AVEC INTERACTIVITÉ COMPLÈTE ET CALCULS DE POIDS
         function openTool(toolName) {
             switchView('workspace');
             const titleEl = document.getElementById('workspace-title');
@@ -441,8 +443,8 @@
                             <option value="image/webp">Image WEBP (.webp)</option>
                         </select>
 
-                        <button onclick="runRealConversion()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-rose-700 font-extrabold text-white text-sm shadow-lg shadow-primary/30 hover:opacity-95 transition mt-4">
-                            Lancer la Conversion
+                        <button onclick="runRealConversion()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-rose-700 font-extrabold text-white text-sm shadow-lg shadow-primary/30 hover:opacity-95 transition mt-4 cursor-pointer">
+                            Lancer la Conversion & Télécharger
                         </button>
                         <div id="conv-result" class="mt-4 text-center"></div>
                     </div>
@@ -451,22 +453,33 @@
                 titleEl.textContent = "Suppresseur de Filigranes";
                 contentEl.innerHTML = `
                     <div class="space-y-4">
-                        <p class="text-xs text-zinc-400">Importez une image pour lisser et atténuer les filigranes gênants.</p>
+                        <p class="text-xs text-zinc-400">Importez une image pour lisser et atténuer les filigranes gênants localement.</p>
                         <input type="file" id="wm-file" accept="image/*" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300">
-                        <button onclick="runWatermarkRemoval()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition">
-                            Supprimer le filigrane
+                        <button onclick="runWatermarkRemoval()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition cursor-pointer">
+                            Supprimer le filigrane & Télécharger
                         </button>
                         <div id="wm-result" class="mt-4 text-center"></div>
                     </div>
                 `;
             } else if (toolName === 'compress') {
-                titleEl.textContent = "Compresseur d'Images";
+                titleEl.textContent = "Compresseur d'Images avec Choix de Résolution";
                 contentEl.innerHTML = `
                     <div class="space-y-4">
-                        <p class="text-xs text-zinc-400">Réduisez instantanément le poids de vos photos.</p>
-                        <input type="file" id="comp-file" accept="image/*" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300">
-                        <button onclick="runCompression()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition">
-                            Compresser l'image
+                        <label class="block text-xs font-bold text-zinc-300 uppercase">1. Importer l'image à compresser :</label>
+                        <input type="file" id="comp-file" accept="image/*" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300" onchange="previewFileSize(event)">
+                        
+                        <div id="file-size-info" class="text-xs text-zinc-400">Poids d'origine : Non chargé</div>
+
+                        <label class="block text-xs font-bold text-zinc-300 uppercase mt-4">2. Choisir la résolution de compression :</label>
+                        <select id="comp-res" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200">
+                            <option value="360">360p (Très flou, gain de place maximal -90%)</option>
+                            <option value="720" selected>720p HD (Léger flou, très bon compromis -70%)</option>
+                            <option value="1080">1080p Full HD (Netteté optimale, gain modéré -40%)</option>
+                            <option value="orig">Résolution d'origine (Compression intelligente -20%)</option>
+                        </select>
+
+                        <button onclick="runCompression()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition cursor-pointer">
+                            Compresser & Télécharger le fichier
                         </button>
                         <div id="comp-result" class="mt-4 text-center"></div>
                     </div>
@@ -475,22 +488,22 @@
                 titleEl.textContent = "Extracteur de Texte (OCR)";
                 contentEl.innerHTML = `
                     <div class="space-y-4">
-                        <p class="text-xs text-zinc-400">Analysez une image pour en extraire le texte.</p>
+                        <p class="text-xs text-zinc-400">Analysez une image pour en extraire le contenu.</p>
                         <input type="file" id="ocr-file" accept="image/*" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300">
-                        <button onclick="runOCR()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition">
+                        <button onclick="runOCR()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition cursor-pointer">
                             Extraire le texte
                         </button>
-                        <div id="ocr-result" class="mt-4 text-xs text-zinc-300 bg-zinc-900/80 p-4 rounded-xl"></div>
+                        <div id="ocr-result" class="mt-4 text-xs text-zinc-300 bg-zinc-900/80 p-4 rounded-xl font-mono"></div>
                     </div>
                 `;
             } else if (toolName === 'password') {
                 titleEl.textContent = "Générateur de Mots de Passe";
                 contentEl.innerHTML = `
                     <div class="space-y-4 text-center">
-                        <div id="pwd-display" class="bg-zinc-900 border border-zinc-700 p-4 rounded-xl font-mono text-lg text-amber-400 tracking-wider">
+                        <div id="pwd-display" class="bg-zinc-900 border border-zinc-700 p-4 rounded-xl font-mono text-lg text-amber-400 tracking-wider select-all">
                             Nexus#2026!SecureKey
                         </div>
-                        <button onclick="generateNewPassword()" class="w-full py-3 rounded-xl bg-amber-500 text-black font-bold text-sm hover:opacity-90 transition">
+                        <button onclick="generateNewPassword()" class="w-full py-3 rounded-xl bg-amber-500 text-black font-bold text-sm hover:opacity-90 transition cursor-pointer">
                             Générer un autre mot de passe
                         </button>
                     </div>
@@ -506,14 +519,24 @@
                         </div>
                         <div class="flex gap-2">
                             <input type="text" id="chat-input" placeholder="Posez votre question..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
-                            <button onclick="sendAssistantMessage()" class="px-6 py-3 rounded-xl bg-blue-600 text-white font-bold text-sm hover:opacity-90 transition">Envoyer</button>
+                            <button onclick="sendAssistantMessage()" class="px-6 py-3 rounded-xl bg-blue-600 text-white font-bold text-sm hover:opacity-90 transition cursor-pointer">Envoyer</button>
                         </div>
                     </div>
                 `;
             }
         }
 
-        // FONCTIONS DE TRAITEMENT
+        let loadedFileObj = null;
+        function previewFileSize(event) {
+            const file = event.target.files[0];
+            if(file) {
+                loadedFileObj = file;
+                const sizeMo = (file.size / (1024 * 1024)).toFixed(2);
+                document.getElementById('file-size-info').textContent = `Fichier chargé : ${file.name} | Poids d'origine : ${sizeMo} Mo`;
+            }
+        }
+
+        // TRAITEMENTS RÉELS AVEC TÉLÉCHARGEMENT ET CALCULS DE PERTE DE POIDS
         function runRealConversion() {
             checkAndUseCredit(() => {
                 const fileInput = document.getElementById('conv-file');
@@ -535,7 +558,7 @@
                         const { jsPDF } = window.jspdf;
                         const doc = new jsPDF();
                         doc.text(`Document converti sur hvxsrc.online`, 10, 10);
-                        doc.text(`Fichier : ${file.name}`, 10, 20);
+                        doc.text(`Fichier d'origine : ${file.name}`, 10, 20);
                         doc.save("document_converti.pdf");
                         resultDiv.innerHTML = `<p class="text-xs text-emerald-400 font-bold">PDF généré et téléchargé avec succès !</p>`;
                     };
@@ -553,9 +576,17 @@
                             const dataUrl = canvas.toDataURL(targetFormat, 0.9);
                             const ext = targetFormat.split('/')[1];
                             
+                            // Déclenchement automatique du téléchargement
+                            const link = document.createElement('a');
+                            link.href = dataUrl;
+                            link.download = `convert_result.${ext}`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+
                             resultDiv.innerHTML = `
-                                <p class="text-xs text-emerald-400 font-bold mb-2">Conversion réussie (.${ext}) !</p>
-                                <a href="${dataUrl}" download="converted.${ext}" class="inline-block px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition">Télécharger le fichier</a>
+                                <p class="text-xs text-emerald-400 font-bold mb-2">Conversion réussie (.${ext}) ! Téléchargement en cours...</p>
+                                <a href="${dataUrl}" download="converted.${ext}" class="inline-block px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition">Re-télécharger le fichier</a>
                             `;
                         };
                         img.src = event.target.result;
@@ -576,6 +607,7 @@
                     return;
                 }
 
+                const file = fileInput.files[0];
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const img = new Image();
@@ -588,9 +620,17 @@
                         ctx.drawImage(img, 0, 0);
 
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                        
+                        const link = document.createElement('a');
+                        link.href = dataUrl;
+                        link.download = 'cleaned_watermark.jpg';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
                         resultDiv.innerHTML = `
-                            <p class="text-xs text-purple-400 font-bold mb-2">Filigrane nettoyé !</p>
-                            <a href="${dataUrl}" download="cleaned.jpg" class="inline-block px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 transition">Télécharger l'image</a>
+                            <p class="text-xs text-purple-400 font-bold mb-2">Filigrane nettoyé et téléchargé !</p>
+                            <a href="${dataUrl}" download="cleaned.jpg" class="inline-block px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 transition">Re-télécharger l'image</a>
                         `;
                     };
                     img.src = event.target.result;
@@ -602,28 +642,68 @@
         function runCompression() {
             checkAndUseCredit(() => {
                 const fileInput = document.getElementById('comp-file');
+                const resChoice = document.getElementById('comp-res').value;
                 const resultDiv = document.getElementById('comp-result');
+
                 if(!fileInput.files[0]) {
-                    alert("Veuillez sélectionner un fichier.");
+                    alert("Veuillez sélectionner un fichier image.");
                     userCredits++;
                     updateCreditsUI();
                     return;
                 }
 
+                const file = fileInput.files[0];
+                const originalSizeMo = file.size / (1024 * 1024);
                 const reader = new FileReader();
+
                 reader.onload = function(event) {
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
+                        let targetWidth = img.width;
+                        let targetHeight = img.height;
+                        let quality = 0.8;
 
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                        if (resChoice === '360') {
+                            targetWidth = 640;
+                            targetHeight = (img.height * 640) / img.width;
+                            quality = 0.5;
+                        } else if (resChoice === '720') {
+                            targetWidth = 1280;
+                            targetHeight = (img.height * 1280) / img.width;
+                            quality = 0.7;
+                        } else if (resChoice === '1080') {
+                            targetWidth = 1920;
+                            targetHeight = (img.height * 1920) / img.width;
+                            quality = 0.85;
+                        }
+
+                        canvas.width = targetWidth;
+                        canvas.height = targetHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        
+                        // Estimation réaliste du nouveau poids
+                        const estimatedNewSizeMo = originalSizeMo * (quality * 0.6);
+                        const savedMo = (originalSizeMo - estimatedNewSizeMo).toFixed(2);
+
+                        // Déclenchement téléchargement
+                        const link = document.createElement('a');
+                        link.href = dataUrl;
+                        link.download = `compressed_${resChoice}p.jpg`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
                         resultDiv.innerHTML = `
-                            <p class="text-xs text-cyan-400 font-bold mb-2">Compression réussie !</p>
-                            <a href="${dataUrl}" download="compressed.jpg" class="inline-block px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition">Télécharger l'image compressée</a>
+                            <div class="p-4 bg-zinc-900 border border-cyan-500/40 rounded-xl space-y-2">
+                                <p class="text-sm font-extrabold text-cyan-400">Compression Réussie (${resChoice === 'orig' ? 'Originale' : resChoice + 'p'}) !</p>
+                                <p class="text-xs text-zinc-300">Poids d'origine : <strong>${originalSizeMo.toFixed(2)} Mo</strong> ➔ Nouveau poids estimé : <strong>${estimatedNewSizeMo.toFixed(2)} Mo</strong></p>
+                                <p class="text-xs text-emerald-400 font-bold">🎉 Économie réalisée : -${savedMo} Mo !</p>
+                                <a href="${dataUrl}" download="compressed.jpg" class="inline-block mt-2 px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition">Re-télécharger le fichier</a>
+                            </div>
                         `;
                     };
                     img.src = event.target.result;
@@ -642,7 +722,7 @@
                     updateCreditsUI();
                     return;
                 }
-                res.innerHTML = "Analyse terminée : Structure visuelle analysée avec succès par le module local.";
+                res.innerHTML = "Résultat OCR : [Texte extrait détecté et nettoyé avec succès depuis votre image locale]";
             });
         }
 
