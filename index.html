@@ -332,7 +332,7 @@
 
     </main>
 
-    <!-- POPUP PUBLICITAIRE CRÉDITS ÉPUISÉS (NON MASQUÉ, CONFORME A-ADS) -->
+    <!-- POPUP PUBLICITAIRE CRÉDITS ÉPUISÉS (UNITÉ A-ADS 2450772 INTÉGRÉE) -->
     <div id="ad-popup" class="fixed inset-0 bg-black/90 z-50 hidden flex-col justify-center items-center backdrop-blur-md p-4 overflow-y-auto">
         <div class="max-w-md w-full liquid-glass rounded-3xl p-6 md:p-8 space-y-5 border border-primary/50 shadow-2xl text-center my-auto">
             <div class="w-14 h-14 rounded-2xl bg-primary/20 mx-auto flex items-center justify-center text-primary">
@@ -343,17 +343,17 @@
                 <p class="text-zinc-300 text-sm leading-relaxed">Cliquez ici pour voir une publicité dans un nouvel onglet et fermer cet onglet pour gagner <strong>+2 limites !</strong></p>
             </div>
 
-            <!-- PUBLICITÉ NON MASQUÉE (Conforme A-Ads) -->
+            <!-- PUBLICITÉ MIS À JOUR (UNITÉ 2450772) -->
             <div class="bg-zinc-900/90 p-4 rounded-2xl border border-zinc-700/80">
-                <!-- BEGIN AADS AD UNIT 2450767 -->
-                <div id="frame" style="width: 100%; margin: auto; position: relative; z-index: 99999;">
-                    <iframe data-aa='2450767' src='//acceptable.a-ads.com/2450767/?size=Adaptive'
-                            style='border:0; padding:0; width:100%; height:160px; overflow:hidden; display: block; margin: auto;' id="aads-iframe"></iframe>
-                    <div style="width: 100%; margin: auto; position: relative; text-align: center; margin-top: 4px;">
-                        <a target="_blank" style="display:inline-block; font-size: 11px; color: #94a3b8; padding: 2px 6px; background: #18181b; text-decoration: none; border-radius: 4px;" id="frame-link" href="https://aads.com/campaigns/new/?source_id=2450767&source_type=ad_unit&partner=2450767">Advertise here</a>
+                <!-- BEGIN AADS AD UNIT 2450772 -->
+                <div id="frame" style="width: 100%; margin: auto; position: relative; z-index: 99998;">
+                    <iframe data-aa='2450772' src='//acceptable.a-ads.com/2450772/?size=Adaptive'
+                            style='border:0; padding:0; width:70%; height:auto; overflow:hidden; display: block; margin: auto;'></iframe>
+                    <div style="width: 70%; margin: auto; position: absolute; left: 0; right: 0;">
+                        <a target="_blank" style="display:inline-block; font-size: 13px; color: #263238; padding: 4px 10px; background: #F8F8F9; text-decoration: none; border-radius: 0 0 4px 4px;" id="frame-link" href="https://aads.com/campaigns/new/?source_id=2450772&source_type=ad_unit&partner=2450772">Advertise here</a>
                     </div>
                 </div>
-                <!-- END AADS AD UNIT 2450767 -->
+                <!-- END AADS AD UNIT 2450772 -->
             </div>
 
             <div class="space-y-3">
@@ -377,7 +377,7 @@
         </div>
     </footer>
 
-    <!-- SCRIPT DE GESTION INTÉGRANT FILE_SAVER.JS POUR TÉLÉCHARGEMENT UNIVERSEL -->
+    <!-- SCRIPT DE GESTION -->
     <script>
         lucide.createIcons();
 
@@ -421,7 +421,7 @@
         }
 
         function openAdAndClaimCredits() {
-            window.open('https://aads.com/campaigns/new/?source_id=2450767&source_type=ad_unit&partner=2450767', '_blank');
+            window.open('https://aads.com/campaigns/new/?source_id=2450772&source_type=ad_unit&partner=2450772', '_blank');
             userCredits += 2;
             updateCreditsUI();
             closeAdPopup();
@@ -543,7 +543,7 @@
             }
         }
 
-        // TÉLÉCHARGEMENT DIRECT GARANTI VIA LA BIBLIOTHÈQUE FILE-SAVER
+        // TÉLÉCHARGEMENT UNIVERSEL VIA FILE_SAVER.JS
         function runRealConversion() {
             checkAndUseCredit(() => {
                 const fileInput = document.getElementById('conv-file');
