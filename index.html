@@ -61,6 +61,9 @@
     <!-- jsPDF pour conversion réelle en PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+    <!-- Module Externe FileSaver.js pour forcer le téléchargement sur iOS / Chrome / Safari -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
     <style>
         /* Anti-scroll horizontal strict & Webkit Fixes */
         html, body {
@@ -374,7 +377,7 @@
         </div>
     </footer>
 
-    <!-- SCRIPT DE GESTION CORRIGÉ POUR iOS & WEB(KIT) -->
+    <!-- SCRIPT DE GESTION INTÉGRANT FILE_SAVER.JS POUR TÉLÉCHARGEMENT UNIVERSEL -->
     <script>
         lucide.createIcons();
 
@@ -540,44 +543,7 @@
             }
         }
 
-        // SYSTÈME DE TÉLÉCHARGEMENT UNIVERSEL ULTRA-ROBUSTE POUR iOS / CHROME / SAFARI
-        function universalDownload(blob, filename) {
-            const url = URL.createObjectURL(blob);
-            
-            // Détection spécifique iOS / Safari mobile pour éviter le blocage des balises a[download]
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            
-            if (isIOS) {
-                // Sur iOS, ouverture directe dans un nouvel onglet pour sauvegarde manuelle
-                window.open(url, '_blank');
-            } else {
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = filename;
-                
-                // Injection explicite WebKit
-                a.setAttribute('target', '_blank');
-                
-                document.body.appendChild(a);
-                
-                // Simulation de clic sécurisée multi-plateforme
-                try {
-                    a.click();
-                } catch (e) {
-                    const evt = document.createEvent('MouseEvents');
-                    evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-                    a.dispatchEvent(evt);
-                }
-                
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                }, 1000);
-            }
-        }
-
-        // TRAITEMENTS AVEC DÉCLENCHEMENT DE TÉLÉCHARGEMENT ADAPTÉ WEB(KIT)
+        // TÉLÉCHARGEMENT DIRECT GARANTI VIA LA BIBLIOTHÈQUE FILE-SAVER
         function runRealConversion() {
             checkAndUseCredit(() => {
                 const fileInput = document.getElementById('conv-file');
@@ -600,7 +566,8 @@
                         const doc = new jsPDF();
                         doc.text(`Document converti sur hvxsrc.online`, 10, 10);
                         doc.text(`Fichier d'origine : ${file.name}`, 10, 20);
-                        doc.save("document_converti.pdf");
+                        const pdfOutput = doc.output('blob');
+                        saveAs(pdfOutput, "document_converti.pdf");
                         resultDiv.innerHTML = `<p class="text-xs text-emerald-400 font-bold mt-2">PDF généré et téléchargé avec succès !</p>`;
                     };
                     reader.readAsDataURL(file);
@@ -616,10 +583,10 @@
 
                             canvas.toBlob((blob) => {
                                 const ext = targetFormat.split('/')[1];
-                                universalDownload(blob, `convert_result.${ext}`);
+                                saveAs(blob, `convert_result.${ext}`);
                                 resultDiv.innerHTML = `
-                                    <p class="text-xs text-emerald-400 font-bold mb-2">Conversion réussie (.${ext}) ! Téléchargement déclenché.</p>
-                                    <button onclick="universalDownload(window.lastBlob, 'convert_result.${ext}')" class="px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition cursor-pointer">Re-télécharger</button>
+                                    <p class="text-xs text-emerald-400 font-bold mb-2">Conversion réussie (.${ext}) ! Téléchargement direct activé.</p>
+                                    <button onclick="saveAs(window.lastBlob, 'convert_result.${ext}')" class="px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition cursor-pointer">Re-télécharger</button>
                                 `;
                                 window.lastBlob = blob;
                             }, targetFormat, 0.9);
@@ -655,10 +622,10 @@
                         ctx.drawImage(img, 0, 0);
 
                         canvas.toBlob((blob) => {
-                            universalDownload(blob, 'cleaned_watermark.jpg');
+                            saveAs(blob, 'cleaned_watermark.jpg');
                             resultDiv.innerHTML = `
                                 <p class="text-xs text-purple-400 font-bold mb-2">Filigrane nettoyé et téléchargé !</p>
-                                <button onclick="universalDownload(window.lastWmBlob, 'cleaned_watermark.jpg')" class="px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 transition cursor-pointer">Re-télécharger</button>
+                                <button onclick="saveAs(window.lastWmBlob, 'cleaned_watermark.jpg')" class="px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 transition cursor-pointer">Re-télécharger</button>
                             `;
                             window.lastWmBlob = blob;
                         }, 'image/jpeg', 0.95);
@@ -717,14 +684,14 @@
                             const estimatedNewSizeMo = blob.size / (1024 * 1024);
                             const savedMo = (originalSizeMo - estimatedNewSizeMo).toFixed(2);
 
-                            universalDownload(blob, `compressed_${resChoice}p.jpg`);
+                            saveAs(blob, `compressed_${resChoice}p.jpg`);
 
                             resultDiv.innerHTML = `
                                 <div class="p-4 bg-zinc-900 border border-cyan-500/40 rounded-xl space-y-2">
                                     <p class="text-sm font-extrabold text-cyan-400">Compression Réussie (${resChoice === 'orig' ? 'Originale' : resChoice + 'p'}) !</p>
                                     <p class="text-xs text-zinc-300">Poids d'origine : <strong>${originalSizeMo.toFixed(2)} Mo</strong> ➔ Nouveau poids : <strong>${estimatedNewSizeMo.toFixed(2)} Mo</strong></p>
                                     <p class="text-xs text-emerald-400 font-bold">🎉 Économie réalisée : -${savedMo > 0 ? savedMo : 0.1} Mo !</p>
-                                    <button onclick="universalDownload(window.lastCompBlob, 'compressed.jpg')" class="inline-block mt-2 px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition cursor-pointer">Re-télécharger</button>
+                                    <button onclick="saveAs(window.lastCompBlob, 'compressed.jpg')" class="inline-block mt-2 px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition cursor-pointer">Re-télécharger</button>
                                 </div>
                             `;
                             window.lastCompBlob = blob;
