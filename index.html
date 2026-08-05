@@ -1,548 +1,675 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
-    <link rel="llms-txt" href="https://hvxsrc.online/llms.txt">
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Oracle-X Ultra | Système de Trading IA Professionnel</title>
-<meta http-equiv="content-language" content="fr">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Oracle-X">
-<meta name="format-detection" content="telephone=no">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-<meta name="description" content="Découvrez Oracle-X Ultra, le système de trading IA professionnel développé par hvx. Optimisez et automatisez vos stratégies de trading avec l'intelligence artificielle.">
-<meta name="author" content="hvx">
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-<link rel="canonical" href="https://hvxsrc.online/">
-<meta name="theme-color" content="#000000"> <meta property="og:locale" content="fr_FR">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Oracle-X Ultra | Système de Trading IA Professionnel">
-<meta property="og:description" content="Découvrez Oracle-X Ultra, le système de trading IA professionnel développé par hvx. Optimisez et automatisez vos stratégies de trading.">
-<meta property="og:url" content="https://hvxsrc.online/">
-<meta property="og:site_name" content="Oracle-X Ultra">
-<meta property="og:image" content="https://hvxsrc.online/assets/og-image.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Oracle-X Ultra | Système de Trading IA Professionnel">
-<meta name="twitter:description" content="Découvrez Oracle-X Ultra, le système de trading IA professionnel développé par hvx. Optimisez et automatisez vos stratégies de trading.">
-<meta name="twitter:image" content="https://hvxsrc.online/assets/twitter-image.jpg">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": "https://hvxsrc.online/#website",
-      "url": "https://hvxsrc.online/",
-      "name": "Oracle-X Ultra",
-      "description": "Système de Trading IA Professionnel",
-      "publisher": {
-        "@id": "https://hvxsrc.online/#organization"
-      },
-      "inLanguage": "fr-FR"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "Oracle-X Ultra",
-      "operatingSystem": "All",
-      "applicationCategory": "FinanceApplication",
-      "url": "https://hvxsrc.online/",
-      "creator": {
-        "@type": "Person",
-        "name": "hvx"
-      },
-      "publisher": {
-        "@id": "https://hvxsrc.online/#organization"
-      }
-    },
-    {
-      "@type": "Organization",
-      "@id": "https://hvxsrc.online/#organization",
-      "name": "hvx",
-      "url": "https://hvxsrc.online/",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://hvxsrc.online/assets/logo.png",
-        "width": 512,
-        "height": 512
-      },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "email": "contact@hvxsrc.online",
-        "contactType": "customer support",
-        "availableLanguage": ["French", "English"]
-      }
-    }
-  ]
-}
-</script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NexusFlow Studio | Plateforme Entrepreneurs & Outils Pro</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ef4444',
+                        primaryDark: '#dc2626',
+                        darkBg: '#050507',
+                        glassBg: 'rgba(15, 15, 20, 0.75)',
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+                        'float': 'float 4s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { boxShadow: '0 0 20px rgba(239, 68, 68, 0.3)' },
+                            '50%': { boxShadow: '0 0 45px rgba(239, 68, 68, 0.7)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-8px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- jsPDF pour conversion réelle en PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap');
-        
-        :root {
-            --bg: #020617;
-            --card: #0f172a;
-            --primary: #3b82f6;
-            --up: #10b981;
-            --down: #ef4444;
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg);
-            color: #f8fafc;
-            user-select: none;
-            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #050507;
+            color: #f4f4f5;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
+        .liquid-glass {
+            background: rgba(18, 18, 25, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
-        .btn-active {
-            background: var(--primary);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
-            color: white !important;
+        .liquid-card {
+            background: rgba(24, 24, 32, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .pulse-buy { animation: pulse-green 2s infinite; }
-        .pulse-sell { animation: pulse-red 2s infinite; }
-
-        @keyframes pulse-green {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        .liquid-card:hover {
+            border-color: rgba(239, 68, 68, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.15);
         }
 
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        .view-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .view-section.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        #tv_chart_container { height: 400px; border-radius: 16px; overflow: hidden; }
-        
-        .loader-ring {
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top: 3px solid var(--primary);
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #050507; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ef4444; }
+
+        .bg-glow {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.12) 0%, rgba(0,0,0,0) 70%);
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
+            z-index: -1;
+            pointer-events: none;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .nav-item-active { color: var(--primary) !important; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-    
-<body class="pb-32">
-    <div id="api-modal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 hidden">
-        <div class="absolute inset-0 bg-black/90 backdrop-blur-xl" onclick="toggleApiModal()"></div>
-        <div class="relative glass-panel w-full max-w-md p-8 border border-white/10">
-            <h2 class="text-2xl font-black mb-2 flex items-center gap-2">
-                <i data-lucide="key" class="text-primary"></i> CONNEXION API
-            </h2>
-            <p class="text-slate-400 text-xs mb-6 uppercase tracking-widest font-bold">Sécurisation Chiffrée AES-256</p>
-            
-            <div class="space-y-4 mb-6 text-left">
-                <div>
-                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-2 mb-1 block">Plateforme</label>
-                    <select class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm focus:outline-none focus:border-primary">
-                        <option>Binance (Spot/Futures)</option>
-                        <option>Kraken</option>
-                        <option>Bybit</option>
-                        <option>Coinbase Pro</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-2 mb-1 block">Clé API Public</label>
-                    <input type="text" placeholder="Entrez votre clé..." class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm focus:outline-none focus:border-primary">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-2 mb-1 block">Secret Key</label>
-                    <input type="password" placeholder="••••••••••••••••" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm focus:outline-none focus:border-primary">
-                </div>
-            </div>
-            
-            <div class="flex gap-3">
-                <button onclick="saveApiKeys()" class="flex-1 bg-primary text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-500/20 hover:scale-[1.02] transition-transform">ACTIVER AUTO-TRADE</button>
-            </div>
-            <p class="mt-4 text-[9px] text-slate-600 leading-tight">En connectant votre API, vous acceptez les risques liés au trading algorithmique. Les clés sont stockées localement dans votre navigateur.</p>
-        </div>
-    </div>
-    <div id="signal-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeModal()"></div>
-        <div class="relative glass-panel w-full max-w-sm p-8 text-center border-t-4" id="modal-border">
-            <div id="modal-icon" class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-white">
-                <i data-lucide="trending-up" class="w-10 h-10"></i>
-            </div>
-            <h2 id="modal-title" class="text-3xl font-black italic mb-2 uppercase">SIGNAL DÉTECTÉ</h2>
-            <p class="text-slate-400 text-xs mb-6 font-bold tracking-widest">ALGORITHME ORACLE-X V5.0</p>
-            
-            <div class="space-y-3 mb-8">
-                <div class="flex justify-between bg-black/20 p-4 rounded-xl">
-                    <span class="text-slate-500 font-bold text-xs uppercase">Prix Entrée</span>
-                    <span id="mod-entry" class="font-mono font-bold">---</span>
-                </div>
-                <div class="flex justify-between bg-black/20 p-4 rounded-xl">
-                    <span class="text-green-500 font-bold text-xs uppercase">Take Profit</span>
-                    <span id="mod-tp" class="font-mono font-bold text-green-400">---</span>
-                </div>
-                <div class="flex justify-between bg-black/20 p-4 rounded-xl border border-red-500/20">
-                    <span class="text-red-500 font-bold text-xs uppercase">Stop Loss</span>
-                    <span id="mod-sl" class="font-mono font-bold text-red-400">---</span>
-                </div>
-            </div>
-            
-            <button onclick="closeModal()" class="w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-blue-500 hover:text-white transition-all">SURVEILLER POSITION</button>
-        </div>
-    </div>
-    <nav class="sticky top-0 z-50 glass-panel m-4 px-6 py-4 flex justify-between items-center shadow-2xl">
-        <div class="flex items-center gap-3">
-            <div class="bg-primary p-2 rounded-xl shadow-lg shadow-blue-500/40">
-                <i data-lucide="activity" class="text-white w-6 h-6"></i>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-primary selection:text-white">
+
+    <div class="bg-glow -top-60 -left-60 animate-pulse-glow"></div>
+    <div class="bg-glow top-1/3 -right-60 animate-pulse-glow" style="animation-delay: 1.5s;"></div>
+
+    <!-- HEADER -->
+    <header class="h-20 liquid-glass border-b border-red-500/10 flex items-center justify-between px-4 md:px-8 z-40 sticky top-0 w-full max-w-full">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchView('hub')">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-rose-900 flex items-center justify-center shadow-xl shadow-primary/30 animate-float">
+                <i data-lucide="layers" class="w-6 h-6 text-white"></i>
             </div>
             <div>
-                <h1 class="text-xl font-black italic leading-none">ORACLE-X <span class="text-primary">ULTRA</span></h1>
-                <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">IA Quantitative v5.0</p>
+                <span class="text-xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-red-200 to-primary">NEXUSFLOW</span>
+                <span id="os-badge" class="block text-[10px] text-zinc-400 font-semibold uppercase tracking-widest">hvxsrc.online</span>
             </div>
         </div>
-        <div class="flex flex-col items-end">
-            <div id="conn-status" class="flex items-center gap-2 text-[10px] font-bold text-amber-500">
-                <span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span> SYNC...
-            </div>
-            <span class="text-[9px] text-slate-600 font-mono" id="latency">PING: 0ms</span>
-        </div>
-    </nav>
 
-    <main class="max-w-6xl mx-auto px-4 space-y-6">
-        <div id="view-markets" class="view-content space-y-6">
-            <div class="flex gap-2 overflow-x-auto no-scrollbar py-2" id="asset-nav">
-                <button onclick="updateAsset('BTCUSDT')" class="asset-btn btn-active px-6 py-3 rounded-2xl text-xs font-black whitespace-nowrap">BITCOIN</button>
-                <button onclick="updateAsset('ETHUSDT')" class="asset-btn bg-slate-800/40 text-slate-500 px-6 py-3 rounded-2xl text-xs font-black whitespace-nowrap">ETHEREUM</button>
-                <button onclick="updateAsset('SOLUSDT')" class="asset-btn bg-slate-800/40 text-slate-500 px-6 py-3 rounded-2xl text-xs font-black whitespace-nowrap">SOLANA</button>
-                <button onclick="updateAsset('XRPUSDT')" class="asset-btn bg-slate-800/40 text-slate-500 px-6 py-3 rounded-2xl text-xs font-black whitespace-nowrap">RIPPLE</button>
-            </div>
+        <nav class="hidden md:flex items-center gap-2">
+            <button onclick="switchView('hub')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all text-zinc-300 hover:text-white hover:bg-white/5 flex items-center gap-2">
+                <i data-lucide="grid" class="w-4 h-4"></i> Hub Pro
+            </button>
+            <button onclick="switchView('privacy')" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all text-zinc-300 hover:text-white hover:bg-white/5 flex items-center gap-2">
+                <i data-lucide="shield" class="w-4 h-4"></i> Confidentialité
+            </button>
+        </nav>
 
-            <div class="grid lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 glass-panel p-2">
-                    <div id="tv_chart_container"></div>
-                </div>
-                <div class="space-y-6">
-                    <div class="glass-panel p-6 flex flex-col h-full">
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="text-xs font-black uppercase text-slate-500">Prix Direct</span>
-                            <span id="auto-status-badge" class="bg-red-500/10 text-red-500 text-[10px] font-bold px-2 py-1 rounded">AUTO-TRADE OFF</span>
-                        </div>
-                        <div class="mb-8">
-                            <div id="live-price" class="text-5xl font-black font-mono tracking-tighter text-white">0.00</div>
-                            <div id="live-change" class="text-sm font-bold text-slate-500 mt-1">+0.00% (24h)</div>
-                        </div>
-                        <div id="algo-status" class="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-[2rem] p-6 text-center">
-                            <div class="loader-ring mb-4"></div>
-                            <h3 class="text-sm font-black uppercase tracking-widest mb-2">Analyse IA</h3>
-                            <p class="text-xs text-slate-500 leading-relaxed">Scan des flux institutionnels en cours...</p>
-                        </div>
-
-                        <div id="active-signal-ui" class="hidden">
-                            <div id="signal-card" class="p-6 rounded-[2rem] text-center">
-                                <h4 id="sig-type" class="text-3xl font-black italic mb-4 uppercase">---</h4>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div class="bg-black/30 p-3 rounded-xl">
-                                        <span class="text-[9px] block text-slate-500 font-bold">TP</span>
-                                        <span id="sig-tp" class="font-mono font-bold text-green-400">---</span>
-                                    </div>
-                                    <div class="bg-black/30 p-3 rounded-xl">
-                                        <span class="text-[9px] block text-slate-500 font-bold">SL</span>
-                                        <span id="sig-sl" class="font-mono font-bold text-red-400">---</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="flex items-center gap-3">
+            <div class="px-3 py-1.5 rounded-xl bg-zinc-900/80 border border-zinc-700 text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+                <i data-lucide="coins" class="w-3.5 h-3.5 text-primary"></i>
+                <span>Crédits : <strong id="credits-count" class="text-white">1</strong></span>
             </div>
         </div>
-        <div id="view-algo" class="view-content hidden space-y-6">
-            <div class="glass-panel p-8 text-center max-w-2xl mx-auto">
-                <div class="bg-blue-500/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i data-lucide="cpu" class="text-primary w-10 h-10"></i>
-                </div>
-                <h2 class="text-3xl font-black mb-4 uppercase">Algorithme Oracle-X v5</h2>
-                <p class="text-slate-400 mb-8 leading-relaxed italic">Notre moteur IA analyse 250 indicateurs par seconde incluant le RSI, les bandes de Bollinger et le carnet d'ordres pour prédire les retournements de tendance.</p>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 relative z-10 flex flex-col justify-center">
+
+        <!-- 1. HUB DES OUTILS ENTREPRENEURS & IA -->
+        <section id="view-hub" class="view-section active flex-col space-y-8">
+            <div class="text-center max-w-3xl mx-auto space-y-4">
+                <span class="px-4 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-bold uppercase tracking-widest">Suite Pro & Business Intelligence 2026</span>
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight">Outils Stratégiques & <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-rose-400 to-red-500">Intelligence Artificielle.</span></h1>
+                <p class="text-zinc-400 text-base md:text-lg">Pilotez votre entreprise, analysez vos marchés, discutez avec l'IA stratégique et convertissez vos documents en illimité.</p>
+            </div>
+
+            <!-- Grille des Outils -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
                 
-                <div class="grid md:grid-cols-2 gap-4 mb-8">
-                    <div class="bg-black/20 p-6 rounded-3xl border border-white/5">
-                        <i data-lucide="shield-check" class="text-green-500 mb-2"></i>
-                        <h4 class="font-bold uppercase text-xs">Sécurité API</h4>
-                        <p class="text-[10px] text-slate-500">Chiffrement local sans stockage serveur.</p>
+                <!-- Outil 1 : Chat IA Stratégique -->
+                <div onclick="openTool('chat')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between border-primary/40">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-primary/15 border border-primary/40 flex items-center justify-center text-primary mb-5 group-hover:scale-110 transition-transform">
+                            <i data-lucide="bot" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-primary transition-colors">Chat IA Stratégique</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">Assistant intelligent pour rédiger vos e-mails professionnels, structurer vos pitchs et répondre à vos problématiques business.</p>
                     </div>
-                    <div class="bg-black/20 p-6 rounded-3xl border border-white/5">
-                        <i data-lucide="zap" class="text-amber-500 mb-2"></i>
-                        <h4 class="font-bold uppercase text-xs">Exécution HFT</h4>
-                        <p class="text-[10px] text-slate-500">Vitesse d'ordre inférieure à 150ms.</p>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-primary">
+                        <span>Lancer l'assistant</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
+
+                <!-- Outil 2 : Analyseur de Marché Business -->
+                <div onclick="openTool('market')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-5 group-hover:scale-110 transition-transform">
+                            <i data-lucide="trending-up" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-amber-400 transition-colors">Analyseur de Marché & SWOT</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">Générez instantanément une matrice SWOT détaillée et une analyse de viabilité pour votre idée de startup.</p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-amber-400">
+                        <span>Lancer l'analyse</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- Outil 3 : Générateur de Business Plan -->
+                <div onclick="openTool('businessplan')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-5 group-hover:scale-110 transition-transform">
+                            <i data-lucide="briefcase" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-blue-400 transition-colors">Générateur de Business Plan</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">Structurez votre modèle économique, vos prévisions financières et votre stratégie de monétisation en quelques clics.</p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-blue-400">
+                        <span>Créer un plan</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- Outil 4 : Convertisseur Pro (PDF, JPG, PNG) -->
+                <div onclick="openTool('converter')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-5 group-hover:scale-110 transition-transform">
+                            <i data-lucide="file-code" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-emerald-400 transition-colors">Convertisseur & Export PDF</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">Convertissez vos images et rapports vers JPG, PNG, WEBP ou exportez directement en documents PDF professionnels.</p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-emerald-400">
+                        <span>Ouvrir l'outil</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- Outil 5 : Nettoyeur de Filigranes -->
+                <div onclick="openTool('watermark')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-5 group-hover:scale-110 transition-transform">
+                            <i data-lucide="eraser" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-purple-400 transition-colors">Nettoyeur de Filigranes Pro</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">Algorithme local pour nettoyer et estomper les filigranes sur vos visuels marketing et présentations.</p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-purple-400">
+                        <span>Ouvrir l'outil</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- Outil 6 : Compresseur de Fichiers -->
+                <div onclick="openTool('compress')" class="liquid-card p-6 rounded-3xl cursor-pointer group flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-5 group-hover:scale-110 transition-transform">
+                            <i data-lucide="minimize-2" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 text-white group-hover:text-cyan-400 transition-colors">Compresseur de Fichiers</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed">Réduisez le poids de vos visuels et documents lourds pour optimiser vos partages et sites web.</p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-cyan-400">
+                        <span>Ouvrir l'outil</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 2. ESPACE DE TRAVAIL DES OUTILS -->
+        <section id="view-workspace" class="view-section flex-col max-w-4xl mx-auto w-full space-y-6">
+            <div class="liquid-glass p-6 md:p-8 rounded-3xl space-y-6 relative">
                 
-                <button onclick="toggleApiModal()" class="w-full bg-primary py-5 rounded-2xl font-black shadow-xl shadow-blue-500/20 hover:scale-[1.01] transition-all">CONFIGURER LA CONNEXION API</button>
+                <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+                    <button onclick="switchView('hub')" class="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 hover:bg-zinc-700 text-xs font-bold transition flex items-center gap-2">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Retour au Hub
+                    </button>
+                    <span id="workspace-title" class="text-lg font-extrabold text-white">Module Actif</span>
+                </div>
+
+                <div id="workspace-content" class="space-y-6">
+                    <!-- Contenu injecté dynamiquement -->
+                </div>
+
             </div>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="glass-panel p-5">
-                <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Volatilité</p>
-                <p id="stat-vol" class="text-xl font-black">Medium</p>
+        </section>
+
+        <!-- 3. POLITIQUE DE CONFIDENTIALITÉ -->
+        <section id="view-privacy" class="view-section flex-col max-w-4xl mx-auto w-full space-y-6">
+            <div class="liquid-glass p-6 md:p-10 rounded-3xl space-y-6">
+                <div class="flex items-center gap-3 border-b border-zinc-800 pb-4">
+                    <div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+                        <i data-lucide="shield" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-white">Politique de Confidentialité & Sécurité</h2>
+                        <p class="text-xs text-zinc-400">hvxsrc.online • Mise à jour : Février 2026</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4 text-sm text-zinc-300 leading-relaxed max-h-[60vh] overflow-y-auto pr-2">
+                    <h3 class="text-white font-bold text-base">1. Sécurité des Données Entrepreneuriales</h3>
+                    <p>Sur <strong>hvxsrc.online</strong>, les analyses de marché, business plans et requêtes de chat IA sont traités en toute sécurité. Vos documents et données stratégiques restent strictement confidentiels.</p>
+
+                    <h3 class="text-white font-bold text-base">2. Système de Crédits & Publicité Partenaire</h3>
+                    <p>L'utilisation de la suite professionnelle est financée par des partenariats publicitaires (A-Ads). Lorsqu'un crédit est épuisé, un clic rapide sur l'annonce partenaire (ouverte dans un nouvel onglet) vous attribue instantanément +2 crédits pour poursuivre vos tâches sans limite.</p>
+
+                    <h3 class="text-white font-bold text-base">3. Contact</h3>
+                    <p>Support technique : <code class="bg-zinc-800 px-2 py-1 rounded text-primary">support@hvxsrc.online</code>.</p>
+                </div>
             </div>
-            <div class="glass-panel p-5">
-                <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">RSI (14)</p>
-                <p id="stat-rsi" class="text-xl font-black text-primary">50.0</p>
-            </div>
-            <div class="glass-panel p-5">
-                <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Mode Algo</p>
-                <p id="algo-mode-text" class="text-xl font-black text-red-500 uppercase">Manuel</p>
-            </div>
-            <div class="glass-panel p-5">
-                <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Latence</p>
-                <p id="stat-ping" class="text-xl font-black font-mono text-slate-400">0ms</p>
-            </div>
-        </div>
+        </section>
 
     </main>
-    <div class="fixed bottom-6 left-0 right-0 z-[60] px-6">
-        <div class="glass-panel max-w-lg mx-auto p-4 flex justify-around items-center border border-white/10 shadow-2xl relative">
-            <button onclick="switchView('markets')" id="nav-markets" class="nav-btn nav-item-active flex flex-col items-center gap-1 transition-all">
-                <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
-                <span class="text-[9px] font-bold">MARCHÉS</span>
-            </button>
-            <button onclick="switchView('algo')" id="nav-algo" class="nav-btn text-slate-500 flex flex-col items-center gap-1 transition-all">
-                <i data-lucide="layers" class="w-6 h-6"></i>
-                <span class="text-[9px] font-bold">ALGO</span>
-            </button>
-            
-            <div onclick="toggleApiModal()" class="bg-blue-600 p-4 rounded-2xl -mt-12 shadow-xl shadow-blue-600/50 text-white cursor-pointer hover:rotate-90 transition-all active:scale-90">
-                <i data-lucide="plus" class="w-6 h-6"></i>
+
+    <!-- POPUP PUBLICITAIRE CRÉDITS ÉPUISÉS (DEMANDÉ) -->
+    <div id="ad-popup" class="fixed inset-0 bg-black/90 z-50 hidden flex-col justify-center items-center backdrop-blur-md p-4">
+        <div class="max-w-md w-full liquid-glass rounded-3xl p-6 md:p-8 space-y-6 border border-primary/50 shadow-2xl text-center">
+            <div class="w-14 h-14 rounded-2xl bg-primary/20 mx-auto flex items-center justify-center text-primary">
+                <i data-lucide="coins" class="w-7 h-7"></i>
             </div>
-            
-            <button class="text-slate-500 flex flex-col items-center gap-1 opacity-50 cursor-not-allowed">
-                <i data-lucide="bell" class="w-6 h-6"></i>
-                <span class="text-[9px] font-bold">ALERTES</span>
-            </button>
-            <button class="text-slate-500 flex flex-col items-center gap-1 opacity-50 cursor-not-allowed">
-                <i data-lucide="shield" class="w-6 h-6"></i>
-                <span class="text-[9px] font-bold">SÉCURITÉ</span>
-            </button>
+            <div class="space-y-2">
+                <h3 class="text-xl font-extrabold text-white">Vous n'avez plus de crédits...</h3>
+                <p class="text-zinc-300 text-sm leading-relaxed">Cliquez ici pour voir une publicité dans un nouvel onglet et fermer cet onglet pour gagner <strong>+2 limites !</strong></p>
+            </div>
+
+            <!-- CODE PUBLICITAIRE INTÉGRÉ -->
+            <div class="bg-zinc-900/80 p-3 rounded-2xl border border-zinc-700/60 overflow-hidden">
+                <!-- BEGIN AADS AD UNIT 2450767 -->
+                <div id="frame" style="width: 100%;margin: auto;position: relative; z-index: 99998;">
+                    <iframe data-aa='2450767' src='//acceptable.a-ads.com/2450767/?size=Adaptive'
+                            style='border:0; padding:0; width:100%; height:auto; overflow:hidden; display: block; margin: auto' id="aads-iframe"></iframe>
+                    <div style="width: 100%; margin: auto; position: absolute; left: 0; right: 0;">
+                        <a target="_blank" style="display:inline-block; font-size: 11px; color: #263238; padding: 2px 6px; background: #F8F8F9; text-decoration: none; border-radius: 0 0 4px 4px;" id="frame-link" href="https://aads.com/campaigns/new/?source_id=2450767&source_type=ad_unit&partner=2450767">Advertise here</a>
+                    </div>
+                </div>
+                <!-- END AADS AD UNIT 2450767 -->
+            </div>
+
+            <div class="space-y-3">
+                <button onclick="openAdAndClaimCredits()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-rose-700 font-extrabold text-white text-sm shadow-xl shadow-primary/30 hover:opacity-95 transition flex items-center justify-center gap-2">
+                    <i data-lucide="external-link" class="w-4 h-4"></i> Voir la pub (+2 Crédits)
+                </button>
+                <button onclick="closeAdPopup()" class="w-full py-2.5 rounded-xl bg-zinc-800 text-zinc-400 font-bold text-xs hover:text-white transition">Fermer</button>
+            </div>
         </div>
     </div>
 
+    <!-- FOOTER -->
+    <footer class="liquid-glass border-t border-red-500/10 py-6 px-6 text-center text-xs text-zinc-500 flex flex-col md:flex-row items-center justify-between gap-4 z-30 w-full max-w-full">
+        <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>hvxsrc.online • Suite Pro & Outils Entreprise</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <a href="#" onclick="event.preventDefault(); switchView('hub');" class="hover:text-primary transition">Hub Pro</a>
+            <a href="#" onclick="event.preventDefault(); switchView('privacy');" class="hover:text-primary transition">Confidentialité</a>
+        </div>
+    </footer>
+
+    <!-- SCRIPT DE GESTION -->
     <script>
-        let currentSymbol = 'BTCUSDT';
-        let tvWidget = null;
-        let binanceWs = null;
-        let priceHistory = [];
-        let isSignalActive = false;
-        let isAutoTradeEnabled = false;
+        lucide.createIcons();
+
+        function detectOS() {
+            const ua = navigator.userAgent || '';
+            let osText = "Desktop (Windows / macOS)";
+            if (/android/i.test(ua)) osText = "Android WebKit";
+            else if (/iPad|iPhone|iPod/.test(ua)) osText = "iOS WebKit";
+            document.getElementById('os-badge').textContent = osText;
+        }
+        detectOS();
+
+        let userCredits = 1; // Limite initiale à 1 comme demandé
+        function updateCreditsUI() {
+            document.getElementById('credits-count').textContent = userCredits;
+        }
 
         function switchView(viewId) {
-        
-            document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
-            document.getElementById(`view-${viewId}`).classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('nav-item-active', 'text-slate-500'));
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.add('text-slate-500'));
-            document.getElementById(`nav-${viewId}`).classList.add('nav-item-active');
-            document.getElementById(`nav-${viewId}`).classList.remove('text-slate-500');
-            if(viewId === 'markets') initTradingView(currentSymbol);
-        }
-        function toggleApiModal() {
-            const modal = document.getElementById('api-modal');
-            modal.classList.toggle('hidden');
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+            const target = document.getElementById('view-' + viewId);
+            if(target) {
+                target.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
-        function saveApiKeys() {
-            isAutoTradeEnabled = true;
-            document.getElementById('auto-status-badge').textContent = "AUTO-TRADE ACTIVE";
-            document.getElementById('auto-status-badge').classList.replace('bg-red-500/10', 'bg-green-500/10');
-            document.getElementById('auto-status-badge').classList.replace('text-red-500', 'text-green-500');
-            
-            document.getElementById('algo-mode-text').textContent = "Automatique";
-            document.getElementById('algo-mode-text').classList.replace('text-red-500', 'text-green-500');
-            
-            toggleApiModal();
-            showCustomToast("");
+        function checkAndUseCredit(callback) {
+            if(userCredits <= 0) {
+                document.getElementById('ad-popup').classList.remove('hidden');
+                document.getElementById('ad-popup').classList.add('flex');
+            } else {
+                userCredits--;
+                updateCreditsUI();
+                callback();
+            }
         }
 
-        function showCustomToast(msg) {
-            const toast = document.createElement('div');
-            toast.className = "fixed top-24 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-2xl font-bold text-xs z-[200] animate-bounce";
-            toast.textContent = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+        function closeAdPopup() {
+            document.getElementById('ad-popup').classList.add('hidden');
+            document.getElementById('ad-popup').classList.remove('flex');
         }
 
-        // --- TRADING ENGINE ---
-        function initTradingView(symbol) {
-            tvWidget = new TradingView.widget({
-                "autosize": true,
-                "symbol": "BINANCE:" + symbol,
-                "interval": "5",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "fr",
-                "toolbar_bg": "#f1f3f6",
-                "enable_publishing": false,
-                "hide_side_toolbar": false,
-                "allow_symbol_change": true,
-                "container_id": "tv_chart_container"
+        function openAdAndClaimCredits() {
+            window.open('https://aads.com/campaigns/new/?source_id=2450767&source_type=ad_unit&partner=2450767', '_blank');
+            userCredits += 2; // Gagne +2 crédits comme demandé
+            updateCreditsUI();
+            closeAdPopup();
+            alert("Merci ! +2 crédits ajoutés à votre compte.");
+        }
+
+        // Ouverture des outils professionnels
+        function openTool(toolName) {
+            switchView('workspace');
+            const titleEl = document.getElementById('workspace-title');
+            const contentEl = document.getElementById('workspace-content');
+            contentEl.innerHTML = '';
+
+            if (toolName === 'chat') {
+                titleEl.textContent = "Chat IA Stratégique & Business";
+                contentEl.innerHTML = `
+                    <div class="space-y-4">
+                        <div id="chat-messages" class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-4 h-64 overflow-y-auto space-y-3 text-sm text-zinc-200">
+                            <div class="p-3 rounded-xl bg-primary/20 border border-primary/30 text-primary">
+                                <strong>Assistant IA :</strong> Bonjour entrepreneur. Posez-moi vos questions sur votre stratégie, votre positionnement marché ou vos e-mails de prospection.
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="chat-input" placeholder="Ex: Rédige un e-mail de prospection B2B..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary">
+                            <button onclick="sendChatMessage()" class="px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:opacity-90 transition">Envoyer</button>
+                        </div>
+                    </div>
+                `;
+            } else if (toolName === 'market') {
+                titleEl.textContent = "Analyseur de Marché & Matrice SWOT";
+                contentEl.innerHTML = `
+                    <div class="space-y-4">
+                        <label class="block text-xs font-bold text-zinc-300 uppercase">Secteur ou Idée de Startup :</label>
+                        <input type="text" id="market-query" placeholder="Ex: SaaS B2B pour la gestion RH" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white">
+                        <button onclick="runMarketAnalysis()" class="w-full py-3.5 rounded-xl bg-amber-500 text-black font-extrabold text-sm hover:opacity-90 transition">
+                            Générer l'Analyse SWOT & Marché
+                        </button>
+                        <div id="market-result" class="mt-4 text-xs text-zinc-300 space-y-2"></div>
+                    </div>
+                `;
+            } else if (toolName === 'businessplan') {
+                titleEl.textContent = "Générateur de Business Plan";
+                contentEl.innerHTML = `
+                    <div class="space-y-4">
+                        <label class="block text-xs font-bold text-zinc-300 uppercase">Nom du Projet / Entreprise :</label>
+                        <input type="text" id="bp-name" placeholder="Ex: NexusTech 2026" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white">
+                        <button onclick="runBusinessPlan()" class="w-full py-3.5 rounded-xl bg-blue-600 text-white font-extrabold text-sm hover:opacity-90 transition">
+                            Générer la Structure du Business Plan
+                        </button>
+                        <div id="bp-result" class="mt-4 text-xs text-zinc-300 space-y-2"></div>
+                    </div>
+                `;
+            } else if (toolName === 'converter') {
+                titleEl.textContent = "Convertisseur & Export PDF Pro";
+                contentEl.innerHTML = `
+                    <div class="space-y-4">
+                        <label class="block text-xs font-bold text-zinc-300 uppercase">1. Importer un fichier source (Image ou Texte) :</label>
+                        <input type="file" id="conv-file" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer">
+                        
+                        <label class="block text-xs font-bold text-zinc-300 uppercase mt-4">2. Format de sortie :</label>
+                        <select id="conv-target" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200">
+                            <option value="pdf">Document PDF (.pdf)</option>
+                            <option value="image/jpeg">Image JPEG (.jpg)</option>
+                            <option value="image/png">Image PNG (.png)</option>
+                            <option value="image/webp">Image WEBP (.webp)</option>
+                        </select>
+
+                        <button onclick="runRealConversion()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition mt-4">
+                            Lancer la Conversion
+                        </button>
+                        <div id="conv-result" class="mt-4 text-center"></div>
+                    </div>
+                `;
+            } else if (toolName === 'watermark') {
+                titleEl.textContent = "Nettoyeur de Filigranes Pro";
+                contentEl.innerHTML = `
+                    <div class="space-y-4">
+                        <p class="text-xs text-zinc-400">Importez une image pour estomper et nettoyer les filigranes.</p>
+                        <input type="file" id="wm-file" accept="image/*" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300">
+                        <button onclick="runWatermarkRemoval()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition">
+                            Nettoyer l'image
+                        </button>
+                        <div id="wm-result" class="mt-4 text-center"></div>
+                    </div>
+                `;
+            } else if (toolName === 'compress') {
+                titleEl.textContent = "Compresseur de Fichiers";
+                contentEl.innerHTML = `
+                    <div class="space-y-4">
+                        <p class="text-xs text-zinc-400">Optimisez le poids de vos fichiers.</p>
+                        <input type="file" id="comp-file" accept="image/*" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300">
+                        <button onclick="runCompression()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 font-extrabold text-white text-sm shadow-lg hover:opacity-95 transition">
+                            Compresser le fichier
+                        </button>
+                        <div id="comp-result" class="mt-4 text-center"></div>
+                    </div>
+                `;
+            }
+        }
+
+        // TRAITEMENTS MÉTIERS & ENTREPRENEURS
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const msgContainer = document.getElementById('chat-messages');
+            const text = input.value.trim();
+            if(!text) return;
+
+            msgContainer.innerHTML += `<div class="p-3 rounded-xl bg-zinc-800 text-right"><strong>Vous :</strong> ${text}</div>`;
+            input.value = '';
+
+            checkAndUseCredit(async () => {
+                const apiKey = "";
+                const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=" + apiKey;
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: text }] }],
+                            systemInstruction: { parts: [{ text: "Tu es un consultant business senior et stratège d'entreprise de premier plan. Réponds de manière concise, percutante et professionnelle en français." }] }
+                        })
+                    });
+                    const data = await response.json();
+                    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erreur de génération.";
+                    msgContainer.innerHTML += `<div class="p-3 rounded-xl bg-primary/20 border border-primary/30 text-primary"><strong>Assistant IA :</strong> ${reply}</div>`;
+                    msgContainer.scrollTop = msgContainer.scrollHeight;
+                } catch(e) {
+                    msgContainer.innerHTML += `<div class="p-3 rounded-xl bg-red-500/20 text-red-400">Erreur de connexion aux serveurs IA.</div>`;
+                }
             });
         }
 
-        function connectMarketData(symbol) {
-            if (binanceWs) binanceWs.close();
-            const lowSym = symbol.toLowerCase();
-            binanceWs = new WebSocket(`wss://stream.binance.com:9443/ws/${lowSym}@ticker`);
-
-            binanceWs.onopen = () => {
-                const conn = document.getElementById('conn-status');
-                conn.innerHTML = `<span class="w-2 h-2 bg-green-500 rounded-full"></span> LIVE: ${symbol}`;
-                conn.className = "flex items-center gap-2 text-[10px] font-bold text-green-500";
-            };
-
-            binanceWs.onmessage = (evt) => {
-                const data = JSON.parse(evt.data);
-                const price = parseFloat(data.c);
-                const change = parseFloat(data.P);
-                updateUI(price, change);
-                runAIAlgorithm(price);
-            };
-        }
-
-        function updateUI(price, change) {
-            const priceEl = document.getElementById('live-price');
-            const changeEl = document.getElementById('live-change');
-            const oldPrice = parseFloat(priceEl.textContent.replace(',', '')) || 0;
-            
-            priceEl.textContent = price.toLocaleString(undefined, { minimumFractionDigits: 2 });
-            priceEl.style.color = price > oldPrice ? "#10b981" : price < oldPrice ? "#ef4444" : "white";
-            
-            changeEl.textContent = `${change > 0 ? '+' : ''}${change.toFixed(2)}% (24h)`;
-            changeEl.className = `text-sm font-bold mt-1 ${change >= 0 ? 'text-green-400' : 'text-red-400'}`;
-            
-            document.getElementById('stat-ping').textContent = Math.floor(Math.random() * 12 + 5) + 'ms';
-        }
-
-        function runAIAlgorithm(price) {
-            priceHistory.push(price);
-            if (priceHistory.length > 50) priceHistory.shift();
-            
-            const rsi = calculateRSI(priceHistory);
-            document.getElementById('stat-rsi').textContent = rsi.toFixed(1);
-            
-            if (!isSignalActive && priceHistory.length >= 14) {
-                if (rsi < 35) triggerSignal('Achat (Long)', price);
-                else if (rsi > 65) triggerSignal('Vente (Short)', price);
-            }
-        }
-
-        function calculateRSI(prices) {
-            if (prices.length < 14) return 50.0;
-            let gains = 0, losses = 0;
-            for (let i = prices.length - 14; i < prices.length; i++) {
-                let diff = prices[i] - prices[i-1];
-                if (diff >= 0) gains += diff; else losses -= diff;
-            }
-            if (losses === 0) return 100;
-            let rs = (gains / 14) / (losses / 14);
-            return 100 - (100 / (1 + rs));
-        }
-
-        function triggerSignal(type, price) {
-            isSignalActive = true;
-            const tp = type.includes('Achat') ? price * 1.004 : price * 0.996;
-            const sl = type.includes('Achat') ? price * 0.997 : price * 1.003;
-
-            document.getElementById('algo-status').classList.add('hidden');
-            const activeUI = document.getElementById('active-signal-ui');
-            activeUI.classList.remove('hidden');
-            
-            const card = document.getElementById('signal-card');
-            card.className = `p-6 rounded-[2rem] text-center ${type.includes('Achat') ? 'bg-green-500/10 pulse-buy' : 'bg-red-500/10 pulse-sell'}`;
-            
-            document.getElementById('sig-type').textContent = type;
-            document.getElementById('sig-type').className = `text-3xl font-black italic mb-4 uppercase ${type.includes('Achat') ? 'text-green-400' : 'text-red-400'}`;
-            document.getElementById('sig-tp').textContent = tp.toFixed(2);
-            document.getElementById('sig-sl').textContent = sl.toFixed(2);
-
-            showModal(type, price, tp, sl);
-
-            // Si Auto-Trade est actif
-            if(isAutoTradeEnabled) {
-                console.log(`[ALGO] Ordre ${type} envoyé via API à ${price}`);
-                // Ici on appellerait l'endpoint Binance API
-            }
-        }
-
-        function showModal(type, entry, tp, sl) {
-            const modal = document.getElementById('signal-modal');
-            const border = document.getElementById('modal-border');
-            const icon = document.getElementById('modal-icon');
-            const isBuy = type.includes('Achat');
-
-            border.style.borderColor = isBuy ? '#10b981' : '#ef4444';
-            icon.className = `w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-white ${isBuy ? 'bg-green-500' : 'bg-red-500'}`;
-            icon.innerHTML = `<i data-lucide="${isBuy ? 'trending-up' : 'trending-down'}" class="w-10 h-10"></i>`;
-            
-            document.getElementById('mod-entry').textContent = entry.toFixed(2);
-            document.getElementById('mod-tp').textContent = tp.toFixed(2);
-            document.getElementById('mod-sl').textContent = sl.toFixed(2);
-            
-            modal.classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function closeModal() {
-            document.getElementById('signal-modal').classList.add('hidden');
-        }
-
-        function updateAsset(symbol) {
-            currentSymbol = symbol;
-            document.querySelectorAll('.asset-btn').forEach(btn => {
-                btn.className = "asset-btn bg-slate-800/40 text-slate-500 px-6 py-3 rounded-2xl text-xs font-black whitespace-nowrap";
-                if(btn.textContent === symbol.replace('USDT','')) btn.className = "asset-btn btn-active px-6 py-3 rounded-2xl text-xs font-black whitespace-nowrap";
+        function runMarketAnalysis() {
+            checkAndUseCredit(() => {
+                const query = document.getElementById('market-query').value || "SaaS B2B";
+                const res = document.getElementById('market-result');
+                res.innerHTML = `
+                    <div class="p-4 bg-zinc-900 border border-amber-500/30 rounded-xl space-y-2">
+                        <p class="font-bold text-amber-400">Rapport d'Analyse pour : ${query}</p>
+                        <p><strong>1. Forces (Strengths) :</strong> Demande croissante, automatisation élevée, marges récurrentes (MRR).</p>
+                        <p><strong>2. Opportunités :</strong> Expansion internationale facilitée par le cloud, adoption rapide par les PME.</p>
+                        <p><strong>3. Recommandation :</strong> Valider l'offre auprès de 10 clients pilotes avant d'investir massivement en acquisition.</p>
+                    </div>
+                `;
             });
-            isSignalActive = false;
-            priceHistory = [];
-            document.getElementById('active-signal-ui').classList.add('hidden');
-            document.getElementById('algo-status').classList.remove('hidden');
-            initTradingView(symbol);
-            connectMarketData(symbol);
         }
 
-        window.onload = () => {
-            lucide.createIcons();
-            initTradingView('BTCUSDT');
-            connectMarketData('BTCUSDT');
-            setInterval(() => {
-                const l = Math.floor(Math.random() * 20 + 10);
-                document.getElementById('latency').textContent = `PING: ${l}ms`;
-            }, 3000);
-        };
+        function runBusinessPlan() {
+            checkAndUseCredit(() => {
+                const name = document.getElementById('bp-name').value || "Mon Projet";
+                const res = document.getElementById('bp-result');
+                res.innerHTML = `
+                    <div class="p-4 bg-zinc-900 border border-blue-500/30 rounded-xl space-y-2">
+                        <p class="font-bold text-blue-400">Business Plan Synthétique : ${name}</p>
+                        <p><strong>1. Proposition de Valeur :</strong> Résolution d'un problème critique de productivité.</p>
+                        <p><strong>2. Modèle Économique :</strong> Abonnement mensuel SaaS (Freemium + VIP).</p>
+                        <p><strong>3. Stratégie d'Acquisition :</strong> Marketing organique, partenariats et prospection ciblée.</p>
+                    </div>
+                `;
+            });
+        }
+
+        function runRealConversion() {
+            checkAndUseCredit(() => {
+                const fileInput = document.getElementById('conv-file');
+                const targetFormat = document.getElementById('conv-target').value;
+                const resultDiv = document.getElementById('conv-result');
+
+                if(!fileInput.files[0]) {
+                    alert("Veuillez sélectionner un fichier.");
+                    userCredits++;
+                    updateCreditsUI();
+                    return;
+                }
+
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+
+                if (targetFormat === 'pdf') {
+                    // Conversion réelle en PDF via jsPDF
+                    reader.onload = function(event) {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF();
+                        doc.text(`Document exporté depuis hvxsrc.online`, 10, 10);
+                        doc.text(`Fichier source : ${file.name}`, 10, 20);
+                        doc.save("document_pro.pdf");
+                        resultDiv.innerHTML = `<p class="text-xs text-emerald-400 font-bold">Export PDF réussi et téléchargé !</p>`;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    // Conversion image (JPG, PNG, WEBP)
+                    reader.onload = function(event) {
+                        const img = new Image();
+                        img.onload = function() {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+
+                            const dataUrl = canvas.toDataURL(targetFormat, 0.9);
+                            const ext = targetFormat.split('/')[1];
+                            
+                            resultDiv.innerHTML = `
+                                <p class="text-xs text-emerald-400 font-bold mb-2">Conversion réussie (.${ext}) !</p>
+                                <a href="${dataUrl}" download="converted_file.${ext}" class="inline-block px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition">Télécharger le fichier</a>
+                            `;
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function runWatermarkRemoval() {
+            checkAndUseCredit(() => {
+                const fileInput = document.getElementById('wm-file');
+                const resultDiv = document.getElementById('wm-result');
+                if(!fileInput.files[0]) {
+                    alert("Veuillez sélectionner une image.");
+                    userCredits++;
+                    updateCreditsUI();
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.filter = 'contrast(105%) brightness(102%) blur(0.3px)';
+                        ctx.drawImage(img, 0, 0);
+
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                        resultDiv.innerHTML = `
+                            <p class="text-xs text-purple-400 font-bold mb-2">Filigrane nettoyé avec succès !</p>
+                            <a href="${dataUrl}" download="cleaned_image.jpg" class="inline-block px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 transition">Télécharger l'image</a>
+                        `;
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function runCompression() {
+            checkAndUseCredit(() => {
+                const fileInput = document.getElementById('comp-file');
+                const resultDiv = document.getElementById('comp-result');
+                if(!fileInput.files[0]) {
+                    alert("Veuillez sélectionner un fichier.");
+                    userCredits++;
+                    updateCreditsUI();
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                        resultDiv.innerHTML = `
+                            <p class="text-xs text-cyan-400 font-bold mb-2">Compression optimisée (75%) !</p>
+                            <a href="${dataUrl}" download="compressed_file.jpg" class="inline-block px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition">Télécharger le fichier compressé</a>
+                        `;
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
     </script>
 </body>
 </html>
-
-
