@@ -61,9 +61,6 @@
     <!-- jsPDF pour conversion réelle en PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <!-- Module Externe FileSaver.js pour forcer le téléchargement sur iOS / Chrome / Safari -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
     <style>
         /* Anti-scroll horizontal strict & Webkit Fixes */
         html, body {
@@ -377,7 +374,7 @@
         </div>
     </footer>
 
-    <!-- SCRIPT DE GESTION -->
+    <!-- SCRIPT DE GESTION AVEC ALERTE iOS & TÉLÉCHARGEMENT STANDARD -->
     <script>
         lucide.createIcons();
 
@@ -543,7 +540,23 @@
             }
         }
 
-        // TÉLÉCHARGEMENT UNIVERSEL VIA FILE_SAVER.JS
+        // TÉLÉCHARGEMENT NORMAL AVEC ALERTE iOS / CHROME MOBILE
+        function standardDownload(url, filename) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // Alerte utile si l'utilisateur est sur iOS / Chrome mobile
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (isIOS) {
+                alert("Si le téléchargement ne démarre pas sur votre iPhone/iPad, veuillez ouvrir hvxsrc.online directement depuis le navigateur Safari.");
+            }
+        }
+
+        // TRAITEMENTS RÉELS AVEC TÉLÉCHARGEMENT NORMAL
         function runRealConversion() {
             checkAndUseCredit(() => {
                 const fileInput = document.getElementById('conv-file');
@@ -566,8 +579,7 @@
                         const doc = new jsPDF();
                         doc.text(`Document converti sur hvxsrc.online`, 10, 10);
                         doc.text(`Fichier d'origine : ${file.name}`, 10, 20);
-                        const pdfOutput = doc.output('blob');
-                        saveAs(pdfOutput, "document_converti.pdf");
+                        doc.save("document_converti.pdf");
                         resultDiv.innerHTML = `<p class="text-xs text-emerald-400 font-bold mt-2">PDF généré et téléchargé avec succès !</p>`;
                     };
                     reader.readAsDataURL(file);
@@ -581,15 +593,15 @@
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0);
 
-                            canvas.toBlob((blob) => {
-                                const ext = targetFormat.split('/')[1];
-                                saveAs(blob, `convert_result.${ext}`);
-                                resultDiv.innerHTML = `
-                                    <p class="text-xs text-emerald-400 font-bold mb-2">Conversion réussie (.${ext}) ! Téléchargement direct activé.</p>
-                                    <button onclick="saveAs(window.lastBlob, 'convert_result.${ext}')" class="px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition cursor-pointer">Re-télécharger</button>
-                                `;
-                                window.lastBlob = blob;
-                            }, targetFormat, 0.9);
+                            const dataUrl = canvas.toDataURL(targetFormat, 0.9);
+                            const ext = targetFormat.split('/')[1];
+                            
+                            standardDownload(dataUrl, `convert_result.${ext}`);
+
+                            resultDiv.innerHTML = `
+                                <p class="text-xs text-emerald-400 font-bold mb-2">Conversion réussie (.${ext}) !</p>
+                                <a href="${dataUrl}" download="converted.${ext}" class="inline-block px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition cursor-pointer">Télécharger à nouveau</a>
+                            `;
                         };
                         img.src = event.target.result;
                     };
@@ -621,14 +633,13 @@
                         ctx.filter = 'contrast(104%) brightness(101%) blur(0.2px)';
                         ctx.drawImage(img, 0, 0);
 
-                        canvas.toBlob((blob) => {
-                            saveAs(blob, 'cleaned_watermark.jpg');
-                            resultDiv.innerHTML = `
-                                <p class="text-xs text-purple-400 font-bold mb-2">Filigrane nettoyé et téléchargé !</p>
-                                <button onclick="saveAs(window.lastWmBlob, 'cleaned_watermark.jpg')" class="px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 transition cursor-pointer">Re-télécharger</button>
-                            `;
-                            window.lastWmBlob = blob;
-                        }, 'image/jpeg', 0.95);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                        standardDownload(dataUrl, 'cleaned_watermark.jpg');
+
+                        resultDiv.innerHTML = `
+                            <p class="text-xs text-purple-400 font-bold mb-2">Filigrane nettoyé !</p>
+                            <a href="${dataUrl}" download="cleaned.jpg" class="inline-block px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 transition cursor-pointer">Télécharger à nouveau</a>
+                        `;
                     };
                     img.src = event.target.result;
                 };
@@ -680,22 +691,22 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
-                        canvas.toBlob((blob) => {
-                            const estimatedNewSizeMo = blob.size / (1024 * 1024);
-                            const savedMo = (originalSizeMo - estimatedNewSizeMo).toFixed(2);
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        
+                        // Estimation réaliste du nouveau poids
+                        const estimatedNewSizeMo = originalSizeMo * (quality * 0.6);
+                        const savedMo = (originalSizeMo - estimatedNewSizeMo).toFixed(2);
 
-                            saveAs(blob, `compressed_${resChoice}p.jpg`);
+                        standardDownload(dataUrl, `compressed_${resChoice}p.jpg`);
 
-                            resultDiv.innerHTML = `
-                                <div class="p-4 bg-zinc-900 border border-cyan-500/40 rounded-xl space-y-2">
-                                    <p class="text-sm font-extrabold text-cyan-400">Compression Réussie (${resChoice === 'orig' ? 'Originale' : resChoice + 'p'}) !</p>
-                                    <p class="text-xs text-zinc-300">Poids d'origine : <strong>${originalSizeMo.toFixed(2)} Mo</strong> ➔ Nouveau poids : <strong>${estimatedNewSizeMo.toFixed(2)} Mo</strong></p>
-                                    <p class="text-xs text-emerald-400 font-bold">🎉 Économie réalisée : -${savedMo > 0 ? savedMo : 0.1} Mo !</p>
-                                    <button onclick="saveAs(window.lastCompBlob, 'compressed.jpg')" class="inline-block mt-2 px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition cursor-pointer">Re-télécharger</button>
-                                </div>
-                            `;
-                            window.lastCompBlob = blob;
-                        }, 'image/jpeg', quality);
+                        resultDiv.innerHTML = `
+                            <div class="p-4 bg-zinc-900 border border-cyan-500/40 rounded-xl space-y-2">
+                                <p class="text-sm font-extrabold text-cyan-400">Compression Réussie (${resChoice === 'orig' ? 'Originale' : resChoice + 'p'}) !</p>
+                                <p class="text-xs text-zinc-300">Poids d'origine : <strong>${originalSizeMo.toFixed(2)} Mo</strong> ➔ Nouveau poids : <strong>${estimatedNewSizeMo.toFixed(2)} Mo</strong></p>
+                                <p class="text-xs text-emerald-400 font-bold">🎉 Économie réalisée : -${savedMo > 0 ? savedMo : 0.1} Mo !</p>
+                                <a href="${dataUrl}" download="compressed.jpg" class="inline-block mt-2 px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition cursor-pointer">Télécharger à nouveau</a>
+                            </div>
+                        `;
                     };
                     img.src = event.target.result;
                 };
