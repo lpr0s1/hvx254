@@ -555,163 +555,226 @@
             }
         }
 
-        // TRAITEMENTS RÉELS AVEC TÉLÉCHARGEMENT NORMAL
-        function runRealConversion() {
-            checkAndUseCredit(() => {
-                const fileInput = document.getElementById('conv-file');
-                const targetFormat = document.getElementById('conv-target').value;
-                const resultDiv = document.getElementById('conv-result');
+      /* ============================================================
+   FONCTION DE TÉLÉCHARGEMENT COMPATIBLE iOS / ANDROID / DESKTOP
+   ============================================================ */
 
-                if(!fileInput.files[0]) {
-                    alert("Veuillez sélectionner un fichier.");
-                    userCredits++;
-                    updateCreditsUI();
-                    return;
-                }
+function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+}
 
-                const file = fileInput.files[0];
-                const reader = new FileReader();
+function standardDownload(dataUrl, filename) {
+    // Convertir DataURL → Blob
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) u8arr[n] = bstr.charCodeAt(n);
+    const blob = new Blob([u8arr], { type: mime });
 
-                if (targetFormat === 'pdf') {
-                    reader.onload = function(event) {
-                        const { jsPDF } = window.jspdf;
-                        const doc = new jsPDF();
-                        doc.text(`Document converti sur hvxsrc.online`, 10, 10);
-                        doc.text(`Fichier d'origine : ${file.name}`, 10, 20);
-                        doc.save("document_converti.pdf");
-                        resultDiv.innerHTML = `<p class="text-xs text-emerald-400 font-bold mt-2">PDF généré et téléchargé avec succès !</p>`;
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    reader.onload = function(event) {
-                        const img = new Image();
-                        img.onload = function() {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0);
+    // iOS Safari / Chrome iOS : méthode spéciale
+    if (isIOS()) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const url = e.target.result;
+            const popup = window.open(url, '_blank');
+            if (!popup) alert("Autorisez les pop-ups pour télécharger le fichier.");
+        };
+        reader.readAsDataURL(blob);
+        return;
+    }
 
-                            const dataUrl = canvas.toDataURL(targetFormat, 0.9);
-                            const ext = targetFormat.split('/')[1];
-                            
-                            standardDownload(dataUrl, `convert_result.${ext}`);
+    // Méthode standard (Android + Desktop)
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
 
-                            resultDiv.innerHTML = `
-                                <p class="text-xs text-emerald-400 font-bold mb-2">Conversion réussie (.${ext}) !</p>
-                                <a href="${dataUrl}" download="converted.${ext}" class="inline-block px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition cursor-pointer">Télécharger à nouveau</a>
-                            `;
-                        };
-                        img.src = event.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+
+/* ============================================================
+   CONVERSION → PDF / IMAGE
+   ============================================================ */
+
+function runRealConversion() {
+    checkAndUseCredit(() => {
+        const fileInput = document.getElementById('conv-file');
+        const targetFormat = document.getElementById('conv-target').value;
+        const resultDiv = document.getElementById('conv-result');
+
+        if(!fileInput.files[0]) {
+            alert("Veuillez sélectionner un fichier.");
+            userCredits++;
+            updateCreditsUI();
+            return;
         }
 
-        function runWatermarkRemoval() {
-            checkAndUseCredit(() => {
-                const fileInput = document.getElementById('wm-file');
-                const resultDiv = document.getElementById('wm-result');
-                if(!fileInput.files[0]) {
-                    alert("Veuillez sélectionner une image.");
-                    userCredits++;
-                    updateCreditsUI();
-                    return;
-                }
+        const file = fileInput.files[0];
+        const reader = new FileReader();
 
-                const file = fileInput.files[0];
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.filter = 'contrast(104%) brightness(101%) blur(0.2px)';
-                        ctx.drawImage(img, 0, 0);
+        if (targetFormat === 'pdf') {
+            reader.onload = function(event) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.text(`Document converti sur hvxsrc.online`, 10, 10);
+                doc.text(`Fichier d'origine : ${file.name}`, 10, 20);
+                doc.save("document_converti.pdf");
 
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-                        standardDownload(dataUrl, 'cleaned_watermark.jpg');
+                resultDiv.innerHTML = `<p class="text-xs text-emerald-400 font-bold mt-2">PDF généré et téléchargé avec succès !</p>`;
+            };
+            reader.readAsDataURL(file);
 
-                        resultDiv.innerHTML = `
-                            <p class="text-xs text-purple-400 font-bold mb-2">Filigrane nettoyé !</p>
-                            <a href="${dataUrl}" download="cleaned.jpg" class="inline-block px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 transition cursor-pointer">Télécharger à nouveau</a>
-                        `;
-                    };
-                    img.src = event.target.result;
+        } else {
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+
+                    const dataUrl = canvas.toDataURL(targetFormat, 0.9);
+                    const ext = targetFormat.split('/')[1];
+
+                    standardDownload(dataUrl, `convert_result.${ext}`);
+
+                    resultDiv.innerHTML = `
+                        <p class="text-xs text-emerald-400 font-bold mb-2">Conversion réussie (.${ext}) !</p>
+                        <a href="${dataUrl}" download="converted.${ext}" class="inline-block px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition cursor-pointer">Télécharger à nouveau</a>
+                    `;
                 };
-                reader.readAsDataURL(file);
-            });
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+
+/* ============================================================
+   SUPPRESSION DE FILIGRANE
+   ============================================================ */
+
+function runWatermarkRemoval() {
+    checkAndUseCredit(() => {
+        const fileInput = document.getElementById('wm-file');
+        const resultDiv = document.getElementById('wm-result');
+
+        if(!fileInput.files[0]) {
+            alert("Veuillez sélectionner une image.");
+            userCredits++;
+            updateCreditsUI();
+            return;
         }
 
-        function runCompression() {
-            checkAndUseCredit(() => {
-                const fileInput = document.getElementById('comp-file');
-                const resChoice = document.getElementById('comp-res').value;
-                const resultDiv = document.getElementById('comp-result');
+        const file = fileInput.files[0];
+        const reader = new FileReader();
 
-                if(!fileInput.files[0]) {
-                    alert("Veuillez sélectionner un fichier image.");
-                    userCredits++;
-                    updateCreditsUI();
-                    return;
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+
+                ctx.filter = 'contrast(104%) brightness(101%) blur(0.2px)';
+                ctx.drawImage(img, 0, 0);
+
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+
+                standardDownload(dataUrl, 'cleaned_watermark.jpg');
+
+                resultDiv.innerHTML = `
+                    <p class="text-xs text-purple-400 font-bold mb-2">Filigrane nettoyé !</p>
+                    <a href="${dataUrl}" download="cleaned.jpg" class="inline-block px-6 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs hover:bg-purple-500 transition cursor-pointer">Télécharger à nouveau</a>
+                `;
+            };
+            img.src = event.target.result;
+        };
+
+        reader.readAsDataURL(file);
+    });
+}
+
+
+/* ============================================================
+   COMPRESSION D'IMAGE
+   ============================================================ */
+
+function runCompression() {
+    checkAndUseCredit(() => {
+        const fileInput = document.getElementById('comp-file');
+        const resChoice = document.getElementById('comp-res').value;
+        const resultDiv = document.getElementById('comp-result');
+
+        if(!fileInput.files[0]) {
+            alert("Veuillez sélectionner un fichier image.");
+            userCredits++;
+            updateCreditsUI();
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const originalSizeMo = file.size / (1024 * 1024);
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let targetWidth = img.width;
+                let targetHeight = img.height;
+                let quality = 0.8;
+
+                if (resChoice === '360') {
+                    targetWidth = 640;
+                    targetHeight = (img.height * 640) / img.width;
+                    quality = 0.5;
+                } else if (resChoice === '720') {
+                    targetWidth = 1280;
+                    targetHeight = (img.height * 1280) / img.width;
+                    quality = 0.7;
+                } else if (resChoice === '1080') {
+                    targetWidth = 1920;
+                    targetHeight = (img.height * 1920) / img.width;
+                    quality = 0.85;
                 }
 
-                const file = fileInput.files[0];
-                const originalSizeMo = file.size / (1024 * 1024);
-                const reader = new FileReader();
+                canvas.width = targetWidth;
+                canvas.height = targetHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        let targetWidth = img.width;
-                        let targetHeight = img.height;
-                        let quality = 0.8;
+                const dataUrl = canvas.toDataURL('image/jpeg', quality);
 
-                        if (resChoice === '360') {
-                            targetWidth = 640;
-                            targetHeight = (img.height * 640) / img.width;
-                            quality = 0.5;
-                        } else if (resChoice === '720') {
-                            targetWidth = 1280;
-                            targetHeight = (img.height * 1280) / img.width;
-                            quality = 0.7;
-                        } else if (resChoice === '1080') {
-                            targetWidth = 1920;
-                            targetHeight = (img.height * 1920) / img.width;
-                            quality = 0.85;
-                        }
+                const estimatedNewSizeMo = originalSizeMo * (quality * 0.6);
+                const savedMo = (originalSizeMo - estimatedNewSizeMo).toFixed(2);
 
-                        canvas.width = targetWidth;
-                        canvas.height = targetHeight;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+                standardDownload(dataUrl, `compressed_${resChoice}p.jpg`);
 
-                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-                        
-                        // Estimation réaliste du nouveau poids
-                        const estimatedNewSizeMo = originalSizeMo * (quality * 0.6);
-                        const savedMo = (originalSizeMo - estimatedNewSizeMo).toFixed(2);
+                resultDiv.innerHTML = `
+                    <div class="p-4 bg-zinc-900 border border-cyan-500/40 rounded-xl space-y-2">
+                        <p class="text-sm font-extrabold text-cyan-400">Compression Réussie (${resChoice === 'orig' ? 'Originale' : resChoice + 'p'}) !</p>
+                        <p class="text-xs text-zinc-300">Poids d'origine : <strong>${originalSizeMo.toFixed(2)} Mo</strong> ➔ Nouveau poids : <strong>${estimatedNewSizeMo.toFixed(2)} Mo</strong></p>
+                        <p class="text-xs text-emerald-400 font-bold">🎉 Économie réalisée : -${savedMo > 0 ? savedMo : 0.1} Mo !</p>
+                        <a href="${dataUrl}" download="compressed.jpg" class="inline-block mt-2 px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition cursor-pointer">Télécharger à nouveau</a>
+                    </div>
+                `;
+            };
+            img.src = event.target.result;
+        };
 
-                        standardDownload(dataUrl, `compressed_${resChoice}p.jpg`);
+        reader.readAsDataURL(file);
+    });
+}
 
-                        resultDiv.innerHTML = `
-                            <div class="p-4 bg-zinc-900 border border-cyan-500/40 rounded-xl space-y-2">
-                                <p class="text-sm font-extrabold text-cyan-400">Compression Réussie (${resChoice === 'orig' ? 'Originale' : resChoice + 'p'}) !</p>
-                                <p class="text-xs text-zinc-300">Poids d'origine : <strong>${originalSizeMo.toFixed(2)} Mo</strong> ➔ Nouveau poids : <strong>${estimatedNewSizeMo.toFixed(2)} Mo</strong></p>
-                                <p class="text-xs text-emerald-400 font-bold">🎉 Économie réalisée : -${savedMo > 0 ? savedMo : 0.1} Mo !</p>
-                                <a href="${dataUrl}" download="compressed.jpg" class="inline-block mt-2 px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold text-xs hover:bg-cyan-500 transition cursor-pointer">Télécharger à nouveau</a>
-                            </div>
-                        `;
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        }
 
         function runOCR() {
             checkAndUseCredit(() => {
