@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr" translate="no" class="dark">
 <head>
     <meta charset="UTF-8">
     
@@ -540,32 +540,25 @@
             }
         }
 
-        // TÉLÉCHARGEMENT NORMAL AVEC ALERTE iOS / CHROME MOBILE
-        function standardDownload(url, filename) {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+        // TÉLÉCHARGEMENT COMPATIBLE iOS / SAFARI / CHROME MOBILE / ANDROID
+function standardDownload(url, filename) {
 
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            if (isIOS) {
-                alert("Si le téléchargement ne démarre pas sur votre iPhone/iPad, veuillez ouvrir hvxsrc.online directement depuis le navigateur Safari.");
-            }
-        }
+    // Détection iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-      /* ============================================================
-   FONCTION DE TÉLÉCHARGEMENT COMPATIBLE iOS / ANDROID / DESKTOP
-   ============================================================ */
+    // Si ce n'est pas un DataURL → téléchargement normal
+    if (!url.startsWith("data:")) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+    }
 
-function isIOS() {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent);
-}
-
-function standardDownload(dataUrl, filename) {
     // Convertir DataURL → Blob
-    const arr = dataUrl.split(',');
+    const arr = url.split(',');
     const mime = arr[0].match(/:(.*?);/)[1];
     const bstr = atob(arr[1]);
     let n = bstr.length;
@@ -573,27 +566,30 @@ function standardDownload(dataUrl, filename) {
     while (n--) u8arr[n] = bstr.charCodeAt(n);
     const blob = new Blob([u8arr], { type: mime });
 
-    // iOS Safari / Chrome iOS : méthode spéciale
-    if (isIOS()) {
+    // iOS Safari : méthode spéciale obligatoire
+    if (isIOS) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const url = e.target.result;
-            const popup = window.open(url, '_blank');
-            if (!popup) alert("Autorisez les pop-ups pour télécharger le fichier.");
+            const iosURL = e.target.result;
+            const popup = window.open(iosURL, '_blank');
+
+            if (!popup) {
+                alert("Veuillez autoriser les pop-ups pour télécharger le fichier sur Safari.");
+            }
         };
         reader.readAsDataURL(blob);
         return;
     }
 
     // Méthode standard (Android + Desktop)
-    const url = URL.createObjectURL(blob);
+    const dlURL = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
+    a.href = dlURL;
     a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(dlURL);
 }
 
 
