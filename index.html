@@ -437,7 +437,7 @@
                 contentEl.innerHTML = `
                     <div class="space-y-4">
                         <label class="block text-xs font-bold text-zinc-300 uppercase">1. Importer un fichier image :</label>
-                        <input type="file" id="conv-file" accept="image/*" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary file:text-white hover:file:bg-primaryDark cursor-pointer">
+                        <input type="file" id="conv-file" accept="image/*, text/plain, application/json, application/pdf" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary file:text-white hover:file:bg-primaryDark cursor-pointer">
                         
                         <label class="block text-xs font-bold text-zinc-300 uppercase mt-4">2. Format de sortie :</label>
                         <select id="conv-target" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-200">
@@ -470,7 +470,7 @@
                 contentEl.innerHTML = `
                     <div class="space-y-4">
                         <label class="block text-xs font-bold text-zinc-300 uppercase">1. Importer l'image à compresser :</label>
-                        <input type="file" id="comp-file" accept="image/*" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300" onchange="previewFileSize(event)">
+                        <input type="file" id="comp-file" accept="image/*, application/pdf" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 text-sm text-zinc-300" onchange="previewFileSize(event)">
                         
                         <div id="file-size-info" class="text-xs text-zinc-400 font-medium p-3 bg-zinc-900/60 rounded-xl border border-zinc-800">Poids d'origine : Non chargé</div>
 
