@@ -635,7 +635,7 @@ function runRealConversion() {
         const targetFormat = document.getElementById('conv-target').value;
         const resultDiv = document.getElementById('conv-result');
 
-        if(!fileInput.files[0]) {
+        if (!fileInput.files[0]) {
             alert("Veuillez sélectionner un fichier.");
             userCredits++;
             updateCreditsUI();
@@ -646,21 +646,53 @@ function runRealConversion() {
         const reader = new FileReader();
 
         if (targetFormat === 'pdf') {
-            reader.onload = function(event) {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                doc.text(`Document converti sur hvxsrc.online`, 10, 10);
-                doc.text(`Fichier d'origine : ${file.name}`, 10, 20);
-                doc.save("document_converti.pdf");
+            const { jsPDF } = window.jspdf;
 
-                resultDiv.innerHTML = `<p class="text-xs text-emerald-400 font-bold mt-2">PDF généré et téléchargé avec succès !</p>`;
-            };
-            reader.readAsDataURL(file);
+            // IMAGE → PDF avec image
+            if (file.type.startsWith('image/')) {
+                reader.onload = function (event) {
+                    const imgData = event.target.result;
+                    const pdf = new jsPDF();
+
+                    // On ajoute l'image dans le PDF
+                    pdf.addImage(imgData, 'JPEG', 10, 10, 180, 0);
+                    pdf.save("document_converti.pdf");
+
+                    resultDiv.innerHTML = `<p class="text-xs text-emerald-400 font-bold mt-2">Image convertie en PDF et téléchargée avec succès !</p>`;
+                };
+                reader.readAsDataURL(file);
+
+            // TXT / JSON / AUTRE TEXTE → PDF avec contenu
+            } else if (
+                file.type === 'text/plain' ||
+                file.type === 'application/json' ||
+                file.type.startsWith('text/')
+            ) {
+                const textReader = new FileReader();
+                textReader.onload = function (event) {
+                    const content = event.target.result;
+                    const pdf = new jsPDF();
+
+                    // On découpe le texte pour qu'il tienne dans la page
+                    const lines = pdf.splitTextToSize(content, 180);
+                    pdf.text(lines, 10, 10);
+                    pdf.save("document_converti.pdf");
+
+                    resultDiv.innerHTML = `<p class="text-xs text-emerald-400 font-bold mt-2">Fichier texte converti en PDF et téléchargé avec succès !</p>`;
+                };
+                textReader.readAsText(file);
+
+            } else {
+                alert("Format non supporté pour la conversion en PDF (image, txt, json recommandés).");
+                userCredits++;
+                updateCreditsUI();
+            }
 
         } else {
-            reader.onload = function(event) {
+            // CONVERSION IMAGE → AUTRE FORMAT (PNG/JPEG/WEBP etc.)
+            reader.onload = function (event) {
                 const img = new Image();
-                img.onload = function() {
+                img.onload = function () {
                     const canvas = document.createElement('canvas');
                     canvas.width = img.width;
                     canvas.height = img.height;
@@ -683,6 +715,7 @@ function runRealConversion() {
         }
     });
 }
+
 
 
 /* ============================================================
