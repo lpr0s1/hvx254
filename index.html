@@ -213,7 +213,17 @@
       }
     </style>
     <div class="alldlg" id="alldlg">
-        <img src="https://hvxsrc.online/lzar.GIF" style="z-index: 99999999;">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gifplayer/dist/gifplayer.css">
+<script src="https://cdn.jsdelivr.net/npm/jquery"></script>
+<script src="https://cdn.jsdelivr.net/npm/gifplayer/dist/jquery.gifplayer.js"></script>
+
+<img class="gifplayer" data-gif="https://hvxsrc.online/lzar.GIF" src="https://hvxsrc.online/lzar.GIF">
+<script>
+$(document).ready(function() {
+    $('.gifplayer').gifplayer();
+});
+</script>
+
     <dialog class="bdlg">
       <br>
       <div style="display: flex; margin: 1" style="color: white"><b style="font-size: 24px">Bienvenu sur <b class="gxt">NEXUS</b>: <b class="gxt">Convertissez</b>, <b class="gxt">Compressez</b>, et bien plus.</div>
