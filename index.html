@@ -154,6 +154,80 @@
         </div>
     </header>
     
+    <!-- POPUP D ARRIVER -->
+    
+      <style>
+      .bdlg{
+        z-index: 999999;
+        background-color: #333;
+        padding: 20px 40px;
+        width: 95%;
+        height: 90%;
+        display: block;
+        border-radius: 10px;
+        animation: hk 5s infinite;
+      }
+      
+      @keyframes hk{
+        0%{background-color: #333}
+        50%{background-color: black}
+        100%{background-color: #333}
+      }
+      
+      .alldlg{
+        z-index: 1;
+        position: fixed;
+      }
+      
+      .btnconti{
+        padding: 15px 40px;
+        margin-top: 50px;
+        font-size: 16px;
+        background: linear-gradient(23deg, #333, darkred);
+        transform: scale(1.1);
+        color: white;
+        border: solid 2px #333;
+        border-bottom-right-radius: 10px;
+        border-bottom-left-radius:
+        10px;
+        animation: zmbk 2s infinite;
+      }
+      
+      @keyframes zmbk{
+        0%{
+          transform: scale(1.0);
+        }
+        50%{
+          transform: scale(1.2);
+        }
+        100%{
+          transform: scale(1.0);
+        }
+      }
+    </style>
+    <div class="alldlg" id="alldlg">
+      <img src="lzar.gif" alt="best lizard">
+    <dialog class="bdlg">
+      <br>
+      <div style="display: flex; margin: 1" style="color: white"><b style="font-size: 24px">Bienvenu sur <b class="gxt">NEXUS</b>: <b class="gxt">Convertissez</b>, <b class="gxt">Compressez</b>, et bien plus.</div>
+      
+      <button class="btnconti" onclick="(() => { document.getElementById('alldlg').style.display = 'none'; })()">CONTINUER</button>
+    </dialog>
+    </div>
+    
+    
+    
+
+<style>
+.gxt {
+  font-size: 28px;
+  background: linear-gradient(90deg,red, darkred, lightgrey);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+</style>
+
+<!-- POPUP D ARRIVER -->
 
 <!-- BEGIN AADS AD UNIT 2450780 -->
 
