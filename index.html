@@ -213,16 +213,20 @@
       }
     </style>
     <div class="alldlg" id="alldlg">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gifplayer/dist/gifplayer.css">
-<script src="https://cdn.jsdelivr.net/npm/jquery"></script>
-<script src="https://cdn.jsdelivr.net/npm/gifplayer/dist/jquery.gifplayer.js"></script>
-
-<img class="gifplayer" data-gif="https://hvxsrc.online/lzar.GIF" src="https://hvxsrc.online/lzar.GIF">
+        <img id="mygif" src="https://hvxsrc.online/lzar.GIF">
 <script>
-$(document).ready(function() {
-    $('.gifplayer').gifplayer();
+document.addEventListener("DOMContentLoaded", function() {
+    const gif = document.getElementById("mygif");
+
+    // Force le navigateur à recharger le GIF
+    const src = gif.src;
+    gif.src = "";
+    setTimeout(() => {
+        gif.src = src + "?reload=" + Date.now();
+    }, 50);
 });
 </script>
+
 
     <dialog class="bdlg">
       <br>
