@@ -396,9 +396,9 @@
 
         function detectOS() {
             const ua = navigator.userAgent || '';
-            let osText = "Desktop (Windows / macOS)";
-            if (/android/i.test(ua)) osText = "Android WebKit";
-            else if (/iPad|iPhone|iPod/.test(ua)) osText = "iOS WebKit";
+            let osText = "(Windows / macOS)";
+            if (/android/i.test(ua)) osText = "Android";
+            else if (/iPad|iPhone|iPod/.test(ua)) osText = "iOS";
             document.getElementById('os-badge').textContent = osText;
         }
         detectOS();
