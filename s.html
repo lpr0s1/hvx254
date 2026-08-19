@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTA 5 Online - Millions Instantanés</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Anton pour les titres type GTA, Roboto pour le texte) -->
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Anton', 'sans-serif'],
+                        body: ['Roboto', 'sans-serif'],
+                    },
+                    colors: {
+                        gta: {
+                            green: '#4ade80',
+                            darkgreen: '#166534',
+                            dark: '#0a0a0a',
+                            gray: '#1a1a1a'
+                        }
+                    },
+                    boxShadow: {
+                        'neon': '0 0 20px rgba(74, 222, 128, 0.6)',
+                        'neon-hover': '0 0 40px rgba(74, 222, 128, 0.8)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #000;
+            overflow-x: hidden;
+        }
+        
+        /* Effet de grain sur le fond pour un style plus "jeu vidéo" */
+        .bg-noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.03;
+            background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+        }
+
+        .clip-path-slant {
+            clip-path: polygon(0 0, 100% 5%, 100% 100%, 0 95%);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4ade80;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body class="font-body text-white antialiased">
+    <div class="bg-noise"></div>
+
+    <!-- Background Hero Image -->
+    <div class="fixed top-0 left-0 w-full h-[120vh] -z-10 overflow-hidden">
+        <div id="bg-image" class="absolute w-full h-full bg-cover bg-center opacity-40 scale-110" style="background-image: url('https://images.unsplash.com/photo-1580659328701-a18d1840e6c2?q=80&w=2070&auto=format&fit=crop');"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-gta-dark/80 to-gta-dark"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-40 top-0 py-4 px-6 md:px-12 bg-black/50 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="font-heading text-3xl tracking-wider text-gta-green drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]">
+                LS<span class="text-white">BANK</span>
+            </div>
+            <button onclick="openModal()" class="text-sm md:text-base font-bold bg-white/10 hover:bg-white/20 transition-all px-4 py-2 rounded border border-white/20 hover:border-gta-green hover:text-gta-green cursor-pointer">
+                Comment ça se passe ? 🤔
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative min-h-screen flex items-center justify-center pt-20 px-4 text-center">
+        <div class="max-w-4xl z-10">
+            <div class="gsap-hero inline-block bg-gta-green/20 border border-gta-green/50 text-gta-green px-4 py-1 rounded-full text-sm font-bold tracking-widest mb-6 backdrop-blur-sm uppercase">
+                100% Sécurisé • Livraison Rapide • Zéro Ban
+            </div>
+            <h1 class="gsap-hero font-heading text-6xl md:text-8xl tracking-wide uppercase leading-tight mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400 drop-shadow-2xl">
+                Devenez le Roi de <br><span class="text-gta-green drop-shadow-[0_0_20px_rgba(74,222,128,0.5)]">Los Santos</span>
+            </h1>
+            <p class="gsap-hero text-xl md:text-2xl text-gray-300 mb-10 max-w-2xl mx-auto font-light">
+                Arrêtez de farmer pendant des heures. Obtenez les millions dont vous avez besoin pour vos bunkers, yachts et supercars, pour le prix d'un café.
+            </p>
+            <div class="gsap-hero flex flex-col sm:flex-row gap-6 justify-center items-center">
+                <a href="#pricing" class="px-8 py-4 bg-gta-green text-black font-heading text-2xl uppercase tracking-wider rounded shadow-neon hover:shadow-neon-hover transform hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto">
+                    Voir les offres
+                </a>
+                <button onclick="openModal()" class="flex items-center gap-2 px-8 py-4 bg-white/5 border border-white/20 hover:bg-white/10 text-white font-bold text-lg rounded transition-all duration-300 w-full sm:w-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gta-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Est-ce risqué ?
+                </button>
+            </div>
+        </div>
+        
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-50">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+        </div>
+    </header>
+
+    <!-- Comparison Section -->
+    <section class="py-20 bg-gta-dark relative z-10 clip-path-slant pb-32">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <h2 class="gsap-compare font-heading text-4xl md:text-5xl uppercase mb-12">Rockstar vs <span class="text-gta-green">Nous</span></h2>
+            
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <!-- Rockstar Card -->
+                <div class="gsap-compare bg-gta-gray p-8 rounded-xl border border-red-500/30 opacity-80 filter grayscale hover:grayscale-0 transition-all duration-500">
+                    <h3 class="font-heading text-2xl text-red-500 uppercase mb-2">Boutique Officielle</h3>
+                    <p class="text-gray-400 mb-6 font-bold">Megalodon Shark Card</p>
+                    <div class="text-5xl font-heading mb-4 text-white">74,99€</div>
+                    <div class="flex items-center justify-center gap-2 text-xl mb-6">
+                        <span class="text-gray-300">Pour seulement</span>
+                        <span class="font-bold text-white">8 000 000 $</span>
+                    </div>
+                    <p class="text-sm text-red-400">Prix excessif • Faible rentabilité</p>
+                </div>
+
+                <!-- Us Card -->
+                <div class="gsap-compare bg-gradient-to-br from-gta-gray to-black p-8 rounded-xl border border-gta-green shadow-neon transform scale-105 z-10 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-gta-green text-black font-bold px-4 py-1 rounded-bl-lg text-sm">
+                        CHOIX LOGIQUE
+                    </div>
+                    <h3 class="font-heading text-3xl text-gta-green uppercase mb-2">Notre Service</h3>
+                    <p class="text-gray-300 mb-6 font-bold">Pack Boss de la Mafia</p>
+                    <div class="text-6xl font-heading mb-4 text-white">4,50€</div>
+                    <div class="flex flex-col items-center justify-center gap-2 text-2xl mb-6">
+                        <span class="text-gray-300">Vous obtenez</span>
+                        <span class="font-heading tracking-wider text-gta-green text-4xl drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]">25 000 000 $</span>
+                    </div>
+                    <p class="text-sm text-gta-green font-bold uppercase tracking-wider">Prix ridicule • 100% Sécurisé</p>
+                </div>
+            </div>
+            
+            <p class="gsap-compare text-xl mt-16 text-gray-300 max-w-3xl mx-auto font-light">
+                Pourquoi payer <span class="text-red-400 font-bold">75€</span> pour 8 millions quand vous pouvez avoir <span class="text-gta-green font-bold text-2xl">3x plus d'argent</span> pour <span class="text-white font-bold text-2xl">10x moins cher</span> ?
+            </p>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-24 bg-black relative z-10">
+        <!-- Floating money background elements -->
+        <div class="absolute top-10 left-10 text-4xl opacity-10 floating-money">💸</div>
+        <div class="absolute bottom-20 right-20 text-4xl opacity-10 floating-money" style="animation-delay: 1s;">💰</div>
+        <div class="absolute top-40 right-1/4 text-4xl opacity-10 floating-money" style="animation-delay: 2s;">💵</div>
+
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="font-heading text-5xl md:text-7xl uppercase tracking-wider mb-4">
+                    Choisissez votre <span class="text-transparent bg-clip-text bg-gradient-to-r from-gta-green to-green-300">Empire</span>
+                </h2>
+                <p class="text-xl text-gray-400">Sélectionnez le pack qui correspond à vos ambitions.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                
+                <!-- Product 1: 15M -->
+                <div class="gsap-price flex flex-col bg-gta-gray/80 backdrop-blur-sm border border-white/10 p-8 rounded-2xl hover:border-gta-green/50 hover:bg-gta-gray transition-all duration-500 group relative">
+                    <div class="absolute inset-0 bg-gta-green/5 blur-2xl rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="relative z-10 text-center flex-grow">
+                        <div class="w-16 h-16 mx-auto bg-white/5 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <span class="text-3xl">🔫</span>
+                        </div>
+                        <h3 class="font-heading text-3xl uppercase text-white mb-2">Pack Braqueur</h3>
+                        <div class="text-gta-green font-heading text-5xl mb-6 tracking-wide drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]">
+                            15 000 000 $
+                        </div>
+                        <ul class="text-left text-gray-300 space-y-3 mb-8">
+                            <li class="flex items-center gap-3">
+                                <svg class="w-5 h-5 text-gta-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                Livraison via Braquage Privé
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <svg class="w-5 h-5 text-gta-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                100% Légal in-game (Anti-Ban)
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <svg class="w-5 h-5 text-gta-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                Rapide & Discret
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="relative z-10 mt-auto text-center">
+                        <div class="text-3xl font-bold text-white mb-6">2,99 €</div>
+                        <a href="https://buy.stripe.com/5kQcN55uV5qRdMf8fP6wE0j" target="_blank" class="block w-full py-4 bg-white/10 hover:bg-gta-green hover:text-black border border-white/20 hover:border-gta-green text-white font-heading text-xl uppercase tracking-wider rounded transition-all duration-300 group-hover:shadow-neon">
+                            Commander Maintenant !
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Product 2: 25M -->
+                <div class="gsap-price flex flex-col bg-gradient-to-b from-gta-gray to-[#0f1712] border-2 border-gta-green shadow-neon p-8 rounded-2xl relative transform md:-translate-y-4 group">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gta-green text-black px-6 py-1 rounded-full font-bold text-sm uppercase tracking-wider shadow-neon">
+                        Le plus populaire
+                    </div>
+                    <div class="absolute inset-0 bg-gta-green/10 blur-xl rounded-2xl"></div>
+                    <div class="relative z-10 text-center flex-grow">
+                        <div class="w-20 h-20 mx-auto bg-gta-green/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
+                            <span class="text-4xl">👑</span>
+                        </div>
+                        <h3 class="font-heading text-4xl uppercase text-white mb-2">Boss de la Mafia</h3>
+                        <div class="text-gta-green font-heading text-6xl mb-6 tracking-wide drop-shadow-[0_0_15px_rgba(74,222,128,0.8)]">
+                            25 000 000 $
+                        </div>
+                        <ul class="text-left text-gray-200 space-y-4 mb-8 font-medium">
+                            <li class="flex items-center gap-3 text-lg">
+                                <svg class="w-6 h-6 text-gta-green shadow-neon rounded-full" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                Le max de cash instantané
+                            </li>
+                            <li class="flex items-center gap-3 text-lg">
+                                <svg class="w-6 h-6 text-gta-green shadow-neon rounded-full" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                Livraison via Braquage Privé
+                            </li>
+                            <li class="flex items-center gap-3 text-lg">
+                                <svg class="w-6 h-6 text-gta-green shadow-neon rounded-full" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                100% Légal in-game (Anti-Ban)
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="relative z-10 mt-auto text-center">
+                        <div class="text-4xl font-bold text-white mb-6">4,50 €</div>
+                        <a href="https://buy.stripe.com/3cIcN51eF3iJaA30Nn6wE0k" target="_blank" class="block w-full py-4 bg-gta-green text-black font-heading text-2xl uppercase tracking-wider rounded shadow-neon hover:shadow-neon-hover transform hover:scale-[1.02] transition-all duration-300">
+                            Commander Maintenant !
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Section (Bottom call to action for Modal) -->
+    <section class="py-16 bg-gta-dark border-t border-white/5 relative z-10">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-2xl md:text-3xl font-heading uppercase mb-6 text-white">Vous hésitez encore ?</h2>
+            <p class="text-gray-400 mb-8">Découvrez notre méthode 100% transparente et garantie sans bannissement.</p>
+            <button onclick="openModal()" class="px-8 py-3 bg-transparent border-2 border-gta-green text-gta-green hover:bg-gta-green hover:text-black font-bold uppercase tracking-wider rounded transition-all duration-300">
+                Comment ça se passe ? (Explication complète)
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-8 border-t border-white/10 relative z-10 text-center">
+        <p class="text-gray-500 text-sm max-w-2xl mx-auto px-4">
+            Ce site n'est pas affilié, associé, autorisé, endossé par, ou de quelque façon officiellement connecté avec Rockstar Games, Take-Two Interactive, ou l'une de leurs filiales ou de leurs affiliés. Grand Theft Auto et GTA sont des marques déposées de Take-Two Interactive.
+        </p>
+        <p class="text-gray-600 text-xs mt-4">© 2023-2024 LSBANK Services. Tous droits réservés.</p>
+    </footer>
+
+    <!-- MODAL "Comment ça se passe ?" -->
+    <div id="infoModal" class="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500 p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm modal-backdrop" onclick="closeModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="modal-content relative bg-gta-gray border border-white/10 p-1 rounded-2xl max-w-2xl w-full shadow-2xl transform scale-95 transition-transform duration-500">
+            <div class="bg-black/50 p-6 md:p-10 rounded-xl relative overflow-hidden">
+                <!-- Decorative top bar -->
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gta-green to-transparent"></div>
+                
+                <!-- Close Button -->
+                <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white hover:rotate-90 transition-all duration-300">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+
+                <h2 class="font-heading text-3xl md:text-4xl text-white mb-2 uppercase">Comment ça marche ?</h2>
+                <p class="text-gta-green font-bold mb-8 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    GARANTIE 100% ANTI-BAN
+                </p>
+
+                <div class="space-y-6 text-gray-300">
+                    <!-- Steps -->
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gta-green/20 text-gta-green flex items-center justify-center font-bold font-heading text-xl">1</div>
+                        <div>
+                            <h4 class="text-white font-bold text-lg">Vous passez commande</h4>
+                            <p class="text-sm mt-1">Choisissez votre pack et réglez de manière sécurisée via Stripe.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gta-green/20 text-gta-green flex items-center justify-center font-bold font-heading text-xl">2</div>
+                        <div>
+                            <h4 class="text-white font-bold text-lg">Ajout en Ami</h4>
+                            <p class="text-sm mt-1">Vous m'ajoutez en ami sur le jeu (les instructions sont fournies après l'achat).</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gta-green/20 text-gta-green flex items-center justify-center font-bold font-heading text-xl">3</div>
+                        <div>
+                            <h4 class="text-white font-bold text-lg">Invitation au Braquage</h4>
+                            <p class="text-sm mt-1">Je vous invite dans un de mes braquages privés déjà préparé.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gta-green text-black shadow-neon flex items-center justify-center font-bold font-heading text-xl">4</div>
+                        <div>
+                            <h4 class="text-white font-bold text-lg">Encaissement</h4>
+                            <p class="text-sm mt-1">Je vous attribue la part maximale du butin. Une fois le braquage terminé (très rapide), l'argent est directement crédité sur votre compte !</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-gta-dark p-4 rounded-lg border border-gta-green/30 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-gta-green/10 rounded-bl-full"></div>
+                    <h4 class="text-gta-green font-bold mb-2">Pourquoi c'est 0 risque pour vous ?</h4>
+                    <p class="text-sm text-gray-400">
+                        Vous ne téléchargez rien, vous ne moddez pas votre jeu. Recevoir une grosse part lors d'un braquage est une <span class="text-white font-bold">mécanique officielle et légitime de GTA Online</span>. Rockstar ne peut pas vous bannir pour avoir participé à une mission avec un autre joueur. Le risque est inexistant de votre côté.
+                    </p>
+                </div>
+
+                <div class="mt-8 text-center">
+                    <button onclick="closeModal()" class="px-8 py-3 bg-white text-black font-bold rounded hover:bg-gray-200 transition-colors w-full md:w-auto">
+                        J'ai compris, fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts pour GSAP et logique de la page -->
+    <script>
+        // Modal Logic
+        const modal = document.getElementById('infoModal');
+        const modalContent = document.querySelector('.modal-content');
+
+        function openModal() {
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+            // Empêcher le scroll en arrière plan
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            // Réactiver le scroll
+            document.body.style.overflow = 'auto';
+        }
+
+        // Fermer la modale avec la touche Echap
+        document.addEventListener('keydown', (e) => {
+            if(e.key === "Escape" && !modal.classList.contains('opacity-0')) {
+                closeModal();
+            }
+        });
+
+        // GSAP Animations
+        document.addEventListener("DOMContentLoaded", (event) => {
+            // Register ScrollTrigger
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Effet Ken Burns lent sur l'image de fond
+            gsap.to("#bg-image", {
+                scale: 1.2,
+                duration: 20,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            });
+
+            // Apparition du Hero
+            const heroTl = gsap.timeline();
+            heroTl.from("nav", { y: -50, opacity: 0, duration: 1, ease: "power3.out" })
+                  .from(".gsap-hero", { 
+                      y: 50, 
+                      opacity: 0, 
+                      duration: 0.8, 
+                      stagger: 0.2, 
+                      ease: "back.out(1.7)" 
+                  }, "-=0.5");
+
+            // Animation de la section comparaison au scroll
+            gsap.from(".gsap-compare", {
+                scrollTrigger: {
+                    trigger: ".clip-path-slant",
+                    start: "top 80%",
+                },
+                y: 50,
+                opacity: 0,
+                duration: 0.8,
+                stagger: 0.2,
+                ease: "power2.out"
+            });
+
+            // Animation des cartes de prix au scroll
+            gsap.from(".gsap-price", {
+                scrollTrigger: {
+                    trigger: "#pricing",
+                    start: "top 75%",
+                },
+                y: 100,
+                opacity: 0,
+                duration: 0.8,
+                stagger: 0.3,
+                ease: "power3.out"
+            });
+
+            // Animation des éléments flottants (argent en background)
+            gsap.utils.toArray('.floating-money').forEach(item => {
+                gsap.to(item, {
+                    y: "-=30",
+                    rotation: "random(-20, 20)",
+                    duration: "random(2, 4)",
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut"
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
