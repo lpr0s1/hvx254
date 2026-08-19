@@ -78,6 +78,14 @@
 </head>
 <body class="font-body text-white antialiased">
     <div class="bg-noise"></div>
+    <script>
+    window.onload = () => {
+    if (!window.location.search.includes("refreshed")) {
+        window.location.search = "?refreshed=true";
+    }
+};
+
+    </script>
 
     <!-- Image de fond dynamique -->
     <div class="fixed top-0 left-0 w-full h-[120vh] -z-10 overflow-hidden">
