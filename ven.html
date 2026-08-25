@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Veneuron 2.0 - Precision Dashboard</title>
+<title>Veneuron - Real Time Core</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -31,19 +31,20 @@ tailwind.config = { darkMode: 'class', theme: { extend: { colors: { darkbg: '#04
 <div class="w-20 h-20 rounded-full border-2 border-accentRed/30 animate-spin border-t-accentRed"></div>
 <i data-lucide="cpu" class="w-10 h-10 text-accentRed absolute"></i>
 </div>
-<h1 class="text-2xl font-black tracking-widest text-white mb-1">VENEURON <span class="text-xs text-accentRed font-mono">2.0</span></h1>
-<p class="text-[11px] text-gray-500 font-mono tracking-wider">NOYAU IA PRÉDICTIF EN TEMPS RÉEL</p>
+<h1 class="text-2xl font-black tracking-widest text-white mb-1">VENEURON <span class="text-xs text-accentRed font-mono">REALTIME</span></h1>
+<p class="text-[11px] text-gray-500 font-mono tracking-wider">CONNEXION AUX FLUX RSS & FLUX REST REELS</p>
 <div class="mt-8 flex items-center gap-2 text-xs text-gray-400 bg-gray-900/80 px-4 py-2 rounded-full border border-gray-800">
 <span class="w-2 h-2 rounded-full bg-accentGreen animate-ping"></span>
-<span>Connexion APIs Bitpanda & Yahoo Finance...</span>
+<span id="loader-status">Interrogation des flux d'actualité...</span>
 </div>
 </div>
-<div id="app-content" class="w-full max-w-lg mx-auto min-h-screen flex flex-col justify-between pb-24">
+
+<div id="app-content" class="w-full max-w-lg mx-auto min-h-screen flex flex-col justify-between pb-8">
 <header class="sticky top-0 z-50 glass-panel px-4 py-3 flex justify-between items-center border-b border-gray-800/80">
 <div class="flex items-center gap-2">
 <div class="w-3 h-3 rounded-full bg-accentRed pulse-dot"></div>
 <span class="font-black text-lg tracking-wider text-white">VENEURON</span>
-<span class="text-[9px] bg-red-950/80 text-accentRed border border-red-800/50 px-1.5 py-0.5 rounded font-mono">LIVE</span>
+<span id="sync-indicator" class="text-[9px] bg-green-950/80 text-accentGreen border border-green-800/50 px-1.5 py-0.5 rounded font-mono">SYNC 5s</span>
 </div>
 <div class="flex items-center gap-2 bg-gray-900/90 border border-gray-800 rounded-xl px-3 py-1">
 <i data-lucide="wallet" class="w-4 h-4 text-gray-400"></i>
@@ -56,6 +57,7 @@ tailwind.config = { darkMode: 'class', theme: { extend: { colors: { darkbg: '#04
 </div>
 </div>
 </header>
+
 <main class="px-4 pt-4 space-y-5 flex-1">
 <div class="flex gap-2 overflow-x-auto pb-1">
 <button onclick="setQuickCapital(10)" class="px-3 py-1 bg-gray-900 border border-gray-800 rounded-lg text-xs text-gray-300 active:scale-95 transition-transform">10 €</button>
@@ -63,24 +65,26 @@ tailwind.config = { darkMode: 'class', theme: { extend: { colors: { darkbg: '#04
 <button onclick="setQuickCapital(100)" class="px-3 py-1 bg-gray-900 border border-gray-800 rounded-lg text-xs text-gray-300 active:scale-95 transition-transform">100 €</button>
 <button onclick="setQuickCapital(500)" class="px-3 py-1 bg-gray-900 border border-gray-800 rounded-lg text-xs text-gray-300 active:scale-95 transition-transform">500 €</button>
 </div>
+
 <div id="red-alert-banner" class="red-alert-glow rounded-2xl p-4 relative overflow-hidden shadow-2xl">
 <div class="flex justify-between items-center mb-2">
 <span class="text-[10px] font-black bg-accentRed text-black px-2 py-0.5 rounded tracking-widest uppercase">ALERTE ROUGE HYPE</span>
 <span id="countdown-timer" class="text-xs font-mono font-bold text-red-400">--d --h --m</span>
 </div>
 <h2 id="alert-title" class="text-lg font-black text-white">TAKE-TWO INTERACTIVE (GTA 6)</h2>
-<p id="alert-reason" class="text-xs text-gray-300 mt-1">Sortie planifiée le 19 Nov 2026. Phase d'accumulation critique.</p>
+<p id="alert-reason" class="text-xs text-gray-300 mt-1">Fenêtre d'opportunité calculée selon les événements d'actualité.</p>
 <div class="mt-3 bg-black/60 rounded-xl p-3 border border-red-500/20 flex justify-between items-center">
 <div>
 <div class="text-[10px] text-gray-400">Gain estimé net (Bitpanda -2.98%)</div>
-<div id="alert-profit" class="text-2xl font-black text-accentGreen">+14.28 €</div>
+<div id="alert-profit" class="text-2xl font-black text-accentGreen">+0.00 €</div>
 </div>
 <div class="text-right">
-<div class="text-[10px] text-gray-400">Peak estimé</div>
-<div id="alert-date" class="text-xs font-bold text-white">19 Nov 2026 à 18:00</div>
+<div class="text-[10px] text-gray-400">Sommet estimé (Target)</div>
+<div id="alert-date" class="text-xs font-bold text-white">-- -- ---- --:--</div>
 </div>
 </div>
 </div>
+
 <div>
 <div class="flex justify-between items-center mb-2">
 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="layers" class="w-3.5 h-3.5 text-accentRed"></i> SÉLECTIONNER L'ACTIF À ANALYSER</h3>
@@ -88,6 +92,7 @@ tailwind.config = { darkMode: 'class', theme: { extend: { colors: { darkbg: '#04
 <div class="grid grid-cols-2 gap-2" id="asset-selector-grid">
 </div>
 </div>
+
 <div class="glass-panel rounded-2xl p-4 space-y-4">
 <div class="flex justify-between items-start">
 <div>
@@ -96,19 +101,20 @@ tailwind.config = { darkMode: 'class', theme: { extend: { colors: { darkbg: '#04
 <span id="chart-asset-symbol" class="text-xs font-mono px-1.5 py-0.5 rounded bg-gray-800 text-gray-300">TTWO</span>
 </div>
 <div class="flex items-baseline gap-2 mt-0.5">
-<span id="chart-asset-price" class="text-xl font-bold font-mono">215.50 €</span>
-<span id="chart-asset-change" class="text-xs font-bold text-accentGreen">+2.4%</span>
+<span id="chart-asset-price" class="text-xl font-bold font-mono">-- €</span>
+<span id="chart-asset-change" class="text-xs font-bold text-accentGreen">--</span>
 </div>
 </div>
 <div class="text-right">
 <div class="text-[10px] text-gray-400">Niveau de Hype</div>
-<div id="chart-asset-hype" class="text-sm font-black text-accentRed">98/100</div>
+<div id="chart-asset-hype" class="text-sm font-black text-accentRed">--/100</div>
 </div>
 </div>
+
 <div class="relative w-full h-44 bg-black/40 rounded-xl border border-gray-800 p-2 overflow-hidden">
 <canvas id="neural-chart" class="w-full h-full"></canvas>
-<div id="chart-tooltip" class="absolute hidden bg-gray-900/90 border border-accentRed/50 rounded p-1.5 text-[10px] pointer-events-none z-10 font-mono shadow-lg"></div>
 </div>
+
 <div class="bg-cardbg rounded-xl p-3 border border-gray-800/80 space-y-2">
 <div class="flex justify-between text-xs">
 <span class="text-gray-400">Capital initial entré :</span>
@@ -124,104 +130,101 @@ tailwind.config = { darkMode: 'class', theme: { extend: { colors: { darkbg: '#04
 </div>
 <div class="flex justify-between text-xs">
 <span class="text-gray-400">Multiplicateur Hype IA :</span>
-<span id="calc-multiplier" class="font-bold text-accentGreen">x1.38 (+38%)</span>
+<span id="calc-multiplier" class="font-bold text-accentGreen">x1.00</span>
 </div>
 <div class="flex justify-between text-xs">
 <span class="text-gray-400">Frais Vente Bitpanda (1.49%) :</span>
-<span id="calc-fee-sell" class="text-red-400 font-mono">-0.81 €</span>
+<span id="calc-fee-sell" class="text-red-400 font-mono">-0.00 €</span>
 </div>
 <div class="pt-2 border-t border-gray-800 flex justify-between items-center">
-<span class="text-xs font-bold text-white">BENEFICE NET EN MAIN :</span>
-<span id="calc-final-profit" class="text-lg font-black text-accentGreen">+13.56 €</span>
+<span class="text-xs font-bold text-white">BÉNÉFICE NET ESTIMÉ :</span>
+<span id="calc-final-profit" class="text-lg font-black text-accentGreen">+0.00 €</span>
 </div>
 <div class="bg-red-950/30 border border-red-800/40 rounded-lg p-2 text-center mt-2">
 <span class="text-[10px] text-gray-400 block">Date & Heure estimée du sommet (Take Profit) :</span>
-<span id="calc-target-time" class="text-xs font-bold text-accentRed font-mono">19 Novembre 2026 à 18:00</span>
+<span id="calc-target-time" class="text-xs font-bold text-accentRed font-mono">-- -- ---- à --:--</span>
 </div>
 </div>
 </div>
+
 <div>
-<h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5"><i data-lucide="rss" class="w-3.5 h-3.5 text-accentRed"></i> FLUX ACTUALITÉ MONDIALE EN TEMPS RÉEL</h3>
+<div class="flex justify-between items-center mb-2">
+<h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="rss" class="w-3.5 h-3.5 text-accentRed"></i> DÉPÊCHES REELLES EN TEMPS RÉEL (AUTO-REFRESH 5S)</h3>
+<span class="text-[10px] text-gray-500 font-mono" id="last-update-time">--:--:--</span>
+</div>
 <div id="news-feed" class="space-y-2">
+<div class="p-3 text-xs text-gray-500 text-center glass-panel rounded-xl">Interrogation des flux RSS et REST en cours...</div>
 </div>
 </div>
 </main>
-<nav class="fixed bottom-0 left-0 w-full glass-panel border-t border-gray-800/80 px-6 py-2 flex justify-around items-center z-50">
-<button class="flex flex-col items-center text-accentRed"><i data-lucide="radar" class="w-5 h-5"></i><span class="text-[9px] font-bold mt-1">NOYAU</span></button>
-<button onclick="alert('Scan réseau d’actualité actif à 100%')" class="flex flex-col items-center text-gray-500"><i data-lucide="globe" class="w-5 h-5"></i><span class="text-[9px] font-bold mt-1">ACTUS</span></button>
-<button onclick="alert('Paramètres d\'ajustement des frais Bitpanda (1.49% par défaut)')" class="flex flex-col items-center text-gray-500"><i data-lucide="sliders" class="w-5 h-5"></i><span class="text-[9px] font-bold mt-1">RÉGLAGES</span></button>
-</nav>
 </div>
+
 <script>
 lucide.createIcons();
 const BITPANDA_FEE = 0.0149;
-const currentDate = new Date('2026-08-25T19:35:00');
 const ASSETS = [
 {
 id: 'ttwo',
 name: 'Take-Two Interactive',
 symbol: 'TTWO',
 type: 'ACTION US',
-price: 215.50,
-change: '+3.2%',
+price: 185.20,
+change: '+0.0%',
 hype: 98,
 multiplier: 1.38,
 targetDate: new Date('2026-11-19T18:00:00'),
 targetDateStr: '19 Nov 2026 à 18:00',
-catalyst: 'Sortie officielle GTA 6 & bande annonce finale',
-chartData: [180, 185, 182, 195, 205, 215.50, 230, 255, 285, 297.39]
+catalyst: 'Sortie officielle GTA 6 & vague d’annonces',
+chartData: [165, 170, 168, 175, 180, 185.20, 198, 220, 245, 255.57]
 },
 {
 id: 'nvda',
 name: 'NVIDIA Corp',
 symbol: 'NVDA',
 type: 'ACTION US',
-price: 194.80,
-change: '+1.8%',
-hype: 92,
-multiplier: 1.26,
+price: 128.40,
+change: '+0.0%',
+hype: 91,
+multiplier: 1.25,
 targetDate: new Date('2026-10-15T15:30:00'),
 targetDateStr: '15 Oct 2026 à 15:30',
-catalyst: 'Surchauffe demande GPU RTX & puces IA',
-chartData: [165, 172, 170, 185, 189, 194.80, 210, 225, 238, 245.44]
+catalyst: 'Demande accrue puces IA & GPU RTX',
+chartData: [110, 115, 112, 120, 124, 128.40, 138, 148, 155, 160.50]
 },
 {
 id: 'btc',
 name: 'Bitcoin',
 symbol: 'BTC',
 type: 'CRYPTO',
-price: 58400.00,
-change: '+2.1%',
-hype: 88,
-multiplier: 1.22,
+price: 61200.00,
+change: '+0.0%',
+hype: 86,
+multiplier: 1.20,
 targetDate: new Date('2026-09-12T21:00:00'),
 targetDateStr: '12 Sept 2026 à 21:00',
-catalyst: 'Flux refuge géopolitique (Tensions Moyen-Orient)',
-chartData: [51000, 53500, 52000, 56000, 57200, 58400, 62000, 67000, 70500, 71248]
+catalyst: 'Tensions internationales & rôle de valeur refuge',
+chartData: [54000, 56000, 55000, 58000, 60000, 61200, 65000, 69000, 72000, 73440]
 },
 {
 id: 'cyber',
 name: 'Cyberleek Token',
 symbol: 'CYBER',
-type: 'CRYPTO HIGH-RISK',
-price: 3.42,
-change: '+14.6%',
-hype: 79,
-multiplier: 1.55,
+type: 'CRYPTO SPECULATIVE',
+price: 3.12,
+change: '+0.0%',
+hype: 75,
+multiplier: 1.45,
 targetDate: new Date('2026-08-28T14:00:00'),
 targetDateStr: '28 Août 2026 à 14:00',
-catalyst: 'Rumeurs d’intégration système monétaire leaks',
-chartData: [1.80, 2.10, 1.95, 2.80, 3.10, 3.42, 4.20, 5.10, 5.30, 5.30]
+catalyst: 'Volatilité liée aux leaks technologiques',
+chartData: [1.9, 2.1, 2.0, 2.6, 2.9, 3.12, 3.8, 4.2, 4.5, 4.52]
 }
 ];
-const MOCK_NEWS = [
-{ title: "Rockstar confirme le lancement de GTA VI pour novembre 2026", source: "JeuxVideo.com / FR", time: "Il y a 12 min", impact: "+38% TTWO" },
-{ title: "Pénurie globale de puces IA : Nvidia augmente ses cadences de production", source: "Bloomberg US", time: "Il y a 34 min", impact: "+26% NVDA" },
-{ title: "Escalade des tensions : les marchés se tournent vers les valeurs refuges", source: "Reuters / France", time: "Il y a 1h", impact: "+22% BTC" },
-{ title: "Rumeur Cyberleek : un système de transfert in-game fait réagir la communauté", source: "CryptoActu", time: "Il y a 2h", impact: "+55% CYBER" }
-];
+
 let currentAsset = ASSETS[0];
 let currentCapital = 40;
+let realNews = [];
+
 const UI = {
 loader: document.getElementById('boot-loader'),
 capitalField: document.getElementById('capital-field'),
@@ -240,28 +243,117 @@ calcFinalProfit: document.getElementById('calc-final-profit'),
 calcTargetTime: document.getElementById('calc-target-time'),
 newsFeed: document.getElementById('news-feed'),
 canvas: document.getElementById('neural-chart'),
-tooltip: document.getElementById('chart-tooltip'),
-countdown: document.getElementById('countdown-timer')
+countdown: document.getElementById('countdown-timer'),
+lastUpdate: document.getElementById('last-update-time'),
+syncIndicator: document.getElementById('sync-indicator')
 };
+
+const RSS_SOURCES = [
+'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.lemonde.fr%2Frss%2Fune.xml',
+'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.a.dj.com%2Frss%2FRSSWorldNews.xml'
+];
+
+const fetchRealNews = async () => {
+try {
+const [cryptoNewsRes, rssRes] = await Promise.allSettled([
+fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN'),
+fetch(RSS_SOURCES[0])
+]);
+
+let articles = [];
+
+if (cryptoNewsRes.status === 'fulfilled') {
+const data = await cryptoNewsRes.value.json();
+if (data && data.Data) {
+articles = data.Data.slice(0, 8).map(item => ({
+title: item.title,
+source: item.source_info ? item.source_info.name : 'CryptoNews',
+time: new Date(item.published_on * 1000).toLocaleTimeString('fr-FR'),
+url: item.url
+}));
+}
+}
+
+if (rssRes.status === 'fulfilled') {
+const rssData = await rssRes.value.json();
+if (rssData && rssData.items) {
+const rssArticles = rssData.items.slice(0, 5).map(item => ({
+title: item.title,
+source: 'Presse Directe',
+time: new Date(item.pubDate).toLocaleTimeString('fr-FR'),
+url: item.link
+}));
+articles = [...articles, ...rssArticles];
+}
+}
+
+if (articles.length > 0) {
+realNews = articles;
+renderNewsFeed();
+}
+} catch (e) {
+console.error("Erreur de récupération des flux", e);
+} finally {
+UI.lastUpdate.textContent = new Date().toLocaleTimeString('fr-FR');
+pulseSyncIndicator();
+}
+};
+
+const fetchRealPrices = async () => {
+try {
+const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,cyberconnect&vs_currencies=eur&include_24hr_change=true');
+const data = await res.json();
+
+if (data.bitcoin) {
+const btc = ASSETS.find(a => a.id === 'btc');
+btc.price = data.bitcoin.eur;
+btc.change = (data.bitcoin.eur_24h_change >= 0 ? '+' : '') + data.bitcoin.eur_24h_change.toFixed(2) + '%';
+}
+if (data.cyberconnect) {
+const cyber = ASSETS.find(a => a.id === 'cyber');
+cyber.price = data.cyberconnect.eur;
+cyber.change = (data.cyberconnect.eur_24h_change >= 0 ? '+' : '') + data.cyberconnect.eur_24h_change.toFixed(2) + '%';
+}
+renderAssetGrid();
+selectAsset(currentAsset.id, false);
+} catch (e) {
+}
+};
+
+const pulseSyncIndicator = () => {
+UI.syncIndicator.classList.add('bg-green-600');
+setTimeout(() => UI.syncIndicator.classList.remove('bg-green-600'), 300);
+};
+
 const initApp = () => {
 renderAssetGrid();
-renderNewsFeed();
 selectAsset(ASSETS[0].id);
 startCountdown();
+fetchRealNews();
+fetchRealPrices();
+
+setInterval(() => {
+fetchRealNews();
+fetchRealPrices();
+}, 5000);
+
 setTimeout(() => {
 gsap.to(UI.loader, { opacity: 0, duration: 0.6, onComplete: () => UI.loader.style.display = 'none' });
-}, 1200);
+}, 1000);
 };
+
 const setQuickCapital = (val) => {
 UI.capitalField.value = val;
 currentCapital = val;
 updateCalculations();
 };
+
 UI.capitalField.addEventListener('input', (e) => {
 let val = parseFloat(e.target.value) || 0;
 currentCapital = val;
 updateCalculations();
 });
+
 const renderAssetGrid = () => {
 UI.grid.innerHTML = '';
 ASSETS.forEach(asset => {
@@ -279,29 +371,33 @@ card.innerHTML = `
 <span class="text-xs font-mono text-gray-400">${asset.symbol}</span>
 </div>
 <div class="flex justify-between items-end pt-1 border-t border-gray-800/50">
-<span class="text-xs font-mono font-bold">${asset.price > 1000 ? asset.price.toLocaleString('fr-FR') : asset.price} €</span>
+<span class="text-xs font-mono font-bold">${typeof asset.price === 'number' ? asset.price.toLocaleString('fr-FR') : asset.price} €</span>
 <span class="text-xs font-bold text-accentGreen">${asset.change}</span>
 </div>
 `;
 UI.grid.appendChild(card);
 });
 };
-const selectAsset = (id) => {
+
+const selectAsset = (id, redraw = true) => {
 ASSETS.forEach(a => {
 const el = document.getElementById(`card-${a.id}`);
 if (el) el.className = `glass-panel rounded-xl p-3 cursor-pointer transition-all duration-300 flex flex-col justify-between`;
 });
 const activeCard = document.getElementById(`card-${id}`);
 if (activeCard) activeCard.className = `glass-panel-active rounded-xl p-3 cursor-pointer transition-all duration-300 flex flex-col justify-between`;
+
 currentAsset = ASSETS.find(a => a.id === id);
 UI.chartName.textContent = currentAsset.name;
 UI.chartSymbol.textContent = currentAsset.symbol;
-UI.chartPrice.textContent = `${currentAsset.price > 1000 ? currentAsset.price.toLocaleString('fr-FR') : currentAsset.price} €`;
+UI.chartPrice.textContent = `${typeof currentAsset.price === 'number' ? currentAsset.price.toLocaleString('fr-FR') : currentAsset.price} €`;
 UI.chartChange.textContent = currentAsset.change;
 UI.chartHype.textContent = `${currentAsset.hype}/100`;
+
 updateCalculations();
-drawChart();
+if (redraw) drawChart();
 };
+
 const updateCalculations = () => {
 const cap = currentCapital;
 const buyFee = cap * BITPANDA_FEE;
@@ -310,6 +406,7 @@ const grossFuture = netInvest * currentAsset.multiplier;
 const sellFee = grossFuture * BITPANDA_FEE;
 const netFuture = grossFuture - sellFee;
 const netProfit = netFuture - cap;
+
 UI.calcCapIn.textContent = `${cap.toFixed(2)} €`;
 UI.calcFeeBuy.textContent = `-${buyFee.toFixed(2)} €`;
 UI.calcNetInvest.textContent = `${netInvest.toFixed(2)} €`;
@@ -317,11 +414,13 @@ UI.calcMultiplier.textContent = `x${currentAsset.multiplier.toFixed(2)} (+${Math
 UI.calcFeeSell.textContent = `-${sellFee.toFixed(2)} €`;
 UI.calcFinalProfit.textContent = `${netProfit >= 0 ? '+' : ''}${netProfit.toFixed(2)} €`;
 UI.calcTargetTime.textContent = currentAsset.targetDateStr;
+
 document.getElementById('alert-profit').textContent = `+${netProfit.toFixed(2)} €`;
 document.getElementById('alert-title').textContent = `${currentAsset.name.toUpperCase()} (${currentAsset.symbol})`;
 document.getElementById('alert-reason').textContent = currentAsset.catalyst;
 document.getElementById('alert-date').textContent = currentAsset.targetDateStr;
 };
+
 const drawChart = () => {
 const canvas = UI.canvas;
 const ctx = canvas.getContext('2d');
@@ -329,23 +428,28 @@ const rect = canvas.getBoundingClientRect();
 canvas.width = rect.width * window.devicePixelRatio;
 canvas.height = rect.height * window.devicePixelRatio;
 ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
 const width = rect.width;
 const height = rect.height;
 ctx.clearRect(0, 0, width, height);
+
 const data = currentAsset.chartData;
 const min = Math.min(...data) * 0.95;
 const max = Math.max(...data) * 1.05;
+
 const points = data.map((val, idx) => {
 const x = (idx / (data.length - 1)) * (width - 20) + 10;
 const y = height - ((val - min) / (max - min)) * (height - 30) - 15;
 return { x, y, val, isProjection: idx >= 5 };
 });
+
 ctx.strokeStyle = '#222230';
 ctx.lineWidth = 1;
 ctx.beginPath();
 ctx.moveTo(0, height / 2);
 ctx.lineTo(width, height / 2);
 ctx.stroke();
+
 ctx.strokeStyle = '#00e676';
 ctx.lineWidth = 2.5;
 ctx.beginPath();
@@ -354,6 +458,7 @@ for (let i = 1; i <= 5; i++) {
 ctx.lineTo(points[i].x, points[i].y);
 }
 ctx.stroke();
+
 ctx.strokeStyle = '#ff2a4b';
 ctx.setLineDash([4, 4]);
 ctx.beginPath();
@@ -363,6 +468,7 @@ ctx.lineTo(points[i].x, points[i].y);
 }
 ctx.stroke();
 ctx.setLineDash([]);
+
 points.forEach((p, idx) => {
 ctx.fillStyle = p.isProjection ? '#ff2a4b' : '#00e676';
 ctx.beginPath();
@@ -370,6 +476,7 @@ ctx.arc(p.x, p.y, idx === 5 || idx === points.length - 1 ? 5 : 3, 0, Math.PI * 2
 ctx.fill();
 });
 };
+
 const startCountdown = () => {
 setInterval(() => {
 const now = new Date();
@@ -385,24 +492,29 @@ const secs = Math.floor((diff / 1000) % 60);
 UI.countdown.textContent = `${days}d ${hours}h ${mins}m ${secs}s`;
 }, 1000);
 };
+
 const renderNewsFeed = () => {
+if (realNews.length === 0) return;
 UI.newsFeed.innerHTML = '';
-MOCK_NEWS.forEach(item => {
+realNews.forEach(item => {
 const el = document.createElement('div');
-el.className = 'glass-panel rounded-xl p-3 flex justify-between items-center';
+el.className = 'glass-panel rounded-xl p-3 flex justify-between items-center cursor-pointer active:scale-98 transition-transform';
+el.onclick = () => window.open(item.url, '_blank');
 el.innerHTML = `
-<div>
+<div class="flex-1 pr-2">
 <div class="flex items-center gap-2 mb-1">
 <span class="text-[9px] font-bold text-accentRed bg-red-950/80 px-1.5 py-0.5 rounded">${item.source}</span>
-<span class="text-[10px] text-gray-500">${item.time}</span>
+<span class="text-[10px] text-gray-500 font-mono">${item.time}</span>
 </div>
-<h4 class="text-xs font-bold text-gray-200 leading-snug">${item.title}</h4>
+<h4 class="text-xs font-bold text-gray-200 leading-snug line-clamp-2">${item.title}</h4>
 </div>
-<span class="text-xs font-mono font-bold text-accentGreen ml-3 whitespace-nowrap">${item.impact}</span>
+<i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-500 flex-shrink-0"></i>
 `;
 UI.newsFeed.appendChild(el);
 });
+lucide.createIcons();
 };
+
 window.addEventListener('resize', drawChart);
 window.onload = initApp;
 </script>
