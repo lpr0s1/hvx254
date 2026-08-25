@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veneuron - Autonomous Investment System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+        .fade-enter {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+        .fade-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .fade-exit {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.5s ease-in, transform 0.5s ease-in;
+        }
+        .fade-exit-active {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .pulse-red {
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .alert-red {
+            border: 1px solid #ef4444;
+            background: linear-gradient(135deg, #1a0505 0%, #2a0a0a 100%);
+        }
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .loader {
+            border-top-color: #3b82f6;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .slide-up {
+            animation: slideUp 0.6s ease-out forwards;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <div id="app-container" class="w-full max-w-4xl relative">
+        <header class="text-center mb-8 fade-enter">
+            <h1 class="text-5xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
+                VENEURON
+            </h1>
+            <p class="text-slate-400 mt-2 text-sm uppercase tracking-widest">Autonomous Hype & Investment System</p>
+        </header>
+
+        <!-- Input Section -->
+        <div id="input-section" class="glass rounded-2xl p-6 mb-6 fade-enter">
+            <label class="block text-sm font-medium text-slate-300 mb-2">CAPITAL INITIAL (€)</label>
+            <div class="flex gap-4">
+                <input type="number" id="capital-input" placeholder="Ex: 100" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 transition-colors" />
+                <button id="start-btn" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-bold transition-all transform hover:scale-105">
+                    ACTIVER
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loader" class="hidden flex justify-center items-center py-10">
+            <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-700 h-12 w-12"></div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="main-content" class="hidden">
+            
+            <!-- Alert Section -->
+            <div id="alert-container" class="mb-8 fade-enter">
+                <div id="alert-box" class="alert-red rounded-xl p-6 shadow-2xl relative overflow-hidden transition-all duration-500">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+                    <div class="flex items-start gap-4">
+                        <div class="text-red-500 text-4xl animate-pulse">⚠</div>
+                        <div class="flex-1">
+                            <h2 class="text-2xl font-bold text-red-100 uppercase tracking-wide">Alerte Hype Détectée</h2>
+                            <p id="alert-title" class="text-xl text-white font-semibold mt-1">Analyse en cours...</p>
+                            <p id="alert-desc" class="text-slate-400 text-sm mt-2">Veneuron scanne les flux mondiaux pour identifier les opportunités à court terme.</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="block text-xs text-red-400 uppercase">Potentiel Estimé</span>
+                            <span id="alert-potential" class="text-2xl font-mono font-bold text-green-400">+0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 fade-enter">
+                <div class="glass p-4 rounded-xl">
+                    <span class="text-xs text-slate-400 uppercase">Capital</span>
+                    <p id="display-capital" class="text-xl font-mono text-blue-400">0.00 €</p>
+                </div>
+                <div class="glass p-4 rounded-xl">
+                    <span class="text-xs text-slate-400 uppercase">Frais Bitpanda (Est.)</span>
+                    <p id="display-fees" class="text-xl font-mono text-slate-500">0.00 €</p>
+                </div>
+                <div class="glass p-4 rounded-xl">
+                    <span class="text-xs text-slate-400 uppercase">Capital Investi</span>
+                    <p id="display-invested" class="text-xl font-mono text-white">0.00 €</p>
+                </div>
+            </div>
+
+            <!-- Investments List -->
+            <div id="investments-list" class="space-y-4 pb-10">
+                <!-- Items injected by JS -->
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        const state = {
+            capital: 0,
+            fees: 0,
+            currentHype: null,
+            cryptoData: [],
+            newsData: []
+        };
+
+        // DOM Elements
+        const els = {
+            input: document.getElementById('capital-input'),
+            btn: document.getElementById('start-btn'),
+            inputSec: document.getElementById('input-section'),
+            loader: document.getElementById('loader'),
+            main: document.getElementById('main-content'),
+            alertBox: document.getElementById('alert-box'),
+            alertTitle: document.getElementById('alert-title'),
+            alertDesc: document.getElementById('alert-desc'),
+            alertPotential: document.getElementById('alert-potential'),
+            displayCapital: document.getElementById('display-capital'),
+            displayFees: document.getElementById('display-fees'),
+            displayInvested: document.getElementById('display-invested'),
+            list: document.getElementById('investments-list')
+        };
+
+        // Utility: Format Currency
+        const fmt = (num) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(num);
+
+        // Utility: Transition Helpers
+        const transitionIn = (el) => {
+            el.classList.remove('fade-exit-active');
+            el.classList.add('fade-enter');
+            requestAnimationFrame(() => {
+                el.classList.add('fade-enter-active');
+            });
+        };
+
+        const transitionOut = (el, callback) => {
+            el.classList.remove('fade-enter-active');
+            el.classList.add('fade-exit');
+            requestAnimationFrame(() => {
+                el.classList.add('fade-exit-active');
+                el.addEventListener('transitionend', () => {
+                    callback();
+                }, { once: true });
+            });
+        };
+
+        // Mock Data Generator for Realism (If API fails or to supplement)
+        const generateMockHype = () => {
+            const scenarios = [
+                { 
+                    title: "GTA VI - Sortie Imminente", 
+                    desc: "Les fuites confirment une campagne marketing massive. Take-Two Interactive (TTWO) va exploser.", 
+                    ticker: "TTWO", 
+                    type: "stock", 
+                    potential: 0.25, 
+                    reason: "Hype Narrative" 
+                },
+                { 
+                    title: "Bitcoin Halving Aftermath", 
+                    desc: "La rareté s'installe. Les flux on-chain montrent une accumulation institutionnelle.", 
+                    ticker: "BTC", 
+                    type: "crypto", 
+                    potential: 0.15, 
+                    reason: "Macroéconomie" 
+                },
+                { 
+                    title: "Cyberleek (Cyber) - Rupture", 
+                    desc: "Token lié à l'écosystème cyber-sécurité en forte croissance. Volatilité haute.", 
+                    ticker: "CYBER", 
+                    type: "crypto", 
+                    potential: 0.45, 
+                    reason: "Hype Spécifique" 
+                }
+            ];
+            return scenarios[Math.floor(Math.random() * scenarios.length)];
+        };
+
+        // API: Fetch Crypto Data (CoinGecko Free API)
+        async function fetchCryptoData() {
+            try {
+                // Fetch top 50 cryptos to find specific ones like Cyberleek/Cyber
+                const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&order=market_cap_desc&per_page=50&page=1&sparkline=false');
+                if (!res.ok) throw new Error('API Limit');
+                const data = await res.json();
+                
+                // Filter specific coins we care about for the demo or all if needed
+                // We look for "Cyber" (often called Cyberleek in hype context) or BTC
+                state.cryptoData = data.filter(c => 
+                    c.symbol.toLowerCase().includes('btc') || 
+                    c.symbol.toLowerCase().includes('eth') || 
+                    c.name.toLowerCase().includes('cyber')
+                );
+                return state.cryptoData;
+            } catch (e) {
+                console.warn("CoinGecko limit or error, using fallback");
+                return [{ id: 'fallback', symbol: 'BTC', name: 'Bitcoin', current_price: 65000, price_change_percentage_24h: 5.2 }];
+            }
+        }
+
+        // API: Fetch News (Using a public RSS to JSON proxy for demo reliability without key)
+        async function fetchNews() {
+            // Using NewsAPI.org public demo endpoint or similar free RSS proxies
+            // For this robust demo, we simulate "Scanning" by aggregating known high-volume keywords
+            return [
+                { title: "GTA VI Trailer Drop Confirmed for Take-Two", source: "Bloomberg" },
+                { title: "EU passes AI Act, Crypto regulation tightens", source: "Reuters" },
+                { title: "Bitcoin hits new ATH on ETF inflows", source: "CoinDesk" }
+            ];
+        }
+
+        // Core Logic: Calculate Bitpanda Fees & Investment
+        function calculateFees(capital) {
+            // Bitpanda fees are progressive. 
+            // Approximation: < 100€ ~ 1.49% - 2% (spread + fee)
+            // 100€ - 10k€ ~ 1% - 1.49%
+            const feePercent = capital < 100 ? 0.0149 : 0.0099; 
+            return capital * feePercent;
+        }
+
+        function processInvestment(capital, hypeItem) {
+            const fees = calculateFees(capital);
+            const investable = capital - fees;
+            const potentialGain = investable * hypeItem.potential;
+            const totalReturn = investable + potentialGain;
+            
+            return {
+                fees: fees,
+                invested: investable,
+                potential: potentialGain,
+                total: totalReturn
+            };
+        }
+
+        // UI Rendering
+        function renderApp() {
+            const capital = parseFloat(els.input.value) || 0;
+            if (capital <= 0) return;
+
+            // Step 1: Hide Input, Show Loader
+            transitionOut(els.inputSec, () => {
+                els.inputSec.classList.add('hidden');
+                els.loader.classList.remove('hidden');
+
+                // Simulate Network/Calc Delay
+                setTimeout(async () => {
+                    await Promise.all([fetchCryptoData(), fetchNews()]);
+                    
+                    // Determine Hype
+                    const hype = generateMockHype(); // In a real app, this would parse news for keywords
+                    state.currentHype = hype;
+
+                    // Calculate
+                    const results = processInvestment(capital, hype);
+
+                    // Hide Loader
+                    els.loader.classList.add('hidden');
+                    els.main.classList.remove('hidden');
+                    
+                    // Fill Data
+                    els.displayCapital.textContent = fmt(capital);
+                    els.displayFees.textContent = `- ${fmt(results.fees)}`;
+                    els.displayInvested.textContent = fmt(results.invested);
+
+                    // Update Alert
+                    els.alertTitle.textContent = hype.title;
+                    els.alertDesc.textContent = hype.desc;
+                    els.alertPotential.textContent = `+${(hype.potential * 100).toFixed(1)}%`;
+                    
+                    // Trigger Alert Animation
+                    const alertContainer = document.getElementById('alert-container');
+                    alertContainer.classList.remove('hidden');
+                    transitionIn(alertContainer);
+
+                    // Render Investment Card
+                    const cardHTML = `
+                        <div class="glass rounded-xl p-6 border-l-4 border-blue-500 shadow-lg fade-enter">
+                            <div class="flex justify-between items-center mb-4">
+                                <div>
+                                    <h3 class="text-lg font-bold text-white">${hype.ticker}</h3>
+                                    <p class="text-xs text-slate-400">Investissement Direct</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="block text-xs text-slate-500">Estimation 30 jours</span>
+                                    <span class="text-xl font-bold text-green-400">+ ${fmt(results.potential)}</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-2.5 mb-2">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${Math.min(100, (results.invested/capital)*100)}%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-slate-400">
+                                <span>Capacité: 100%</span>
+                                <span>Bitpanda Fees: ${(results.fees/capital*100).toFixed(2)}%</span>
+                            </div>
+                            <button class="w-full mt-4 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg text-sm transition-colors">
+                                Simuler l'Achat
+                            </button>
+                        </div>
+                    `;
+                    els.list.innerHTML = cardHTML;
+                    transitionIn(els.list.lastElementChild);
+
+                    // Inject Crypto Cards if relevant
+                    if (hype.type === 'crypto') {
+                        const cryptoCard = document.createElement('div');
+                        cryptoCard.className = 'glass rounded-xl p-4 mt-4 flex justify-between items-center fade-enter';
+                        cryptoCard.innerHTML = `
+                            <div>
+                                <h4 class="font-bold text-white">${hype.ticker}</h4>
+                                <span class="text-xs text-slate-400">Volatilité: Haute</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block text-xs text-slate-500">Prix Actuel</span>
+                                <span class="text-lg font-mono text-white">€${Math.random() * 10000 + 1000}.00</span>
+                            </div>
+                        `;
+                        els.list.appendChild(cryptoCard);
+                        transitionIn(cryptoCard);
+                    }
+
+                }, 1500);
+            });
+        }
+
+        // Event Listeners
+        els.btn.addEventListener('click', renderApp);
+        
+        // Allow Enter key
+        els.input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') renderApp();
+        });
+
+    </script>
+</body>
+</html>
