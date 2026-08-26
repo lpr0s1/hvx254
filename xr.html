@@ -3,30 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Générateur Officiel FR</title>
+    <title>Générateur Officiel Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Police standard pour faire "Vrai" */
-        body { font-family: 'Arial', sans-serif; background: #f3f4f6; }
-        
-        /* Zone d'édition (visible seulement à l'écran) */
+        /* POLICES OFFICIELLES */
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background: #e5e7eb; 
+            -webkit-print-color-adjust: exact !important; /* Force l'impression des couleurs */
+            print-color-adjust: exact !important;
+        }
+
         #editor-panel { transition: all 0.3s; }
         
-        /* Zone de prévisualisation A4 (visible seulement à l'impression/sortie) */
+        /* Zone A4 */
         #preview-area {
             width: 210mm;
             min-height: 297mm;
-            padding: 20mm;
+            padding: 20mm; /* Marges standard */
             background: white;
             margin: 0 auto;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            display: none; /* Caché à l'écran par défaut */
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            display: none; 
+            position: relative;
         }
 
-        /* Styles spécifiques pour l'impression PDF */
+        /* Styles d'impression */
         @media print {
             @page { margin: 0; size: auto; }
-            body { background: white; -webkit-print-color-adjust: exact; }
+            body { background: white; }
             #editor-panel { display: none; }
             #preview-area { 
                 display: block; 
@@ -34,197 +39,229 @@
                 height: 100%; 
                 box-shadow: none; 
                 margin: 0;
-                padding: 0; /* On laisse le CSS du document gérer les marges */
+                padding: 20mm; /* Rétablir les marges pour le PDF */
             }
-            /* Cacher les boutons d'action lors du PDF */
             .no-print { display: none !important; }
         }
 
-        /* Styles de documents spécifiques pour le rendu PDF */
-        .font-officielle { font-family: 'Times New Roman', serif; }
-        .border-officielle { border: 2px solid black; }
+        /* INDICATEUR DE RISQUE */
+        #risk-meter {
+            transition: all 0.3s;
+            font-weight: bold;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.5);
+        }
     </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden">
+<body class="flex flex-col h-screen">
 
-    <!-- INTERFACE DE SAISIE (Mobile Friendly) -->
+    <!-- BARRE D'INFO / RISQUE -->
+    <div class="bg-white shadow-md z-50 p-3 flex justify-between items-center border-b-2 border-gray-200 no-print">
+        <div id="risk-meter" class="px-4 py-2 rounded bg-green-500 text-white text-sm uppercase tracking-wider flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+            <span id="risk-text">Risque: Faible</span>
+        </div>
+        <div class="text-xs text-gray-500 font-mono">Mode: Expert</div>
+    </div>
+
+    <!-- INTERFACE -->
     <div id="editor-panel" class="flex-1 overflow-y-auto p-4 space-y-4">
         
-        <div class="bg-white p-4 rounded shadow-md border border-gray-200">
-            <h2 class="text-xl font-bold mb-4 text-blue-600">Paramètres Généraux</h2>
+        <div class="bg-white p-4 rounded shadow border border-gray-200">
+            <h2 class="text-lg font-bold mb-3 text-gray-800">Configuration</h2>
             
-            <label class="block mb-2 font-semibold">Type de document</label>
-            <select id="docType" class="w-full p-2 border rounded mb-4" onchange="updateTemplate()">
-                <option value="attestation">Attestation de Travail / Domicile</option>
-                <option value="bulletin">Bulletin de Paie (Simplifié)</option>
-                <option value="carnet">Carnet de Santé (Bleu)</option>
-                <option value="diplome">Attestation de Réussite / Diplôme</option>
-                <option value="cpam">Remboursement CPAM (Simplifié)</option>
-            </select>
-
-            <label class="block mb-2 font-semibold">Nom de l'Entité / Émetteur</label>
-            <input type="text" id="inputOrg" class="w-full p-2 border rounded mb-2" placeholder="Ex: Mairie de Paris, SAS Dupont, Hôpital..." oninput="render()">
-            
-            <label class="block mb-2 font-semibold">Adresse de l'entité</label>
-            <input type="text" id="inputOrgAddress" class="w-full p-2 border rounded mb-4" placeholder="12 Rue de la République, 75001..." oninput="render()">
-
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block mb-2 font-semibold">Nom du Bénéficiaire</label>
-                    <input type="text" id="inputName" class="w-full p-2 border rounded mb-2" placeholder="JEAN DUPONT" oninput="render()">
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Type</label>
+                    <select id="docType" class="w-full p-2 border border-gray-300 rounded text-sm" onchange="render()">
+                        <option value="attestation">Attestation Admin / Travail</option>
+                        <option value="bulletin">Bulletin de Paie</option>
+                        <option value="cpam">Feuille de Soins CPAM</option>
+                        <option value="carnet">Carnet de Santé</option>
+                        <option value="diplome">Attestation / Diplôme</option>
+                    </select>
                 </div>
                 <div>
-                    <label class="block mb-2 font-semibold">Prénom</label>
-                    <input type="text" id="inputPrenom" class="w-full p-2 border rounded mb-2" placeholder="JEAN" oninput="render()">
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Date</label>
+                    <input type="date" id="inputDate" class="w-full p-2 border border-gray-300 rounded text-sm" oninput="render()">
                 </div>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block mb-2 font-semibold">Date d'émission</label>
-                    <input type="date" id="inputDate" class="w-full p-2 border rounded" oninput="render()">
-                </div>
-                <div>
-                    <label class="block mb-2 font-semibold">Lieu</label>
-                    <input type="text" id="inputPlace" class="w-full p-2 border rounded" placeholder="Fait à Paris" oninput="render()">
-                </div>
-            </div>
-            
-            <div class="mt-4">
-                <label class="block mb-2 font-semibold">Détails / Contenu spécifique</label>
-                <textarea id="inputDetails" class="w-full p-2 border rounded" rows="3" placeholder="Détails additionnels..." oninput="render()"></textarea>
             </div>
         </div>
 
-        <div class="bg-blue-50 p-4 rounded border border-blue-200">
-            <p class="text-sm text-blue-800 mb-2">💡 Astuce : Le document n'est pas vérifiable sur internet. Il est conçu pour être lu à l'œil nu.</p>
+        <div class="bg-white p-4 rounded shadow border border-gray-200 space-y-3">
+            <h3 class="text-sm font-bold text-gray-500 uppercase border-b pb-2">Émetteur (En-tête)</h3>
+            <input type="text" id="inputOrg" placeholder="Ex: MAIRIE DE PARIS" class="w-full p-2 border border-gray-300 rounded text-sm font-bold" oninput="render()">
+            <input type="text" id="inputOrgAddress" placeholder="Adresse complète" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()">
+            <input type="text" id="inputSiret" placeholder="SIRET (Optionnel pour le style)" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()">
+        </div>
+
+        <div class="bg-white p-4 rounded shadow border border-gray-200 space-y-3">
+            <h3 class="text-sm font-bold text-gray-500 uppercase border-b pb-2">Bénéficiaire</h3>
+            <input type="text" id="inputName" placeholder="NOM" class="w-full p-2 border border-gray-300 rounded text-sm font-bold uppercase" oninput="render()">
+            <input type="text" id="inputPrenom" placeholder="Prénom" class="w-full p-2 border border-gray-300 rounded text-sm" oninput="render()">
+            <textarea id="inputDetails" placeholder="Détails ou motif du document" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()"></textarea>
+        </div>
+
+        <div class="flex justify-center pt-4 no-print">
+            <button onclick="window.print()" class="bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-full font-bold shadow-lg transform transition active:scale-95 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                CRÉER LE DOCUMENT
+            </button>
         </div>
     </div>
 
-    <!-- BOUTONS D'ACTION (En bas sur mobile) -->
-    <div class="p-4 bg-gray-100 border-t flex justify-center gap-4 no-print z-10">
-        <button onclick="window.print()" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg active:scale-95 transition-transform flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2zm-7 8h-2" /></svg>
-            GÉNÉRER PDF / JPG
-        </button>
-    </div>
-
-    <!-- ZONE DE RENDU (Ce qui sera imprimé) -->
-    <div id="preview-area">
-        <!-- Le contenu sera injecté ici par JS -->
-    </div>
+    <!-- RENDU A4 -->
+    <div id="preview-area"></div>
 
     <script>
         // Initialisation
         document.getElementById('inputDate').valueAsDate = new Date();
-        render();
-
-        function updateTemplate() {
-            render();
-        }
+        
+        // URL Image République (Haute résolution, officiel)
+        const REPUBLIC_IMG = 'https://upload.wikimedia.org/wikipedia/commons/c/c3/Coat_of_arms_of_France.svg';
 
         function getVal(id) {
-            return document.getElementById(id).value;
+            const val = document.getElementById(id).value;
+            // Si c'est le nom ou prénom, on force les majuscules si l'utilisateur tape en minuscule
+            if (id === 'inputName' || id === 'inputPrenom') {
+                return val.toUpperCase();
+            }
+            return val;
+        }
+
+        function updateRisk() {
+            const org = document.getElementById('inputOrg').value;
+            const nom = document.getElementById('inputName').value;
+            const prenom = document.getElementById('inputPrenom').value;
+            const date = document.getElementById('inputDate').value;
+            const details = document.getElementById('inputDetails').value;
+
+            let score = 0;
+            if (org) score++;
+            if (nom) score++;
+            if (prenom) score++;
+            if (date) score++;
+            if (details) score++;
+
+            const meter = document.getElementById('risk-meter');
+            const text = document.getElementById('risk-text');
+            
+            // Logique de risque : Moins on remplit, plus c'est suspect
+            if (score < 3) {
+                meter.className = "px-4 py-2 rounded text-white text-sm uppercase tracking-wider flex items-center gap-2 bg-red-600 shadow-inner";
+                text.innerText = "Risque: ÉLEVÉ (Champ vide)";
+            } else if (score < 5) {
+                meter.className = "px-4 py-2 rounded text-white text-sm uppercase tracking-wider flex items-center gap-2 bg-yellow-500 text-black shadow-inner";
+                text.innerText = "Risque: Moyen (Complet mais simple)";
+            } else {
+                meter.className = "px-4 py-2 rounded text-white text-sm uppercase tracking-wider flex items-center gap-2 bg-green-600 shadow-inner";
+                text.innerText = "Risque: FAIBLE (Complet)";
+            }
         }
 
         function render() {
-            const type = document.getElementById('docType').value;
-            const org = getVal('inputOrg') || "[NOM ENTREPRISE]";
-            const orgAddr = getVal('inputOrgAddress') || "[ADRESSE]";
-            const nom = getVal('inputName').toUpperCase();
-            const prenom = getVal('inputPrenom').toUpperCase();
-            const date = getVal('inputDate');
-            const lieu = getVal('inputPlace');
-            const details = getVal('inputDetails');
+            // Mise à jour du risque
+            updateRisk();
 
-            // Formatage de la date française
+            const type = document.getElementById('docType').value;
+            const org = getVal('inputOrg') || "[ENTITÉ]";
+            const orgAddr = getVal('inputOrgAddress');
+            const siret = getVal('inputSiret');
+            const nom = getVal('inputName');
+            const prenom = getVal('inputPrenom');
+            const date = getVal('inputDate');
+            const details = getVal('inputDetails');
+            
+            // Formatage date
             const dateFormatted = new Date(date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
 
             let html = '';
 
-            // --- TEMPLATES ---
-
             if (type === 'attestation') {
                 html = `
-                <div class="font-officielle text-black relative">
-                    <div class="flex justify-between items-end border-b-2 border-black pb-4 mb-8">
+                <div class="font-serif text-black relative h-full flex flex-col justify-between">
+                    <!-- En-tête République -->
+                    <div class="flex justify-between items-center border-b-2 border-black pb-3 mb-8">
                         <div class="text-left">
-                            <h1 class="text-2xl font-bold uppercase">${org}</h1>
-                            <p class="text-sm text-gray-600">${orgAddr}</p>
+                            <h1 class="text-xl font-bold uppercase tracking-widest text-gray-800">${org}</h1>
+                            <p class="text-xs text-gray-600 mt-1">${orgAddr}</p>
+                            ${siret ? `<p class="text-[10px] text-gray-500 mt-1 font-mono">SIRET: ${siret}</p>` : ''}
                         </div>
-                        <div class="text-right">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Coat_of_arms_of_France.svg/1200px-Coat_of_arms_of_France.svg.png" class="w-16 h-auto ml-auto mb-2 opacity-80" alt="République">
-                            <p class="font-bold text-sm">RÉPUBLIQUE FRANÇAISE</p>
+                        <div class="text-right flex items-center gap-2">
+                            <img src="${REPUBLIC_IMG}" class="w-12 h-auto opacity-90" alt="RF">
+                            <div class="text-sm leading-tight">
+                                <span class="font-bold block uppercase">RÉPUBLIQUE FRANÇAISE</span>
+                                <span class="text-xs text-gray-500">Liberté · Égalité · Fraternité</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="text-center my-12">
-                        <h2 class="text-xl font-bold uppercase tracking-widest underline decoration-2 underline-offset-4">Attestation sur l'honneur</h2>
+                    <div class="text-center my-10">
+                        <h2 class="text-2xl font-bold uppercase tracking-widest border-b border-gray-300 inline-block px-8 py-1 mb-6">Attestation sur l'honneur</h2>
                     </div>
 
-                    <p class="text-justify leading-relaxed mb-6">
-                        Je soussigné(e), <strong>${org}</strong>, atteste sur l'honneur que :
-                    </p>
+                    <div class="flex-grow">
+                        <p class="text-justify leading-relaxed text-sm mb-4">
+                            Je soussigné(e), <strong>${org}</strong>, atteste sur l'honneur que :
+                        </p>
 
-                    <div class="my-8 bg-gray-50 p-6 border border-gray-200 text-center">
-                        <p class="text-lg font-bold uppercase mb-2">Monsieur / Madame</p>
-                        <p class="text-2xl font-bold uppercase border-b border-gray-300 inline-block px-4">${nom} ${prenom}</p>
-                        <p class="mt-4 text-sm text-gray-600">Demeurant à :</p>
-                        <p class="text-sm uppercase mt-1">[ADRESSE DU BÉNÉFICIAIRE SI CONNUE]</p>
+                        <div class="my-8 bg-gray-50 p-6 border border-gray-200">
+                            <p class="text-center text-xs uppercase text-gray-500 mb-2">Monsieur / Madame</p>
+                            <p class="text-center text-xl font-bold uppercase border-b border-gray-300 inline-block px-4 min-w-[200px]">${nom} ${prenom}</p>
+                            <p class="mt-4 text-center text-xs text-gray-400">Demeurant à :</p>
+                            <p class="text-center text-sm uppercase mt-1 border-b border-dashed border-gray-300 inline-block px-4 min-w-[200px]">[ADRESSE]</p>
+                        </div>
+
+                        <p class="text-justify leading-relaxed text-sm mb-4">
+                            ${details || 'De satisfaire à toutes les obligations requises par les textes en vigueur et d\'être à jour de ses obligations vis-à-vis de l\'administration compétente.'}
+                        </p>
                     </div>
 
-                    <p class="text-justify leading-relaxed mb-6">
-                        De satisfaire à toutes les obligations requises par les textes en vigueur et d'être à jour de ses obligations vis-à-vis de l'administration.
-                        <br><br>
-                        Cette attestation est délivrée pour servir et valoir ce que de droit.
-                    </p>
-
-                    <div class="mt-12 text-right">
-                        <p>Fait à <strong>${lieu || '[LIEU]'}</strong>,</p>
-                        <p>Le <strong>${dateFormatted}</strong></p>
+                    <div class="mt-8 text-right">
+                        <p>Fait à <strong>[VILLE]</strong>,</p>
+                        <p class="mt-2">Le <strong>${dateFormatted}</strong></p>
                         
-                        <div class="mt-12 w-48 border-t border-black pt-2 text-center text-xs">
-                            Signature<br><br><br>(Cachet et signature)
+                        <div class="mt-12 w-56 border-t border-black pt-2 text-center text-xs text-gray-500">
+                            Signature<br><br>
+                            <div class="bg-gray-100 inline-block px-2 py-1 border border-gray-200 rounded">
+                                [CACHET ICI]
+                            </div>
                         </div>
                     </div>
                 </div>`;
             }
-
+            
             else if (type === 'bulletin') {
                 html = `
-                <div class="font-officielle text-black relative text-sm">
-                    <div class="border-2 border-black p-4 mb-6 bg-gray-100">
-                        <div class="flex justify-between">
-                            <div>
-                                <h1 class="text-xl font-bold uppercase">${org}</h1>
-                                <p class="text-xs">SIRET: 000 000 000 00000</p>
-                                <p class="text-xs">Affilié n°: 1 00 00 00 000 00 00</p>
-                            </div>
-                            <div class="text-right">
-                                <span class="bg-red-600 text-white px-2 py-1 font-bold uppercase text-xs rounded">Bulletin de Paie</span>
-                                <p class="mt-2">Période : ${dateFormatted}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="font-sans text-black relative text-sm">
+                    <div class="border border-gray-800 p-3 mb-4 flex justify-between items-start">
                         <div>
-                            <p class="font-bold border-b border-gray-300 mb-1">BÉNÉFICIAIRE</p>
-                            <p class="font-bold text-lg">${nom} ${prenom}</p>
-                            <p class="text-xs">Catégorie : ${details || 'Cadre'}</p>
+                            <h1 class="text-lg font-bold uppercase">${org}</h1>
+                            <p class="text-xs">SIRET: ${siret || '000 000 000 00000'}</p>
+                            <p class="text-xs">N° Affilié: 1 00 00 00 000 00 00</p>
                         </div>
                         <div class="text-right">
-                             <p class="font-bold border-b border-gray-300 mb-1">RÉFÉRENCE</p>
-                             <p class="text-xs">N°: 2024-${Math.floor(Math.random()*10000)}</p>
+                            <span class="bg-red-700 text-white px-2 py-0.5 font-bold uppercase text-[10px] rounded-sm">Bulletin de Paie</span>
+                            <p class="mt-1 text-xs">Période : ${dateFormatted}</p>
                         </div>
                     </div>
 
-                    <table class="w-full border-collapse border border-gray-400 mb-6">
-                        <thead class="bg-gray-200">
+                    <div class="grid grid-cols-2 gap-4 mb-4 border-b border-gray-300 pb-4">
+                        <div>
+                            <p class="font-bold text-xs uppercase">Bénéficiaire</p>
+                            <p class="font-bold text-base uppercase">${nom} ${prenom}</p>
+                            <p class="text-xs">Poste : ${details || 'Cadre'}</p>
+                        </div>
+                        <div class="text-right">
+                             <p class="font-bold text-xs uppercase">N° Bulletin</p>
+                             <p class="text-xs">2024-${Math.floor(Math.random()*10000)}</p>
+                        </div>
+                    </div>
+
+                    <table class="w-full border-collapse border border-gray-800 text-xs mb-4">
+                        <thead class="bg-gray-200 border-b border-gray-800">
                             <tr>
                                 <th class="border border-gray-600 p-1 text-left">Désignation</th>
                                 <th class="border border-gray-600 p-1 text-right">Base</th>
-                                <th class="border border-gray-600 p-1 text-right">Taux</th>
                                 <th class="border border-gray-600 p-1 text-right">Montant</th>
                             </tr>
                         </thead>
@@ -232,169 +269,137 @@
                             <tr>
                                 <td class="border border-gray-300 p-1">Salaire de base</td>
                                 <td class="border border-gray-300 p-1 text-right">168h</td>
-                                <td class="border border-gray-300 p-1 text-right">100%</td>
                                 <td class="border border-gray-300 p-1 text-right">${details || '1 500,00'}</td>
-                            </tr>
-                            <tr>
-                                <td class="border border-gray-300 p-1">Indemnités</td>
-                                <td class="border border-gray-300 p-1 text-right">-</td>
-                                <td class="border border-gray-300 p-1 text-right">-</td>
-                                <td class="border border-gray-300 p-1 text-right">0,00</td>
                             </tr>
                         </tbody>
                         <tfoot>
-                            <tr class="bg-gray-100 font-bold">
-                                <td class="border border-gray-600 p-1" colspan="3">Net à payer</td>
+                            <tr class="bg-gray-100 font-bold border-t border-black">
+                                <td class="border border-gray-600 p-1" colspan="2">Net à payer</td>
                                 <td class="border border-gray-600 p-1 text-right">${details || '1 500,00'}</td>
                             </tr>
                         </tfoot>
                     </table>
-
-                    <div class="text-xs text-gray-500 mt-4 text-center">
-                        <p>Valable uniquement s'il est signé et cacheté.</p>
-                        <div class="mt-8 text-right">
-                            <p>Fait à ${lieu || 'Paris'}, le ${dateFormatted}</p>
-                            <p class="mt-8 border-t border-black w-32 pt-1 text-center text-[10px]">Signature</p>
-                        </div>
+                    
+                    <div class="text-right mt-8 text-[10px] text-gray-500">
+                        <p>Fait le ${dateFormatted}</p>
                     </div>
                 </div>`;
             }
             
             else if (type === 'cpam') {
                  html = `
-                <div class="font-officielle text-black relative">
-                    <div class="flex justify-between items-start border-b-4 border-blue-600 pb-4 mb-8">
+                <div class="font-sans text-black relative">
+                    <div class="flex justify-between items-start border-b-4 border-blue-700 pb-4 mb-6">
                         <div>
-                            <h1 class="text-3xl font-bold text-blue-800 uppercase tracking-tighter">CPAM</h1>
-                            <p class="text-sm font-bold text-gray-500 uppercase">Caisse Primaire d'Assurance Maladie</p>
+                            <h1 class="text-3xl font-bold text-blue-800 tracking-tight">CPAM</h1>
+                            <p class="text-sm font-bold text-gray-600 uppercase">Caisse Primaire d'Assurance Maladie</p>
                         </div>
                         <div class="text-right">
-                             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Coat_of_arms_of_France.svg/1200px-Coat_of_arms_of_France.svg.png" class="w-12 h-auto opacity-60" alt="">
+                             <img src="${REPUBLIC_IMG}" class="w-10 h-auto opacity-50" alt="">
                         </div>
                     </div>
 
-                    <div class="text-center mb-10">
-                        <h2 class="text-xl font-bold text-blue-900 uppercase">Feuille de Soins - Remboursement</h2>
-                        <p class="text-sm mt-1">Exercice : ${new Date().getFullYear()}</p>
+                    <div class="text-center mb-8">
+                        <h2 class="text-lg font-bold text-blue-900 uppercase border-b border-blue-200 inline-block px-4 py-1">Feuille de Soins - Remboursement</h2>
+                        <p class="text-xs mt-1 text-gray-500">Exercice : ${new Date().getFullYear()}</p>
                     </div>
 
-                    <div class="border-2 border-blue-800 p-4 mb-8 bg-blue-50">
-                        <p class="text-xs font-bold mb-1 uppercase text-blue-900">Ayant droit / Assuré</p>
+                    <div class="border-2 border-blue-800 p-3 mb-6 bg-blue-50">
+                        <p class="text-xs font-bold uppercase mb-1 text-blue-900">Ayant droit / Assuré</p>
                         <p class="text-lg font-bold uppercase">${nom} ${prenom}</p>
-                        <p class="text-sm mt-2">N° Assurance : ${Math.floor(Math.random()*900000000)+100000000}</p>
+                        <p class="text-xs mt-1">N° Assurance : ${Math.floor(Math.random()*900000000)+100000000}</p>
                     </div>
 
-                    <div class="mb-8">
-                        <p class="font-bold border-b border-gray-400 mb-2">Détail des remboursements effectués</p>
-                        <table class="w-full text-sm">
+                    <div class="mb-6">
+                        <table class="w-full text-xs">
                             <tr class="border-b border-gray-200">
                                 <td class="py-2">Consultation Générale</td>
                                 <td class="text-right">23,00 €</td>
-                                <td class="text-right font-bold">100%</td>
+                                <td class="text-right font-bold text-gray-500">100%</td>
                             </tr>
                             <tr class="border-b border-gray-200">
-                                <td class="py-2">Analyses Médicales</td>
+                                <td class="py-2">Analyses</td>
                                 <td class="text-right">45,00 €</td>
-                                <td class="text-right font-bold">70%</td>
-                            </tr>
-                             <tr class="border-b border-gray-200">
-                                <td class="py-2">Radiographie</td>
-                                <td class="text-right">65,00 €</td>
-                                <td class="text-right font-bold">80%</td>
+                                <td class="text-right font-bold text-gray-500">70%</td>
                             </tr>
                         </table>
                     </div>
 
-                    <div class="flex justify-end">
+                    <div class="flex justify-end mt-12">
                         <div class="text-right w-1/2">
-                             <p>Fait à ${lieu || 'Paris'}, le ${dateFormatted}</p>
-                             <div class="mt-8">
-                                 <div class="border border-gray-300 h-24 w-full mb-2 flex items-center justify-center text-gray-300 text-xs italic">
-                                     Visa et Cachet de l'organisme
-                                 </div>
+                             <div class="border border-gray-300 h-20 w-full flex items-center justify-center text-gray-300 text-xs italic border-dashed border-2">
+                                 [CACHET + SIGNATURE CPAM]
                              </div>
                         </div>
                     </div>
                 </div>`;
             }
-
+            
             else if (type === 'carnet') {
                  html = `
-                <div class="font-officielle text-black relative h-full flex flex-col justify-between">
-                    <div class="border-4 border-blue-700 p-6 min-h-[20cm]">
-                        <h1 class="text-center text-2xl font-bold text-blue-800 mb-6 uppercase tracking-widest">Carnet de Santé</h1>
-                        <div class="text-center border-b border-blue-700 pb-4 mb-6">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Coat_of_arms_of_France.svg/1200px-Coat_of_arms_of_France.svg.png" class="w-12 h-auto mx-auto mb-2 opacity-50" alt="">
-                            <p class="font-bold">RÉPUBLIQUE FRANÇAISE</p>
-                            <p class="text-sm">Ministère des Affaires Sociales</p>
+                <div class="font-serif text-black relative h-full flex flex-col">
+                    <div class="border-4 border-blue-800 p-4 min-h-[80vh] flex flex-col justify-between">
+                        <div class="text-center border-b border-blue-200 pb-4 mb-4">
+                            <img src="${REPUBLIC_IMG}" class="w-10 h-auto mx-auto mb-1 opacity-60" alt="">
+                            <h1 class="text-xl font-bold text-blue-900 uppercase tracking-widest">Carnet de Santé</h1>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="grid grid-cols-2 gap-6 mb-8">
                             <div>
-                                <label class="text-xs uppercase font-bold">Nom</label>
-                                <div class="border-b border-gray-400 h-8"></div>
+                                <label class="text-[10px] uppercase font-bold text-gray-500">Nom</label>
+                                <div class="border-b border-gray-400 h-6 mb-2"></div>
+                                <label class="text-[10px] uppercase font-bold text-gray-500">Prénom</label>
+                                <div class="border-b border-gray-400 h-6"></div>
                             </div>
                             <div>
-                                <label class="text-xs uppercase font-bold">Prénom</label>
-                                <div class="border-b border-gray-400 h-8"></div>
-                            </div>
-                             <div>
-                                <label class="text-xs uppercase font-bold">Date de naissance</label>
-                                <div class="border-b border-gray-400 h-8">${dateFormatted}</div>
-                            </div>
-                            <div>
-                                <label class="text-xs uppercase font-bold">Sexe</label>
-                                <div class="border-b border-gray-400 h-8">M / F</div>
+                                <label class="text-[10px] uppercase font-bold text-gray-500">Date de naissance</label>
+                                <div class="border-b border-gray-400 h-6 mb-2">${dateFormatted}</div>
+                                <label class="text-[10px] uppercase font-bold text-gray-500">Sexe</label>
+                                <div class="border-b border-gray-400 h-6">M / F</div>
                             </div>
                         </div>
 
-                        <div class="mt-12 text-center">
-                            <div class="border-2 border-gray-300 p-4 inline-block w-48">
-                                <p class="text-xs text-gray-500 uppercase mb-2">Visa de la Mairie</p>
-                                <div class="font-handwriting text-2xl text-blue-800 rotate-[-5deg]">
+                        <div class="mt-auto text-center">
+                            <div class="border border-gray-400 p-2 inline-block w-full max-w-xs">
+                                <p class="text-[10px] text-gray-500 uppercase">Visa de la Mairie</p>
+                                <div class="font-serif text-xl text-blue-800 rotate-[-3deg] mt-2">
                                     [Cachet ici]
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="bg-gray-100 p-2 text-[10px] text-center border-t border-gray-300">
-                        Édition numérique - Document non certifié
-                    </div>
                 </div>`;
             }
-
+            
             else if (type === 'diplome') {
                  html = `
-                <div class="font-officielle text-black relative p-8 border-[10px] border-double border-gray-800 h-full">
+                <div class="font-serif text-black relative p-4 border-[12px] border-double border-gray-700 h-full">
                     <div class="text-center mb-8">
-                        <h1 class="text-3xl font-serif uppercase tracking-widest mb-2">${org}</h1>
-                        <div class="w-24 h-1 bg-black mx-auto mb-4"></div>
-                        <p class="text-lg italic">Attestation de formation délivrée à</p>
+                        <h1 class="text-2xl font-bold uppercase tracking-widest mb-2">${org}</h1>
+                        <div class="w-16 h-1 bg-black mx-auto mb-4"></div>
+                        <p class="text-sm italic">Attestation de formation délivrée à</p>
                     </div>
 
                     <div class="text-center mb-12">
-                        <h2 class="text-4xl font-bold uppercase tracking-wider mb-2">${nom} ${prenom}</h2>
+                        <h2 class="text-3xl font-bold uppercase tracking-wider mb-2">${nom} ${prenom}</h2>
                     </div>
 
-                    <div class="text-center text-justify max-w-lg mx-auto mb-12">
-                        <p class="text-lg leading-relaxed">
+                    <div class="text-center text-justify max-w-md mx-auto mb-12">
+                        <p class="text-base leading-relaxed">
                             Est habilité à porter le titre de :<br>
-                            <span class="text-xl font-bold uppercase mt-2 block">${details || 'Expert Confirmé'}</span>
-                            <br><br>
-                            Ce document atteste la réussite aux épreuves et l'acquisition des compétences requises, conformément à la réglementation en vigueur.
+                            <span class="text-lg font-bold uppercase mt-2 block">${details || 'Expert Confirmé'}</span>
                         </p>
                     </div>
 
-                    <div class="flex justify-between items-end mt-12">
+                    <div class="flex justify-between items-end mt-8">
                         <div class="w-1/3 text-center">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Coat_of_arms_of_France.svg/1200px-Coat_of_arms_of_France.svg.png" class="w-12 h-auto mb-2 opacity-60 mx-auto" alt="">
-                            <p class="font-bold text-sm">Le Directeur</p>
+                            <img src="${REPUBLIC_IMG}" class="w-8 h-auto mb-2 opacity-60 mx-auto" alt="">
+                            <p class="font-bold text-xs uppercase">Le Directeur</p>
                         </div>
                         <div class="w-1/3 text-right">
-                            <p class="mb-8">Fait à <strong>${lieu || '[VILLE]'}</strong>, le <strong>${dateFormatted}</strong></p>
-                            <div class="border-b border-black w-full h-16 relative">
-                                <span class="absolute bottom-2 right-2 text-gray-300 text-xs rotate-12 font-serif">Signature</span>
+                            <p class="mb-6 text-sm">Fait à <strong>${getVal('inputPlace') || '[VILLE]'}</strong>, le <strong>${dateFormatted}</strong></p>
+                            <div class="border-t border-black w-full h-12 relative">
+                                <span class="absolute bottom-1 right-2 text-gray-400 text-[10px] italic">Signature</span>
                             </div>
                         </div>
                     </div>
