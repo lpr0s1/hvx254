@@ -3,102 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Générateur Officiel Pro</title>
+    <title>Générateur Officiel 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* POLICES OFFICIELLES */
-        body { 
-            font-family: 'Arial', sans-serif; 
-            background: #e5e7eb; 
-            -webkit-print-color-adjust: exact !important; /* Force l'impression des couleurs */
-            print-color-adjust: exact !important;
-        }
-
+        body { font-family: 'Arial', sans-serif; background: #e5e7eb; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         #editor-panel { transition: all 0.3s; }
+        #preview-area { width: 210mm; min-height: 297mm; padding: 20mm; background: white; margin: 0 auto; box-shadow: 0 0 15px rgba(0,0,0,0.1); display: none; position: relative; }
         
-        /* Zone A4 */
-        #preview-area {
-            width: 210mm;
-            min-height: 297mm;
-            padding: 20mm; /* Marges standard */
-            background: white;
-            margin: 0 auto;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            display: none; 
-            position: relative;
-        }
+        /* Police officielle pour le rendu */
+        .font-officiel { font-family: 'Times New Roman', Times, serif; }
+        .font-mono { font-family: 'Courier New', Courier, monospace; }
 
-        /* Styles d'impression */
         @media print {
             @page { margin: 0; size: auto; }
             body { background: white; }
             #editor-panel { display: none; }
-            #preview-area { 
-                display: block; 
-                width: 100%; 
-                height: 100%; 
-                box-shadow: none; 
-                margin: 0;
-                padding: 20mm; /* Rétablir les marges pour le PDF */
-            }
+            #preview-area { display: block; width: 100%; height: 100%; box-shadow: none; margin: 0; padding: 20mm; }
             .no-print { display: none !important; }
-        }
-
-        /* INDICATEUR DE RISQUE */
-        #risk-meter {
-            transition: all 0.3s;
-            font-weight: bold;
-            text-shadow: 0 1px 1px rgba(255,255,255,0.5);
         }
     </style>
 </head>
 <body class="flex flex-col h-screen">
 
-    <!-- BARRE D'INFO / RISQUE -->
+    <!-- Barre de Risque -->
     <div class="bg-white shadow-md z-50 p-3 flex justify-between items-center border-b-2 border-gray-200 no-print">
         <div id="risk-meter" class="px-4 py-2 rounded bg-green-500 text-white text-sm uppercase tracking-wider flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
             <span id="risk-text">Risque: Faible</span>
         </div>
-        <div class="text-xs text-gray-500 font-mono">Mode: Expert</div>
+        <div class="text-xs text-gray-500 font-mono">Mode: Expert 2026</div>
     </div>
 
-    <!-- INTERFACE -->
+    <!-- Interface Saisie -->
     <div id="editor-panel" class="flex-1 overflow-y-auto p-4 space-y-4">
-        
-        <div class="bg-white p-4 rounded shadow border border-gray-200">
-            <h2 class="text-lg font-bold mb-3 text-gray-800">Configuration</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Type</label>
-                    <select id="docType" class="w-full p-2 border border-gray-300 rounded text-sm" onchange="render()">
-                        <option value="attestation">Attestation Admin / Travail</option>
-                        <option value="bulletin">Bulletin de Paie</option>
-                        <option value="cpam">Feuille de Soins CPAM</option>
-                        <option value="carnet">Carnet de Santé</option>
-                        <option value="diplome">Attestation / Diplôme</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Date</label>
-                    <input type="date" id="inputDate" class="w-full p-2 border border-gray-300 rounded text-sm" oninput="render()">
-                </div>
+        <div class="bg-white p-4 rounded shadow border border-gray-200 grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Type</label>
+                <select id="docType" class="w-full p-2 border border-gray-300 rounded text-sm" onchange="render()">
+                    <option value="bulletin">Fiche de Paie 2026 (Officielle)</option>
+                    <option value="attestation">Attestation Admin / Travail</option>
+                    <option value="cpam">Feuille de Soins CPAM</option>
+                    <option value="carnet">Carnet de Santé</option>
+                    <option value="diplome">Attestation / Diplôme</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Date</label>
+                <input type="date" id="inputDate" class="w-full p-2 border border-gray-300 rounded text-sm" oninput="render()">
             </div>
         </div>
 
         <div class="bg-white p-4 rounded shadow border border-gray-200 space-y-3">
-            <h3 class="text-sm font-bold text-gray-500 uppercase border-b pb-2">Émetteur (En-tête)</h3>
-            <input type="text" id="inputOrg" placeholder="Ex: MAIRIE DE PARIS" class="w-full p-2 border border-gray-300 rounded text-sm font-bold" oninput="render()">
+            <h3 class="text-sm font-bold text-gray-500 uppercase border-b pb-2">Entité</h3>
+            <input type="text" id="inputOrg" placeholder="Nom de l'Entreprise" class="w-full p-2 border border-gray-300 rounded text-sm font-bold" oninput="render()">
             <input type="text" id="inputOrgAddress" placeholder="Adresse complète" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()">
-            <input type="text" id="inputSiret" placeholder="SIRET (Optionnel pour le style)" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()">
+            <input type="text" id="inputSiret" placeholder="SIRET" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()">
         </div>
 
         <div class="bg-white p-4 rounded shadow border border-gray-200 space-y-3">
-            <h3 class="text-sm font-bold text-gray-500 uppercase border-b pb-2">Bénéficiaire</h3>
-            <input type="text" id="inputName" placeholder="NOM" class="w-full p-2 border border-gray-300 rounded text-sm font-bold uppercase" oninput="render()">
+            <h3 class="text-sm font-bold text-gray-500 uppercase border-b pb-2">Salarié</h3>
+            <input type="text" id="inputName" placeholder="Nom" class="w-full p-2 border border-gray-300 rounded text-sm font-bold uppercase" oninput="render()">
             <input type="text" id="inputPrenom" placeholder="Prénom" class="w-full p-2 border border-gray-300 rounded text-sm" oninput="render()">
-            <textarea id="inputDetails" placeholder="Détails ou motif du document" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()"></textarea>
+            <input type="text" id="inputPoste" placeholder="Poste / Catégorie" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()">
+            <input type="text" id="inputCodeConvo" placeholder="Code Convention (ex: 1524)" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()">
+        </div>
+
+        <div class="bg-white p-4 rounded shadow border border-gray-200 space-y-3">
+            <h3 class="text-sm font-bold text-gray-500 uppercase border-b pb-2">Paramètres Salaire</h3>
+            <input type="number" id="inputBrut" placeholder="Salaire Brut (€)" class="w-full p-2 border border-gray-300 rounded text-sm font-mono" oninput="render()">
+            <input type="number" id="inputHeures" placeholder="Heures travaillées (ex: 151.67)" class="w-full p-2 border border-gray-300 rounded text-sm font-mono" oninput="render()">
+            <input type="text" id="inputDetails" placeholder="Observations / Détails" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()">
         </div>
 
         <div class="flex justify-center pt-4 no-print">
@@ -109,82 +83,175 @@
         </div>
     </div>
 
-    <!-- RENDU A4 -->
+    <!-- Rendu A4 -->
     <div id="preview-area"></div>
 
     <script>
+        const REPUBLIC_IMG = 'https://upload.wikimedia.org/wikipedia/commons/c/c3/Coat_of_arms_of_France.svg';
+        
         // Initialisation
         document.getElementById('inputDate').valueAsDate = new Date();
-        
-        // URL Image République (Haute résolution, officiel)
-        const REPUBLIC_IMG = 'https://upload.wikimedia.org/wikipedia/commons/c/c3/Coat_of_arms_of_France.svg';
 
         function getVal(id) {
             const val = document.getElementById(id).value;
-            // Si c'est le nom ou prénom, on force les majuscules si l'utilisateur tape en minuscule
-            if (id === 'inputName' || id === 'inputPrenom') {
-                return val.toUpperCase();
-            }
+            if (id === 'inputName' || id === 'inputPrenom') return val.toUpperCase();
             return val;
         }
 
         function updateRisk() {
-            const org = document.getElementById('inputOrg').value;
-            const nom = document.getElementById('inputName').value;
-            const prenom = document.getElementById('inputPrenom').value;
-            const date = document.getElementById('inputDate').value;
-            const details = document.getElementById('inputDetails').value;
+            const org = getVal('inputOrg');
+            const nom = getVal('inputName');
+            const prenom = getVal('inputPrenom');
+            const date = getVal('inputDate');
+            const brut = getVal('inputBrut');
 
             let score = 0;
             if (org) score++;
             if (nom) score++;
             if (prenom) score++;
             if (date) score++;
-            if (details) score++;
+            if (brut && !isNaN(brut)) score++;
 
             const meter = document.getElementById('risk-meter');
             const text = document.getElementById('risk-text');
             
-            // Logique de risque : Moins on remplit, plus c'est suspect
-            if (score < 3) {
+            if (score < 4) {
                 meter.className = "px-4 py-2 rounded text-white text-sm uppercase tracking-wider flex items-center gap-2 bg-red-600 shadow-inner";
-                text.innerText = "Risque: ÉLEVÉ (Champ vide)";
-            } else if (score < 5) {
+                text.innerText = "Risque: ÉLEVÉ (Manque données)";
+            } else if (score < 6) {
                 meter.className = "px-4 py-2 rounded text-white text-sm uppercase tracking-wider flex items-center gap-2 bg-yellow-500 text-black shadow-inner";
-                text.innerText = "Risque: Moyen (Complet mais simple)";
+                text.innerText = "Risque: Moyen";
             } else {
                 meter.className = "px-4 py-2 rounded text-white text-sm uppercase tracking-wider flex items-center gap-2 bg-green-600 shadow-inner";
-                text.innerText = "Risque: FAIBLE (Complet)";
+                text.innerText = "Risque: FAIBLE (Structure complète)";
             }
         }
 
         function render() {
-            // Mise à jour du risque
             updateRisk();
-
             const type = document.getElementById('docType').value;
             const org = getVal('inputOrg') || "[ENTITÉ]";
             const orgAddr = getVal('inputOrgAddress');
             const siret = getVal('inputSiret');
             const nom = getVal('inputName');
             const prenom = getVal('inputPrenom');
+            const poste = getVal('inputPoste');
+            const codeConvo = getVal('inputCodeConvo');
             const date = getVal('inputDate');
+            const brut = parseFloat(getVal('inputBrut')) || 0;
+            const heures = parseFloat(getVal('inputHeures')) || 151.67;
             const details = getVal('inputDetails');
             
-            // Formatage date
             const dateFormatted = new Date(date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+            const idDoc = Math.floor(Math.random() * 10000000).toString();
 
             let html = '';
 
-            if (type === 'attestation') {
+            if (type === 'bulletin') {
+                // Calculs automatiques "fiables"
+                const cotisationSalariée = brut * 0.22; // ~22%
+                const netSocial = brut - cotisationSalariée;
+                const netA Payer = netSocial; // Simplifié pour la vue
+
                 html = `
-                <div class="font-serif text-black relative h-full flex flex-col justify-between">
-                    <!-- En-tête République -->
+                <div class="font-sans text-black text-[10px] leading-tight relative">
+                    <!-- En-tête -->
+                    <div class="border-b border-gray-800 pb-2 mb-2 flex justify-between">
+                        <div>
+                            <h1 class="text-lg font-bold uppercase text-gray-900">${org}</h1>
+                            <p class="text-xs">${orgAddr}</p>
+                            <p class="text-[9px] text-gray-500">SIRET: ${siret || '000 000 000 00000'}</p>
+                        </div>
+                        <div class="text-right">
+                            <img src="${REPUBLIC_IMG}" class="w-8 h-auto inline-block opacity-60" alt="">
+                            <span class="font-bold uppercase text-xs ml-1">Bulletin de Paie</span>
+                            <p class="text-[9px]">Période: ${dateFormatted}</p>
+                        </div>
+                    </div>
+
+                    <!-- Infos Salarié -->
+                    <div class="grid grid-cols-3 gap-2 mb-2 border-b border-gray-300 pb-2">
+                        <div>
+                            <p class="font-bold text-xs uppercase">Salarié</p>
+                            <p class="font-bold text-sm uppercase">${nom} ${prenom}</p>
+                            <p class="text-[9px]">Poste: ${poste || 'Employé'}</p>
+                            <p class="text-[9px]">Convention: ${codeConvo || '1524'}</p>
+                        </div>
+                        <div>
+                            <p class="font-bold text-xs uppercase">Réf</p>
+                            <p class="text-[9px] font-mono">N°: ${idDoc}</p>
+                            <p class="text-[9px]">Affilié: 1 00 00 00 000 00 00</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-xs uppercase">Heures</p>
+                            <p class="text-[9px]">${heures} h</p>
+                            <p class="text-[9px]">Rémunération brute</p>
+                        </div>
+                    </div>
+
+                    <!-- Tableaux Normés -->
+                    <table class="w-full border-collapse border-t border-b border-gray-800 mb-2">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="border border-gray-600 p-1 text-left w-[10px]">N°</th>
+                                <th class="border border-gray-600 p-1 text-left">Désignation</th>
+                                <th class="border border-gray-600 p-1 text-right">Base</th>
+                                <th class="border border-gray-600 p-1 text-right">Montant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-gray-100 font-bold"><td colspan="4" class="border border-gray-600 p-1">1. Salaires et éléments variables</td></tr>
+                            <tr>
+                                <td class="border border-gray-300 p-1 text-center">100</td>
+                                <td class="border border-gray-300 p-1">Salaire de base</td>
+                                <td class="border border-gray-300 p-1 text-right">${heures.toFixed(2)} h</td>
+                                <td class="border border-gray-300 p-1 text-right">${brut.toFixed(2)} €</td>
+                            </tr>
+                            
+                            <tr class="bg-gray-100 font-bold"><td colspan="4" class="border border-gray-600 p-1">2. Cotisations Salariées</td></tr>
+                            <tr>
+                                <td class="border border-gray-300 p-1 text-center">200</td>
+                                <td class="border border-gray-300 p-1">Sécurité sociale</td>
+                                <td class="border border-gray-300 p-1 text-right">${brut.toFixed(2)} €</td>
+                                <td class="border border-gray-300 p-1 text-right text-red-600">-${(brut*0.10).toFixed(2)} €</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-300 p-1 text-center">210</td>
+                                <td class="border border-gray-300 p-1">Retraite Complémentaire</td>
+                                <td class="border border-gray-300 p-1 text-right">${brut.toFixed(2)} €</td>
+                                <td class="border border-gray-300 p-1 text-right text-red-600">-${(brut*0.06).toFixed(2)} €</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-300 p-1 text-center">220</td>
+                                <td class="border border-gray-300 p-1">Assurance chômage</td>
+                                <td class="border border-gray-300 p-1 text-right">${brut.toFixed(2)} €</td>
+                                <td class="border border-gray-300 p-1 text-right text-red-600">-${(brut*0.03).toFixed(2)} €</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Bilan -->
+                    <div class="border border-black p-2 flex justify-between items-center bg-gray-50">
+                        <div class="text-xs">
+                            <p class="font-bold">Net Social: <strong>${netSocial.toFixed(2)} €</strong></p>
+                            <p class="font-bold">Net à Payer: <strong class="text-lg text-black">${netA Payer.toFixed(2)} €</strong></p>
+                        </div>
+                        <div class="text-right w-1/3 border-l border-gray-300 pl-2">
+                            <p class="text-[9px]">Fait à ${getVal('inputPlace') || 'Paris'}, le ${dateFormatted}</p>
+                            <div class="mt-2 border-t border-gray-400 w-full h-8 flex items-center justify-center text-[9px] text-gray-400 italic">
+                                Signature
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+            else if (type === 'attestation') {
+                html = `
+                <div class="font-officiel text-black relative h-full flex flex-col justify-between">
                     <div class="flex justify-between items-center border-b-2 border-black pb-3 mb-8">
                         <div class="text-left">
                             <h1 class="text-xl font-bold uppercase tracking-widest text-gray-800">${org}</h1>
                             <p class="text-xs text-gray-600 mt-1">${orgAddr}</p>
-                            ${siret ? `<p class="text-[10px] text-gray-500 mt-1 font-mono">SIRET: ${siret}</p>` : ''}
                         </div>
                         <div class="text-right flex items-center gap-2">
                             <img src="${REPUBLIC_IMG}" class="w-12 h-auto opacity-90" alt="RF">
@@ -194,98 +261,31 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="text-center my-10">
                         <h2 class="text-2xl font-bold uppercase tracking-widest border-b border-gray-300 inline-block px-8 py-1 mb-6">Attestation sur l'honneur</h2>
                     </div>
-
                     <div class="flex-grow">
                         <p class="text-justify leading-relaxed text-sm mb-4">
                             Je soussigné(e), <strong>${org}</strong>, atteste sur l'honneur que :
                         </p>
-
                         <div class="my-8 bg-gray-50 p-6 border border-gray-200">
                             <p class="text-center text-xs uppercase text-gray-500 mb-2">Monsieur / Madame</p>
                             <p class="text-center text-xl font-bold uppercase border-b border-gray-300 inline-block px-4 min-w-[200px]">${nom} ${prenom}</p>
-                            <p class="mt-4 text-center text-xs text-gray-400">Demeurant à :</p>
-                            <p class="text-center text-sm uppercase mt-1 border-b border-dashed border-gray-300 inline-block px-4 min-w-[200px]">[ADRESSE]</p>
                         </div>
-
                         <p class="text-justify leading-relaxed text-sm mb-4">
-                            ${details || 'De satisfaire à toutes les obligations requises par les textes en vigueur et d\'être à jour de ses obligations vis-à-vis de l\'administration compétente.'}
+                            ${details || 'De satisfaire à toutes les obligations requises par les textes en vigueur.'}
                         </p>
                     </div>
-
                     <div class="mt-8 text-right">
                         <p>Fait à <strong>[VILLE]</strong>,</p>
                         <p class="mt-2">Le <strong>${dateFormatted}</strong></p>
-                        
                         <div class="mt-12 w-56 border-t border-black pt-2 text-center text-xs text-gray-500">
                             Signature<br><br>
-                            <div class="bg-gray-100 inline-block px-2 py-1 border border-gray-200 rounded">
-                                [CACHET ICI]
-                            </div>
+                            <div class="bg-gray-100 inline-block px-2 py-1 border border-gray-200 rounded">[CACHET ICI]</div>
                         </div>
                     </div>
                 </div>`;
             }
-            
-            else if (type === 'bulletin') {
-                html = `
-                <div class="font-sans text-black relative text-sm">
-                    <div class="border border-gray-800 p-3 mb-4 flex justify-between items-start">
-                        <div>
-                            <h1 class="text-lg font-bold uppercase">${org}</h1>
-                            <p class="text-xs">SIRET: ${siret || '000 000 000 00000'}</p>
-                            <p class="text-xs">N° Affilié: 1 00 00 00 000 00 00</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="bg-red-700 text-white px-2 py-0.5 font-bold uppercase text-[10px] rounded-sm">Bulletin de Paie</span>
-                            <p class="mt-1 text-xs">Période : ${dateFormatted}</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 mb-4 border-b border-gray-300 pb-4">
-                        <div>
-                            <p class="font-bold text-xs uppercase">Bénéficiaire</p>
-                            <p class="font-bold text-base uppercase">${nom} ${prenom}</p>
-                            <p class="text-xs">Poste : ${details || 'Cadre'}</p>
-                        </div>
-                        <div class="text-right">
-                             <p class="font-bold text-xs uppercase">N° Bulletin</p>
-                             <p class="text-xs">2024-${Math.floor(Math.random()*10000)}</p>
-                        </div>
-                    </div>
-
-                    <table class="w-full border-collapse border border-gray-800 text-xs mb-4">
-                        <thead class="bg-gray-200 border-b border-gray-800">
-                            <tr>
-                                <th class="border border-gray-600 p-1 text-left">Désignation</th>
-                                <th class="border border-gray-600 p-1 text-right">Base</th>
-                                <th class="border border-gray-600 p-1 text-right">Montant</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="border border-gray-300 p-1">Salaire de base</td>
-                                <td class="border border-gray-300 p-1 text-right">168h</td>
-                                <td class="border border-gray-300 p-1 text-right">${details || '1 500,00'}</td>
-                            </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr class="bg-gray-100 font-bold border-t border-black">
-                                <td class="border border-gray-600 p-1" colspan="2">Net à payer</td>
-                                <td class="border border-gray-600 p-1 text-right">${details || '1 500,00'}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                    
-                    <div class="text-right mt-8 text-[10px] text-gray-500">
-                        <p>Fait le ${dateFormatted}</p>
-                    </div>
-                </div>`;
-            }
-            
             else if (type === 'cpam') {
                  html = `
                 <div class="font-sans text-black relative">
@@ -298,43 +298,21 @@
                              <img src="${REPUBLIC_IMG}" class="w-10 h-auto opacity-50" alt="">
                         </div>
                     </div>
-
                     <div class="text-center mb-8">
                         <h2 class="text-lg font-bold text-blue-900 uppercase border-b border-blue-200 inline-block px-4 py-1">Feuille de Soins - Remboursement</h2>
-                        <p class="text-xs mt-1 text-gray-500">Exercice : ${new Date().getFullYear()}</p>
                     </div>
-
                     <div class="border-2 border-blue-800 p-3 mb-6 bg-blue-50">
                         <p class="text-xs font-bold uppercase mb-1 text-blue-900">Ayant droit / Assuré</p>
                         <p class="text-lg font-bold uppercase">${nom} ${prenom}</p>
-                        <p class="text-xs mt-1">N° Assurance : ${Math.floor(Math.random()*900000000)+100000000}</p>
+                        <p class="text-xs mt-1">N° Assurance: ${Math.floor(Math.random()*900000000)+100000000}</p>
                     </div>
-
-                    <div class="mb-6">
-                        <table class="w-full text-xs">
-                            <tr class="border-b border-gray-200">
-                                <td class="py-2">Consultation Générale</td>
-                                <td class="text-right">23,00 €</td>
-                                <td class="text-right font-bold text-gray-500">100%</td>
-                            </tr>
-                            <tr class="border-b border-gray-200">
-                                <td class="py-2">Analyses</td>
-                                <td class="text-right">45,00 €</td>
-                                <td class="text-right font-bold text-gray-500">70%</td>
-                            </tr>
-                        </table>
-                    </div>
-
                     <div class="flex justify-end mt-12">
                         <div class="text-right w-1/2">
-                             <div class="border border-gray-300 h-20 w-full flex items-center justify-center text-gray-300 text-xs italic border-dashed border-2">
-                                 [CACHET + SIGNATURE CPAM]
-                             </div>
+                             <div class="border border-gray-300 h-20 w-full flex items-center justify-center text-gray-300 text-xs italic border-dashed border-2">[CACHET + SIGNATURE CPAM]</div>
                         </div>
                     </div>
                 </div>`;
             }
-            
             else if (type === 'carnet') {
                  html = `
                 <div class="font-serif text-black relative h-full flex flex-col">
@@ -343,7 +321,6 @@
                             <img src="${REPUBLIC_IMG}" class="w-10 h-auto mx-auto mb-1 opacity-60" alt="">
                             <h1 class="text-xl font-bold text-blue-900 uppercase tracking-widest">Carnet de Santé</h1>
                         </div>
-
                         <div class="grid grid-cols-2 gap-6 mb-8">
                             <div>
                                 <label class="text-[10px] uppercase font-bold text-gray-500">Nom</label>
@@ -358,19 +335,15 @@
                                 <div class="border-b border-gray-400 h-6">M / F</div>
                             </div>
                         </div>
-
                         <div class="mt-auto text-center">
                             <div class="border border-gray-400 p-2 inline-block w-full max-w-xs">
                                 <p class="text-[10px] text-gray-500 uppercase">Visa de la Mairie</p>
-                                <div class="font-serif text-xl text-blue-800 rotate-[-3deg] mt-2">
-                                    [Cachet ici]
-                                </div>
+                                <div class="font-serif text-xl text-blue-800 rotate-[-3deg] mt-2">[Cachet ici]</div>
                             </div>
                         </div>
                     </div>
                 </div>`;
             }
-            
             else if (type === 'diplome') {
                  html = `
                 <div class="font-serif text-black relative p-4 border-[12px] border-double border-gray-700 h-full">
@@ -379,25 +352,19 @@
                         <div class="w-16 h-1 bg-black mx-auto mb-4"></div>
                         <p class="text-sm italic">Attestation de formation délivrée à</p>
                     </div>
-
                     <div class="text-center mb-12">
                         <h2 class="text-3xl font-bold uppercase tracking-wider mb-2">${nom} ${prenom}</h2>
                     </div>
-
                     <div class="text-center text-justify max-w-md mx-auto mb-12">
-                        <p class="text-base leading-relaxed">
-                            Est habilité à porter le titre de :<br>
-                            <span class="text-lg font-bold uppercase mt-2 block">${details || 'Expert Confirmé'}</span>
-                        </p>
+                        <p class="text-base leading-relaxed">Est habilité à porter le titre de: <span class="text-lg font-bold uppercase mt-2 block">${details || 'Expert Confirmé'}</span></p>
                     </div>
-
                     <div class="flex justify-between items-end mt-8">
                         <div class="w-1/3 text-center">
                             <img src="${REPUBLIC_IMG}" class="w-8 h-auto mb-2 opacity-60 mx-auto" alt="">
                             <p class="font-bold text-xs uppercase">Le Directeur</p>
                         </div>
                         <div class="w-1/3 text-right">
-                            <p class="mb-6 text-sm">Fait à <strong>${getVal('inputPlace') || '[VILLE]'}</strong>, le <strong>${dateFormatted}</strong></p>
+                            <p class="mb-6 text-sm">Fait à <strong>[VILLE]</strong>, le <strong>${dateFormatted}</strong></p>
                             <div class="border-t border-black w-full h-12 relative">
                                 <span class="absolute bottom-1 right-2 text-gray-400 text-[10px] italic">Signature</span>
                             </div>
