@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Générateur Officiel 2026</title>
+    <title>Générateur Officiel 2026 v2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Arial', sans-serif; background: #e5e7eb; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -25,7 +25,7 @@
 </head>
 <body class="flex flex-col h-screen">
 
-    <!-- Barre de Risque -->
+    <!-- Barre d'état -->
     <div class="bg-white shadow-md z-50 p-3 flex justify-between items-center border-b-2 border-gray-200 no-print">
         <div id="risk-meter" class="px-4 py-2 rounded bg-green-500 text-white text-sm uppercase tracking-wider flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
@@ -41,7 +41,9 @@
                 <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Type</label>
                 <select id="docType" class="w-full p-2 border border-gray-300 rounded text-sm" onchange="render()">
                     <option value="bulletin">Fiche de Paie 2026 (Officielle)</option>
-                    <option value="attestation">Attestation Admin / Travail</option>
+                    <option value="contrat_cdi">Contrat CDI</option>
+                    <option value="contrat_cdd">Contrat CDD</option>
+                    <option value="attestation">Attestation de Travail (France Travail)</option>
                     <option value="cpam">Feuille de Soins CPAM</option>
                     <option value="carnet">Carnet de Santé</option>
                     <option value="diplome">Attestation / Diplôme</option>
@@ -54,10 +56,11 @@
         </div>
 
         <div class="bg-white p-4 rounded shadow border border-gray-200 space-y-3">
-            <h3 class="text-sm font-bold text-gray-500 uppercase border-b pb-2">Entité</h3>
+            <h3 class="text-sm font-bold text-gray-500 uppercase border-b pb-2">Entité (Employeur)</h3>
             <input type="text" id="inputOrg" placeholder="Nom de l'Entreprise" class="w-full p-2 border border-gray-300 rounded text-sm font-bold" oninput="render()">
             <input type="text" id="inputOrgAddress" placeholder="Adresse complète" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()">
             <input type="text" id="inputSiret" placeholder="SIRET" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()">
+            <input type="text" id="inputPlace" placeholder="Lieu de signature (ex: Paris)" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()">
         </div>
 
         <div class="bg-white p-4 rounded shadow border border-gray-200 space-y-3">
@@ -68,11 +71,24 @@
             <input type="text" id="inputCodeConvo" placeholder="Code Convention (ex: 1524)" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()">
         </div>
 
-        <div class="bg-white p-4 rounded shadow border border-gray-200 space-y-3">
-            <h3 class="text-sm font-bold text-gray-500 uppercase border-b pb-2">Paramètres Salaire</h3>
+        <!-- Champs dynamiques pour la paie -->
+        <div id="paie-fields" class="bg-blue-50 p-4 rounded shadow border border-blue-200 space-y-3">
+            <h3 class="text-sm font-bold text-blue-700 uppercase border-b border-blue-200 pb-2">Paramètres Salaire</h3>
             <input type="number" id="inputBrut" placeholder="Salaire Brut (€)" class="w-full p-2 border border-gray-300 rounded text-sm font-mono" oninput="render()">
             <input type="number" id="inputHeures" placeholder="Heures travaillées (ex: 151.67)" class="w-full p-2 border border-gray-300 rounded text-sm font-mono" oninput="render()">
             <input type="text" id="inputDetails" placeholder="Observations / Détails" class="w-full p-2 border border-gray-300 rounded text-xs" oninput="render()">
+        </div>
+
+        <!-- Champs dynamiques pour les contrats -->
+        <div id="contract-fields" class="hidden bg-purple-50 p-4 rounded shadow border border-purple-200 space-y-3">
+            <h3 class="text-sm font-bold text-purple-700 uppercase border-b border-purple-200 pb-2">Détails du Contrat</h3>
+            <input type="text" id="inputIntitulé" placeholder="Intitulé du poste (ex: Développeur Web)" class="w-full p-2 border border-gray-300 rounded text-sm" oninput="render()">
+            <input type="number" id="inputSalaireBase" placeholder="Salaire de base (ex: 3500)" class="w-full p-2 border border-gray-300 rounded text-sm font-mono" oninput="render()">
+            
+            <div id="cdd-fields" class="hidden">
+                <label class="block text-xs font-bold text-purple-700 mb-1">Date de fin du CDD</label>
+                <input type="date" id="inputDateFinCdd" class="w-full p-2 border border-gray-300 rounded text-sm" oninput="render()">
+            </div>
         </div>
 
         <div class="flex justify-center pt-4 no-print">
@@ -91,6 +107,30 @@
         
         // Initialisation
         document.getElementById('inputDate').valueAsDate = new Date();
+        document.getElementById('inputDateFinCdd').valueAsDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+        document.getElementById('inputPlace').value = 'Paris';
+        document.getElementById('inputCodeConvo').value = '1524';
+        document.getElementById('inputHeures').value = '151.67';
+
+        // Gestion de l'affichage des champs
+        function updateFields() {
+            const type = document.getElementById('docType').value;
+            const isPaie = type === 'bulletin';
+            const isContract = type.startsWith('contrat_');
+            
+            document.getElementById('paie-fields').style.display = isPaie ? 'block' : 'none';
+            document.getElementById('contract-fields').style.display = isContract ? 'block' : 'none';
+            
+            if (isContract) {
+                const isCdd = type === 'contrat_cdd';
+                document.getElementById('cdd-fields').classList.toggle('hidden', !isCdd);
+            }
+
+            render();
+        }
+
+        document.getElementById('docType').addEventListener('change', updateFields);
+        updateFields();
 
         function getVal(id) {
             const val = document.getElementById(id).value;
@@ -103,14 +143,12 @@
             const nom = getVal('inputName');
             const prenom = getVal('inputPrenom');
             const date = getVal('inputDate');
-            const brut = getVal('inputBrut');
-
+            
             let score = 0;
             if (org) score++;
             if (nom) score++;
             if (prenom) score++;
             if (date) score++;
-            if (brut && !isNaN(brut)) score++;
 
             const meter = document.getElementById('risk-meter');
             const text = document.getElementById('risk-text');
@@ -118,9 +156,6 @@
             if (score < 4) {
                 meter.className = "px-4 py-2 rounded text-white text-sm uppercase tracking-wider flex items-center gap-2 bg-red-600 shadow-inner";
                 text.innerText = "Risque: ÉLEVÉ (Manque données)";
-            } else if (score < 6) {
-                meter.className = "px-4 py-2 rounded text-white text-sm uppercase tracking-wider flex items-center gap-2 bg-yellow-500 text-black shadow-inner";
-                text.innerText = "Risque: Moyen";
             } else {
                 meter.className = "px-4 py-2 rounded text-white text-sm uppercase tracking-wider flex items-center gap-2 bg-green-600 shadow-inner";
                 text.innerText = "Risque: FAIBLE (Structure complète)";
@@ -141,6 +176,10 @@
             const brut = parseFloat(getVal('inputBrut')) || 0;
             const heures = parseFloat(getVal('inputHeures')) || 151.67;
             const details = getVal('inputDetails');
+            const lieu = getVal('inputPlace');
+            const intitulé = getVal('inputIntitulé');
+            const salaireBase = getVal('inputSalaireBase');
+            const dateFinCdd = getVal('inputDateFinCdd');
             
             const dateFormatted = new Date(date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
             const idDoc = Math.floor(Math.random() * 10000000).toString();
@@ -148,14 +187,12 @@
             let html = '';
 
             if (type === 'bulletin') {
-                // Calculs automatiques "fiables"
-                const cotisationSalariée = brut * 0.22; // ~22%
+                const cotisationSalariée = brut * 0.22; 
                 const netSocial = brut - cotisationSalariée;
-                const netA Payer = netSocial; // Simplifié pour la vue
+                const netA Payer = netSocial; 
 
                 html = `
                 <div class="font-sans text-black text-[10px] leading-tight relative">
-                    <!-- En-tête -->
                     <div class="border-b border-gray-800 pb-2 mb-2 flex justify-between">
                         <div>
                             <h1 class="text-lg font-bold uppercase text-gray-900">${org}</h1>
@@ -169,7 +206,6 @@
                         </div>
                     </div>
 
-                    <!-- Infos Salarié -->
                     <div class="grid grid-cols-3 gap-2 mb-2 border-b border-gray-300 pb-2">
                         <div>
                             <p class="font-bold text-xs uppercase">Salarié</p>
@@ -189,7 +225,6 @@
                         </div>
                     </div>
 
-                    <!-- Tableaux Normés -->
                     <table class="w-full border-collapse border-t border-b border-gray-800 mb-2">
                         <thead class="bg-gray-200">
                             <tr>
@@ -230,14 +265,13 @@
                         </tbody>
                     </table>
 
-                    <!-- Bilan -->
                     <div class="border border-black p-2 flex justify-between items-center bg-gray-50">
                         <div class="text-xs">
                             <p class="font-bold">Net Social: <strong>${netSocial.toFixed(2)} €</strong></p>
                             <p class="font-bold">Net à Payer: <strong class="text-lg text-black">${netA Payer.toFixed(2)} €</strong></p>
                         </div>
                         <div class="text-right w-1/3 border-l border-gray-300 pl-2">
-                            <p class="text-[9px]">Fait à ${getVal('inputPlace') || 'Paris'}, le ${dateFormatted}</p>
+                            <p class="text-[9px]">Fait à ${lieu || 'Paris'}, le ${dateFormatted}</p>
                             <div class="mt-2 border-t border-gray-400 w-full h-8 flex items-center justify-center text-[9px] text-gray-400 italic">
                                 Signature
                             </div>
@@ -262,26 +296,121 @@
                         </div>
                     </div>
                     <div class="text-center my-10">
-                        <h2 class="text-2xl font-bold uppercase tracking-widest border-b border-gray-300 inline-block px-8 py-1 mb-6">Attestation sur l'honneur</h2>
+                        <h2 class="text-2xl font-bold uppercase tracking-widest border-b border-gray-300 inline-block px-8 py-1 mb-6">Attestation de travail</h2>
                     </div>
                     <div class="flex-grow">
                         <p class="text-justify leading-relaxed text-sm mb-4">
-                            Je soussigné(e), <strong>${org}</strong>, atteste sur l'honneur que :
+                            Je soussigné(e), <strong>${org}</strong>, atteste que :
                         </p>
                         <div class="my-8 bg-gray-50 p-6 border border-gray-200">
                             <p class="text-center text-xs uppercase text-gray-500 mb-2">Monsieur / Madame</p>
                             <p class="text-center text-xl font-bold uppercase border-b border-gray-300 inline-block px-4 min-w-[200px]">${nom} ${prenom}</p>
                         </div>
                         <p class="text-justify leading-relaxed text-sm mb-4">
-                            ${details || 'De satisfaire à toutes les obligations requises par les textes en vigueur.'}
+                            A été employé(e) au sein de notre entreprise du <strong>${new Date(date).toLocaleDateString('fr-FR')}</strong> au poste de <strong>${poste || 'Employé'}</strong>.
                         </p>
                     </div>
                     <div class="mt-8 text-right">
-                        <p>Fait à <strong>[VILLE]</strong>,</p>
+                        <p>Fait à <strong>${lieu || 'Paris'}</strong>,</p>
                         <p class="mt-2">Le <strong>${dateFormatted}</strong></p>
                         <div class="mt-12 w-56 border-t border-black pt-2 text-center text-xs text-gray-500">
                             Signature<br><br>
                             <div class="bg-gray-100 inline-block px-2 py-1 border border-gray-200 rounded">[CACHET ICI]</div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+            else if (type === 'contrat_cdi') {
+                html = `
+                <div class="font-officiel text-black relative text-sm leading-6">
+                    <div class="text-center mb-8">
+                        <h1 class="text-2xl font-bold uppercase tracking-widest underline decoration-2 underline-offset-4">Contrat de Travail à Durée Indéterminée (CDI)</h1>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-8 mb-6">
+                        <div>
+                            <p class="font-bold border-b border-gray-300 mb-1">L'EMPLOYEUR</p>
+                            <p class="font-bold text-base">${org}</p>
+                            <p class="text-xs">Dont: ${orgAddr}</p>
+                            <p class="text-xs">SIRET: ${siret || '000 000 000 00000'}</p>
+                        </div>
+                        <div>
+                            <p class="font-bold border-b border-gray-300 mb-1">LE SALARIÉ</p>
+                            <p class="font-bold text-base">${nom} ${prenom}</p>
+                            <p class="text-xs">Domicilié à: ${getVal('inputOrgAddress') || 'Adresse du salarié'}</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <p class="font-bold border-b border-gray-300 mb-2">ARTICLE 1 - OBJET</p>
+                        <p>Le salarié est engagé en qualité de <strong class="uppercase">${intitulé || poste || 'Employé'}</strong>.</p>
+                    </div>
+
+                    <div class="mb-6">
+                        <p class="font-bold border-b border-gray-300 mb-2">ARTICLE 2 - RÉMUNÉRATION</p>
+                        <p>Le salarié percevra une rémunation brute mensuelle de <strong>${salaireBase || '2500'} €</strong>, versée par virement ou chèque.</p>
+                    </div>
+
+                    <div class="mb-6">
+                        <p class="font-bold border-b border-gray-300 mb-2">ARTICLE 3 - DURÉE DU TRAVAIL</p>
+                        <p>La durée du travail est fixée à 35 heures hebdomadaires.</p>
+                    </div>
+
+                    <div class="flex justify-between items-end mt-12">
+                        <div class="w-1/2">
+                            <p class="mb-2">Le salarié reconnaît avoir reçu le présent contrat.</p>
+                            <div class="border-t border-black w-full h-12"></div>
+                        </div>
+                        <div class="w-1/2 text-right">
+                            <p class="mb-2">Fait à <strong>${lieu || 'Paris'}</strong>, le <strong>${dateFormatted}</strong></p>
+                            <div class="border-t border-black w-48 h-12 inline-block"></div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+            else if (type === 'contrat_cdd') {
+                html = `
+                <div class="font-officiel text-black relative text-sm leading-6">
+                    <div class="text-center mb-8">
+                        <h1 class="text-2xl font-bold uppercase tracking-widest underline decoration-2 underline-offset-4">Contrat de Travail à Durée Déterminée (CDD)</h1>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-8 mb-6">
+                        <div>
+                            <p class="font-bold border-b border-gray-300 mb-1">L'EMPLOYEUR</p>
+                            <p class="font-bold text-base">${org}</p>
+                            <p class="text-xs">Dont: ${orgAddr}</p>
+                            <p class="text-xs">SIRET: ${siret || '000 000 000 00000'}</p>
+                        </div>
+                        <div>
+                            <p class="font-bold border-b border-gray-300 mb-1">LE SALARIÉ</p>
+                            <p class="font-bold text-base">${nom} ${prenom}</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <p class="font-bold border-b border-gray-300 mb-2">ARTICLE 1 - OBJET</p>
+                        <p>Le salarié est engagé en qualité de <strong class="uppercase">${intitulé || poste || 'Employé'}</strong>.</p>
+                    </div>
+
+                    <div class="mb-6">
+                        <p class="font-bold border-b border-gray-300 mb-2">ARTICLE 2 - DURÉE</p>
+                        <p>Ce contrat est conclu pour une durée déterminée, du <strong>${dateFormatted}</strong> au <strong>${dateFinCdd ? new Date(dateFinCdd).toLocaleDateString('fr-FR') : '____'}</strong>.</p>
+                    </div>
+
+                    <div class="mb-6">
+                        <p class="font-bold border-b border-gray-300 mb-2">ARTICLE 3 - RÉMUNÉRATION</p>
+                        <p>Le salarié percevra une rémunation brute mensuelle de <strong>${salaireBase || '2500'} €</strong>.</p>
+                    </div>
+
+                    <div class="flex justify-between items-end mt-12">
+                        <div class="w-1/2">
+                            <p class="mb-2">Le salarié reconnaît avoir reçu le présent contrat.</p>
+                            <div class="border-t border-black w-full h-12"></div>
+                        </div>
+                        <div class="w-1/2 text-right">
+                            <p class="mb-2">Fait à <strong>${lieu || 'Paris'}</strong>, le <strong>${dateFormatted}</strong></p>
+                            <div class="border-t border-black w-48 h-12 inline-block"></div>
                         </div>
                     </div>
                 </div>`;
