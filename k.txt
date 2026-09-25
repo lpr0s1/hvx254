@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Recherche Locale</title>
+    <title>Recherche Fichiers V2</title>
     <HTA:APPLICATION 
-        ID="AppRecherche" 
-        APPLICATIONNAME="Recherche Fichiers" 
+        ID="AppRechercheV2" 
+        APPLICATIONNAME="Recherche Fichiers V2" 
         BORDER="thick" 
         CAPTION="yes" 
         MAXIMIZEBUTTON="no" 
@@ -14,14 +14,13 @@
         SYSMENU="yes" 
         SELECTION="no" 
         NAVIGABLE="no"
-        INNERBORDER="no"
     />
     <style>
         body {
-            background-color: #1e1e1e;
+            background-color: #121212;
             color: #00ff00;
             font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 13px;
             margin: 0;
             padding: 10px;
             overflow: hidden;
@@ -40,17 +39,14 @@
         }
         input[type="text"] {
             flex-grow: 1;
-            background-color: #2d2d2d;
+            background-color: #1e1e1e;
             color: white;
             border: 1px solid #444;
             padding: 8px;
             font-family: inherit;
         }
-        input[type="text"]:focus {
-            outline: 1px solid #00ff00;
-        }
         button {
-            background-color: #333;
+            background-color: #2d2d2d;
             color: #00ff00;
             border: 1px solid #00ff00;
             padding: 8px 15px;
@@ -60,10 +56,7 @@
         }
         button:hover {
             background-color: #00ff00;
-            color: #1e1e1e;
-        }
-        button:active {
-            background-color: #00cc00;
+            color: #121212;
         }
         .console {
             flex-grow: 1;
@@ -75,24 +68,30 @@
             word-break: break-all;
         }
         .log-entry {
-            margin-bottom: 2px;
+            margin-bottom: 3px;
         }
-        .log-info { color: #888; }
+        .log-info { color: #666; }
         .log-success { color: #00ff00; }
         .log-error { color: #ff5555; }
         .path-link {
             color: #ffff00;
             text-decoration: underline;
             cursor: pointer;
+            background-color: #1e1e1e;
+            padding: 0 2px;
         }
         .path-link:hover {
-            color: #ffffff;
             background-color: #333;
         }
     </style>
     <script type="text/javascript">
         var fso = new ActiveXObject("Scripting.FileSystemObject");
         var shell = new ActiveXObject("WScript.Shell");
+
+        // Fonction de trim compatible HTA (sans .trim())
+        String.prototype.ltrim = function() { return this.replace(/^\s+/, ""); };
+        String.prototype.rtrim = function() { return this.replace(/\s+$/, ""); };
+        String.prototype.trim = function() { return this.ltrim().rtrim(); };
 
         function log(msg, type) {
             var div = document.createElement('div');
@@ -103,14 +102,16 @@
         }
 
         function searchFiles() {
-            var input = document.getElementById('searchInput').value.trim();
+            var rawInput = document.getElementById('searchInput').value;
+            var input = rawInput.trim();
+            
             if (!input) {
                 log("Veuillez entrer un terme de recherche.", "error");
                 return;
             }
 
             consoleDiv.innerHTML = "";
-            log("Démarrage de la recherche pour : '" + input + "'", "info");
+            log("Recherche de : '" + input + "'...", "info");
             log("----------------------------------------", "info");
 
             var userDir = shell.ExpandEnvironmentStrings("%USERPROFILE%");
@@ -125,36 +126,43 @@
                         traverseFolder(folderPath, input, function(filePath) {
                             foundCount++;
                             var relativePath = filePath.substring(userDir.length + 1);
-                            var linkHtml = '<span class="path-link" onclick="openFolder(\'' + filePath.substring(0, filePath.lastIndexOf("\\")) + '\')">' + relativePath + '</span>';
+                            var folderPart = filePath.substring(0, filePath.lastIndexOf("\\"));
+                            var fileNamePart = filePath.substring(filePath.lastIndexOf("\\") + 1);
+                            
+                            var linkHtml = '<span class="path-link" onclick="openFolder(\'' + folderPart + '\')">[Ouvrir dossier]</span> ' + relativePath;
                             log(linkHtml, "success");
                         });
                     } catch (e) {
                         errorCount++;
-                        log("Erreur dans " + folder + ": " + e.message, "error");
+                        log("Erreur dans " + folder + " : " + e.message, "error");
                     }
                 } else {
-                    log("Dossier introuvé : " + folder + " (ignoration)", "info");
+                    log("Dossier non trouvé : " + folder, "info");
                 }
             });
 
             log("----------------------------------------", "info");
-            log("Recherche terminée. Fichiers trouvés : " + foundCount + ". Dossiers avec erreurs : " + errorCount, "info");
+            log("Terminé. Fichiers trouvés : " + foundCount + ".", "info");
         }
 
         function traverseFolder(folderPath, searchStr, callback) {
-            var folder = fso.GetFolder(folderPath);
-            var filesEnum = new Enumerator(folder.Files);
-            
-            for (; !filesEnum.atEnd(); filesEnum.moveNext()) {
-                var file = filesEnum.item();
-                if (file.Name.toLowerCase().indexOf(searchStr.toLowerCase()) !== -1) {
-                    callback(file.Path);
+            try {
+                var folder = fso.GetFolder(folderPath);
+                var filesEnum = new Enumerator(folder.Files);
+                
+                for (; !filesEnum.atEnd(); filesEnum.moveNext()) {
+                    var file = filesEnum.item();
+                    if (file.Name.toLowerCase().indexOf(searchStr.toLowerCase()) !== -1) {
+                        callback(file.Path);
+                    }
                 }
-            }
 
-            var subFoldersEnum = new Enumerator(folder.SubFolders);
-            for (; !subFoldersEnum.atEnd(); subFoldersEnum.moveNext()) {
-                traverseFolder(subFoldersEnum.item().Path, searchStr, callback);
+                var subFoldersEnum = new Enumerator(folder.SubFolders);
+                for (; !subFoldersEnum.atEnd(); subFoldersEnum.moveNext()) {
+                    traverseFolder(subFoldersEnum.item().Path, searchStr, callback);
+                }
+            } catch (e) {
+                // Ignore les erreurs d'accès (Permission Denied) pour les dossiers système
             }
         }
 
@@ -162,7 +170,7 @@
             try {
                 shell.Run('explorer /select,"' + folderPath + '"', 1, false);
             } catch (e) {
-                log("Impossible d'ouvrir le dossier : " + e.message, "error");
+                log("Erreur ouverture dossier : " + e.message, "error");
             }
         }
 
@@ -174,8 +182,8 @@
 <body onload="init()">
     <div class="container">
         <div class="input-area">
-            <input type="text" id="searchInput" placeholder="Entrez le nom du fichier (ex: higo)..." onkeydown="if(event.keyCode==13) searchFiles()">
-            <button onclick="searchFiles()">RECHERCHER</button>
+            <input type="text" id="searchInput" placeholder="Nom du fichier (ex: higo)..." onkeydown="if(event.keyCode==13) searchFiles()">
+            <button onclick="searchFiles()">CHERCHER</button>
         </div>
         <div class="console" id="consoleDiv"></div>
     </div>
