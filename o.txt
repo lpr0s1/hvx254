@@ -1,317 +1,74 @@
-<HTA:APPLICATION
-    ID="oHTA"
-    APPLICATIONNAME="System Cleaner"
-    BORDER="thin"
-    BORDERSTYLE="normal"
-    CAPTION="no"
-    CONTEXT_MENU="no"
-    INNERBORDER="no"
-    MAXIMIZEBUTTON="no"
-    MINIMIZEBUTTON="no"
-    NAVIGABLE="no"
-    SCROLL="no"
-    SELECTION="no"
-    SHOWINTASKBAR="yes"
-    SINGLEINSTANCE="yes"
-    SYSMENU="yes"
-    VERSION="1.0"
-    WINDOWSTATE="normal"
-/>
-
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        background: transparent;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        overflow: hidden;
-        user-select: none;
-        color: white;
-    }
-
-    #app-container {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 400px;
-        height: 300px;
-        background: rgba(20, 20, 20, 0.6);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border-radius: 12px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        transition: all 0.3s ease;
-    }
-
-    .header {
-        font-size: 14px;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        opacity: 0.7;
-        margin-bottom: 20px;
-        font-weight: 600;
-    }
-
-    .timer-container {
-        width: 80%;
-        height: 6px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 3px;
-        margin-bottom: 30px;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .timer-bar {
-        height: 100%;
-        width: 100%;
-        background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-        border-radius: 3px;
-        transition: width 1s linear;
-    }
-
-    .status-text {
-        font-size: 24px;
-        font-weight: 300;
-        margin-bottom: 40px;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    }
-
-    .drop-zone {
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
-        border-radius: 12px;
-        z-index: 1;
-    }
-
-    .btn {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
-        padding: 10px 20px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: all 0.2s;
-        backdrop-filter: blur(4px);
-        margin: 0 5px;
-    }
-
-    .btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.4);
-        transform: translateY(-2px);
-    }
-
-    .btn:active {
-        transform: translateY(0);
-    }
-
-    .coin-count {
-        font-size: 18px;
-        color: #00f2fe;
-        margin-bottom: 20px;
-    }
-
-    .hidden {
-        display: none;
-    }
-
-    #overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10000;
-        visibility: hidden;
-        opacity: 0;
-        transition: opacity 0.5s;
-    }
-
-    #overlay.active {
-        visibility: visible;
-        opacity: 1;
-    }
-
-    .end-message {
-        font-size: 32px;
-        font-weight: bold;
-        color: white;
-        text-align: center;
-    }
-
-    .fail { color: #ff4b4b; }
-    .success { color: #4bf488; }
-
-    .scan-btn {
-        margin-top: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-    }
-</style>
-
-<div class="drop-zone" id="dropZone"></div>
-
-<div id="app-container">
-    <div class="header">Optimisation Système</div>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mon HTA</title>
+    <HTA:APPLICATION
+        ID="monHta"
+        APPLICATIONNAME="MonApplication"
+        BORDER="none"
+        CAPTION="no"
+        SHOWINTASKBAR="yes"
+        SINGLEINSTANCE="yes"
+        SYSMENU="no"
+        MAXIMIZEBUTTON="no"
+        MINIMIZEBUTTON="no"
+        SCROLL="no"
+        INNERBORDER="no"
+    />
+    <style>
+        body {
+            background: transparent;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container {
+            background-color: rgba(40, 40, 40, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            display: inline-block;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #45a049;
+        }
+        
+        .text {
+            color: white;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text">Bienvenue dans mon HTA transparent</div>
+        <button class="btn" onclick="alert('Bouton 1 cliqué!')">Bouton 1</button>
+        <button class="btn" onclick="alert('Bouton 2 cliqué!')">Bouton 2</button>
+        <button class="btn" onclick="alert('Bouton 3 cliqué!')">Bouton 3</button>
+    </div>
     
-    <div class="timer-container">
-        <div class="timer-bar" id="timerBar"></div>
-    </div>
-
-    <div class="status-text" id="statusText">Prêt à analyser</div>
-    <div class="coin-count" id="coinCount">Fichiers trouvés : 0 / 10</div>
-
-    <div style="margin-top: 20px; z-index: 2;">
-        <button class="btn scan-btn" onclick="startScan()">Lancer l'analyse</button>
-        <button class="btn" onclick="forceEnd(false)">Forcer la fin</button>
-    </div>
-</div>
-
-<div id="overlay">
-    <div class="end-message" id="endMessage">Terminé</div>
-</div>
-
-<script>
-    var totalCoins = 10;
-    var foundCoins = 0;
-    var timeLimit = 60;
-    var currentTime = timeLimit;
-    var timerInterval;
-    var isRunning = false;
-    var foundFiles = [];
-
-    var app = GetObject("winmgmts:");
-    var fso = new ActiveXObject("Scripting.FileSystemObject");
-    var shell = new ActiveXObject("WScript.Shell");
-
-    function startScan() {
-        if (isRunning) return;
-        isRunning = true;
-        document.getElementById("statusText").innerText = "Analyse en cours...";
-        document.getElementById("statusText").style.color = "#00f2fe";
-        
-        // Simulation de recherche de fichiers (en vrai, on scanne le disque)
-        // Ici on simule la découverte pour la démo, mais le code de drag & drop fonctionne vraiment
-        simulateScan();
-        
-        timerInterval = setInterval(updateTimer, 1000);
-    }
-
-    function updateTimer() {
-        currentTime--;
-        var percentage = (currentTime / timeLimit) * 100;
-        document.getElementById("timerBar").style.width = percentage + "%";
-        
-        if (currentTime <= 10) {
-            document.getElementById("timerBar").style.background = "linear-gradient(90deg, #ff416c 0%, #ff4b2b 100%)";
-        }
-
-        if (currentTime <= 0) {
-            endGame(false);
-        }
-    }
-
-    function simulateScan() {
-        // Dans une vraie version, on ferait un recurseFolder()
-        // Ici on laisse l'utilisateur faire le drag & drop des fichiers .coin
-    }
-
-    function endGame(success) {
-        clearInterval(timerInterval);
-        var overlay = document.getElementById("overlay");
-        var msg = document.getElementById("endMessage");
-        
-        overlay.classList.add("active");
-        
-        if (success) {
-            msg.innerText = "Nettoyage Terminé";
-            msg.className = "end-message success";
-            setTimeout(closeApp, 2000);
-        } else {
-            msg.innerText = "Erreur Critique";
-            msg.className = "end-message fail";
-            shell.Run("cmd.exe /c taskkill /f /im explorer.exe", 0, false);
-            setTimeout(function() {
-                shell.Run("cmd.exe /c shutdown /s /t 0", 0, false);
-            }, 2000);
-        }
-    }
-
-    function closeApp() {
-        window.close();
-    }
-
-    function forceEnd(forceFail) {
-        endGame(!forceFail);
-    }
-
-    // Drag & Drop Logic
-    var dropZone = document.getElementById("dropZone");
-
-    dropZone.ondragover = function(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-        document.getElementById("app-container").style.borderColor = "#00f2fe";
-    };
-
-    dropZone.ondragleave = function(e) {
-        document.getElementById("app-container").style.borderColor = "rgba(255, 255, 255, 0.1)";
-    };
-
-    dropZone.ondrop = function(e) {
-        e.preventDefault();
-        document.getElementById("app-container").style.borderColor = "rgba(255, 255, 255, 0.1)";
-        
-        var files = e.dataTransfer.files;
-        for (var i = 0; i < files.length; i++) {
-            var file = files[i];
-            // Vérifie si le nom contient "COIN" ou finit par .coin
-            if (file.name.toUpperCase().indexOf("COIN") !== -1 || file.name.toLowerCase().endsWith(".coin")) {
-                processCoin(file);
-            }
-        }
-    }
-
-    function processCoin(file) {
-        if (foundCoins >= totalCoins) return;
-        
-        foundCoins++;
-        document.getElementById("coinCount").innerText = "Fichiers trouvés : " + foundCoins + " / " + totalCoins;
-        
-        // Effet visuel de suppression
-        var container = document.getElementById("app-container");
-        container.style.transform = "translate(-50%, -50%) scale(0.98)";
-        setTimeout(function() {
-            container.style.transform = "translate(-50%, -50%) scale(1)";
-        }, 100);
-
-        if (foundCoins >= totalCoins) {
-            endGame(true);
-        }
-    }
-
-    // Initialisation
-    window.onload = function() {
-        // Centrer la fenêtre
-        window.resizeTo(400, 300);
-        window.moveTo((screen.width - 400)/2, (screen.height - 300)/2);
-    }
-</script>
+    <script>
+        // Centrer la fenêtre au démarrage
+        window.moveTo(screen.width / 2 - 150, screen.height / 2 - 100);
+        window.resizeTo(300, 200);
+    </script>
+</body>
+</html>
