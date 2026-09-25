@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recherche Locale</title>
+    <HTA:APPLICATION 
+        ID="AppRecherche" 
+        APPLICATIONNAME="Recherche Fichiers" 
+        BORDER="thick" 
+        CAPTION="yes" 
+        MAXIMIZEBUTTON="no" 
+        MINIMIZEBUTTON="yes" 
+        SHOWINTASKBAR="yes" 
+        SINGLEINSTANCE="yes" 
+        SYSMENU="yes" 
+        SELECTION="no" 
+        NAVIGABLE="no"
+        INNERBORDER="no"
+    />
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            margin: 0;
+            padding: 10px;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 95%;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            background-color: #2d2d2d;
+            color: white;
+            border: 1px solid #444;
+            padding: 8px;
+            font-family: inherit;
+        }
+        input[type="text"]:focus {
+            outline: 1px solid #00ff00;
+        }
+        button {
+            background-color: #333;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #00ff00;
+            color: #1e1e1e;
+        }
+        button:active {
+            background-color: #00cc00;
+        }
+        .console {
+            flex-grow: 1;
+            background-color: #000;
+            border: 1px solid #333;
+            padding: 10px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .log-entry {
+            margin-bottom: 2px;
+        }
+        .log-info { color: #888; }
+        .log-success { color: #00ff00; }
+        .log-error { color: #ff5555; }
+        .path-link {
+            color: #ffff00;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .path-link:hover {
+            color: #ffffff;
+            background-color: #333;
+        }
+    </style>
+    <script type="text/javascript">
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
+        var shell = new ActiveXObject("WScript.Shell");
+
+        function log(msg, type) {
+            var div = document.createElement('div');
+            div.className = 'log-' + (type || 'info');
+            div.innerHTML = msg;
+            consoleDiv.appendChild(div);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        function searchFiles() {
+            var input = document.getElementById('searchInput').value.trim();
+            if (!input) {
+                log("Veuillez entrer un terme de recherche.", "error");
+                return;
+            }
+
+            consoleDiv.innerHTML = "";
+            log("Démarrage de la recherche pour : '" + input + "'", "info");
+            log("----------------------------------------", "info");
+
+            var userDir = shell.ExpandEnvironmentStrings("%USERPROFILE%");
+            var folders = ["Documents", "Downloads", "Pictures"];
+            var foundCount = 0;
+            var errorCount = 0;
+
+            folders.forEach(function(folder) {
+                var folderPath = userDir + "\\" + folder;
+                if (fso.FolderExists(folderPath)) {
+                    try {
+                        traverseFolder(folderPath, input, function(filePath) {
+                            foundCount++;
+                            var relativePath = filePath.substring(userDir.length + 1);
+                            var linkHtml = '<span class="path-link" onclick="openFolder(\'' + filePath.substring(0, filePath.lastIndexOf("\\")) + '\')">' + relativePath + '</span>';
+                            log(linkHtml, "success");
+                        });
+                    } catch (e) {
+                        errorCount++;
+                        log("Erreur dans " + folder + ": " + e.message, "error");
+                    }
+                } else {
+                    log("Dossier introuvé : " + folder + " (ignoration)", "info");
+                }
+            });
+
+            log("----------------------------------------", "info");
+            log("Recherche terminée. Fichiers trouvés : " + foundCount + ". Dossiers avec erreurs : " + errorCount, "info");
+        }
+
+        function traverseFolder(folderPath, searchStr, callback) {
+            var folder = fso.GetFolder(folderPath);
+            var filesEnum = new Enumerator(folder.Files);
+            
+            for (; !filesEnum.atEnd(); filesEnum.moveNext()) {
+                var file = filesEnum.item();
+                if (file.Name.toLowerCase().indexOf(searchStr.toLowerCase()) !== -1) {
+                    callback(file.Path);
+                }
+            }
+
+            var subFoldersEnum = new Enumerator(folder.SubFolders);
+            for (; !subFoldersEnum.atEnd(); subFoldersEnum.moveNext()) {
+                traverseFolder(subFoldersEnum.item().Path, searchStr, callback);
+            }
+        }
+
+        function openFolder(folderPath) {
+            try {
+                shell.Run('explorer /select,"' + folderPath + '"', 1, false);
+            } catch (e) {
+                log("Impossible d'ouvrir le dossier : " + e.message, "error");
+            }
+        }
+
+        function init() {
+            document.getElementById('searchInput').focus();
+        }
+    </script>
+</head>
+<body onload="init()">
+    <div class="container">
+        <div class="input-area">
+            <input type="text" id="searchInput" placeholder="Entrez le nom du fichier (ex: higo)..." onkeydown="if(event.keyCode==13) searchFiles()">
+            <button onclick="searchFiles()">RECHERCHER</button>
+        </div>
+        <div class="console" id="consoleDiv"></div>
+    </div>
+</body>
+</html>
