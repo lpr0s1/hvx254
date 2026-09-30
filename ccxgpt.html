@@ -9,6 +9,8 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Access-Control-Allow-Origin" content="https://hvxsrc.online">
     <title>CcxGPT</title>
+    
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -48,7 +50,7 @@
 <meta name="apple-mobile-web-app-title" content="CcxGPT">
 
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="format-detection" content="telephone=yes">
+<meta name="format-detection" content="telephone=no">
 
 <script type="application/ld+json">
 {
@@ -215,7 +217,6 @@
     <!-- Matomo -->
 <script>
   var _paq = window._paq = window._paq || [];
-  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
   _paq.push(['trackPageView']);
   _paq.push(['enableLinkTracking']);
   (function() {
@@ -243,7 +244,7 @@
         </div>
         <div class="flex items-center gap-2">
           
-          <button onclick="navigator.share({title: 'CcxGPT - AI NON Censurer', url: 'https://hvxsrc.online/ccxgpt'})" class="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800" title="Partager a vos amis">
+          <button onclick="navigator.share({title: 'CcxGPT - AI NON Censurer', url: 'https://hvxsrc.online/ccxgpt'})" id="clearChatBtn" class="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800" title="Effacer la conversation">
 <i class="fa-solid fa-share"></i>
 </button>
             <button onclick="window.location.href=''" id="clearChatBtn" class="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800" title="Effacer la conversation">
@@ -611,7 +612,7 @@
             }
         });
         
-        // Initial state
+    
         sendBtn.disabled = true;
 
     </script>
