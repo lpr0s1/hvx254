@@ -10,15 +10,29 @@
                 <h1>Page introuvable</h1>
                 <style>
                 h1{
-                    color: red;
-                    font-size: 100px;
-                    animation: x 3s infinite;
-                }
-                @keyframes x{
-                  0%{filter: blur(2px); transform: scale(1.0);}
-                  50%{transform: scale(2.5); color: blue; filter: blur(0px); transform: translateX(20px);}
-                  100%{color: red; transform: scale(1.0); filter: blur(2px);}
-                }
+                    background: linear-gradient(
+        90deg,
+        #333 0%,
+        #333 40%,
+        #fff 50%,
+        #333 60%,
+        #333 100%
+    );
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    animation: s 5s linear infinite;
+}
+
+@keyframes s{
+    from{
+       background-position: 100% 0;
+    }
+    to{
+        background-position: -100% 0;
+    }
+}
                 </style>
         </center>
     </body>
