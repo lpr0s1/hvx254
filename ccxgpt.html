@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CcxGPT - Premium UI</title>
-    <meta name="description" content="Interface premium pour CcxGPT">
+    <title>CcxGPT - Real Browser LLM (Web-Local)</title>
+    <meta name="description" content="Interface premium pour CcxGPT avec un modèle IA local réel dans le navigateur (WebAssembly/WASM)">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,6 +18,13 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    
+    <!-- Transformers.js pour faire tourner un vrai modèle local dans le navigateur -->
+    <script type="module">
+        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2';
+        window.transformersPipeline = pipeline;
+        window.transformersEnv = env;
+    </script>
     
     <script>
         tailwind.config = {
@@ -43,23 +50,11 @@
                     },
                     animation: {
                         'fade-in-up': 'fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'gradient-xy': 'gradientXY 8s ease infinite',
                     },
                     keyframes: {
                         fadeInUp: {
                             '0%': { opacity: '0', transform: 'translateY(20px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        gradientXY: {
-                            '0%, 100%': {
-                                'background-size': '400% 400%',
-                                'background-position': 'left center'
-                            },
-                            '50%': {
-                                'background-size': '400% 400%',
-                                'background-position': 'right center'
-                            }
                         }
                     }
                 }
@@ -67,26 +62,19 @@
         }
     </script>
     <style>
-        :root {
-            --bg-color: #09090b;
-        }
+        :root { --bg-color: #09090b; }
         body {
             background-color: var(--bg-color);
             color: #f4f4f5;
             overscroll-behavior-y: none;
-            /* Subtil motif de fond */
             background-image: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
                               radial-gradient(circle at 100% 100%, rgba(56, 189, 248, 0.03) 0%, transparent 50%);
             background-attachment: fixed;
         }
-        
-        /* Scrollbar élégante */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
-
-        /* Utilitaires Glassmorphism */
         .glass {
             background: rgba(24, 24, 27, 0.6);
             backdrop-filter: blur(12px);
@@ -98,18 +86,12 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
         }
-
-        /* Markdown Styling */
         .prose p { margin-bottom: 1rem; line-height: 1.7; }
         .prose strong { color: #fff; font-weight: 600; }
         .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
         .prose ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
         .prose li { margin-bottom: 0.25rem; }
         .prose h1, .prose h2, .prose h3 { color: #fff; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }
-        .prose a { color: #a78bfa; text-decoration: underline; text-underline-offset: 2px; }
-        .prose a:hover { color: #c4b5fd; }
-        
-        /* Code blocks */
         .prose pre {
             background: #0d0d0f !important;
             border: 1px solid #27272a;
@@ -118,23 +100,14 @@
             margin: 1.5rem 0;
             overflow: hidden;
         }
-        .prose code {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85em;
-        }
+        .prose code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; }
         .prose :not(pre) > code {
             background: rgba(255, 255, 255, 0.1);
             padding: 0.2rem 0.4rem;
             border-radius: 0.375rem;
             color: #e4e4e7;
         }
-        .prose pre code {
-            display: block;
-            padding: 1rem;
-            overflow-x: auto;
-            background: transparent !important;
-            color: #e4e4e7;
-        }
+        .prose pre code { display: block; padding: 1rem; overflow-x: auto; background: transparent !important; color: #e4e4e7; }
         .code-header {
             display: flex;
             justify-content: space-between;
@@ -146,157 +119,84 @@
             color: #a1a1aa;
             font-family: 'Inter', sans-serif;
         }
-        .mac-dots {
-            display: flex;
-            gap: 6px;
-        }
-        .mac-dots div {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
-        /* Animations */
+        .mac-dots { display: flex; gap: 6px; }
+        .mac-dots div { width: 10px; height: 10px; border-radius: 50%; }
         .msg-enter { animation: fadeInUp 0.4s ease-out forwards; }
-        
         .typing-indicator span {
-            display: inline-block;
-            width: 5px;
-            height: 5px;
-            background-color: #a1a1aa;
-            border-radius: 50%;
-            margin: 0 2px;
-            animation: typing 1.4s infinite both;
+            display: inline-block; width: 5px; height: 5px; background-color: #a1a1aa; border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite both;
         }
         .typing-indicator span:nth-child(1) { animation-delay: 0s; }
         .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
         .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-        
         @keyframes typing {
             0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
             40% { transform: scale(1); opacity: 1; }
         }
-
-        /* Textarea auto-resize fix */
-        textarea {
-            scrollbar-width: none; /* Firefox */
-        }
-        textarea::-webkit-scrollbar {
-            display: none; /* Chrome/Safari */
-        }
+        textarea { scrollbar-width: none; }
+        textarea::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col font-sans overflow-hidden text-sm md:text-base selection:bg-accent-500/30 selection:text-white">
 
     <header class="flex-none h-16 flex items-center justify-between px-4 md:px-6 glass z-20 border-b border-dark-border shadow-sm">
         <div class="flex items-center gap-3">
-            <div class="relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-[0_0_15px_rgba(99,102,241,0.4)]">
+            <div class="relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 shadow-[0_0_15px_rgba(139,92,246,0.4)]">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 12 2.1 7.1"/><path d="M12 12l9.9 4.9"/></svg>
             </div>
             <div class="flex flex-col">
                 <h1 class="font-bold text-white tracking-tight flex items-center gap-2">
-                    CcxGPT
+                    CcxGPT <span id="modelStatusBadge" class="text-xs px-2 py-0.5 bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded-full font-mono">Chargement du Moteur WASM...</span>
                     <span class="flex h-2 w-2 relative">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        <span id="statusPulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                        <span id="statusDot" class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
                     </span>
                 </h1>
-            </div>
-            
-            <!-- Model Selector -->
-            <div class="hidden md:flex ml-4 bg-dark-surface border border-dark-border rounded-lg p-1">
-                <button id="modelProBtn" class="px-3 py-1 text-xs font-medium rounded-md bg-dark-border text-white transition-colors" onclick="selectModel('gemini-1.5-pro')">
-                    1.5 Pro (Smart)
-                </button>
-                <button id="modelFlashBtn" class="px-3 py-1 text-xs font-medium rounded-md text-dark-muted hover:text-white transition-colors" onclick="selectModel('gemini-3-flash-preview')">
-                    3.0 Flash (Fast)
-                </button>
             </div>
         </div>
         
         <div class="flex items-center gap-1 md:gap-2">
+            <button id="loadModelBtn" class="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-purple-300 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Charger Modèle Local
+            </button>
             <button id="clearChatBtn" class="p-2 text-dark-muted hover:text-white hover:bg-dark-surface rounded-lg transition-all" title="Nouvelle conversation">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
-            </button>
-            <button id="settingsBtn" class="p-2 text-dark-muted hover:text-white hover:bg-dark-surface rounded-lg transition-all" title="Paramètres">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
         </div>
     </header>
 
-    <main id="chatContainer" class="flex-1 overflow-y-auto px-4 py-8 md:p-8 flex flex-col gap-6 relative scroll-smooth w-full max-w-4xl mx-auto z-10 pb-32">
-        
-        <!-- Welcome Screen -->
+    <main id="chatContainer" class="flex-1 overflow-y-auto px-4 py-8 md:p-8 flex flex-col gap-6 relative scroll-smooth w-0 max-w-4xl mx-auto z-10 pb-32" style="width: 100%;">
         <div id="welcomeScreen" class="flex flex-col items-center justify-center h-full min-h-[50vh] msg-enter">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-6 shadow-lg shadow-purple-500/20">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center mb-6 shadow-lg shadow-purple-500/20">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 12 2.1 7.1"/><path d="M12 12l9.9 4.9"/></svg>
             </div>
-            <h2 class="text-2xl md:text-3xl font-semibold mb-2 text-white text-center">Comment puis-je vous aider ?</h2>
-            <p class="text-dark-muted text-center mb-10 max-w-md">L'IA est prête. Posez une question complexe, demandez du code ou générez du texte.</p>
+            <h2 class="text-2xl md:text-3xl font-semibold mb-2 text-white text-center">Moteur IA Réel dans le Navigateur</h2>
+            <p id="welcomeSubtext" class="text-dark-muted text-center mb-10 max-w-md">Aucune API, aucune simulation. Un véritable modèle de langage tourne directement sur votre appareil via WebAssembly (WASM).</p>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
                 <button class="suggestion-btn text-left p-4 rounded-xl bg-dark-surface border border-dark-border hover:bg-dark-border transition-colors flex flex-col gap-2 group">
-                    <span class="text-sm font-medium text-white group-hover:text-accent-500 transition-colors">Explique-moi la physique quantique</span>
-                    <span class="text-xs text-dark-muted">En termes simples, comme si j'avais 10 ans.</span>
+                    <span class="text-sm font-medium text-white group-hover:text-accent-500 transition-colors">Expliquer un concept technique</span>
+                    <span class="text-xs text-dark-muted">Génération locale directe.</span>
                 </button>
                 <button class="suggestion-btn text-left p-4 rounded-xl bg-dark-surface border border-dark-border hover:bg-dark-border transition-colors flex flex-col gap-2 group">
-                    <span class="text-sm font-medium text-white group-hover:text-accent-500 transition-colors">Générer un script Python</span>
-                    <span class="text-xs text-dark-muted">Pour scraper les titres d'une page web.</span>
-                </button>
-                <button class="suggestion-btn text-left p-4 rounded-xl bg-dark-surface border border-dark-border hover:bg-dark-border transition-colors flex flex-col gap-2 group">
-                    <span class="text-sm font-medium text-white group-hover:text-accent-500 transition-colors">Écris un e-mail professionnel</span>
-                    <span class="text-xs text-dark-muted">Pour demander une augmentation à mon boss.</span>
-                </button>
-                <button class="suggestion-btn text-left p-4 rounded-xl bg-dark-surface border border-dark-border hover:bg-dark-border transition-colors flex flex-col gap-2 group">
-                    <span class="text-sm font-medium text-white group-hover:text-accent-500 transition-colors">Brainstorming d'idées</span>
-                    <span class="text-xs text-dark-muted">Trouver un nom pour ma startup tech.</span>
+                    <span class="text-sm font-medium text-white group-hover:text-accent-500 transition-colors">Écrire du code informatique</span>
+                    <span class="text-xs text-dark-muted">Exécution 100% autonome.</span>
                 </button>
             </div>
         </div>
-
     </main>
 
     <div class="fixed bottom-0 left-0 w-full z-20 pointer-events-none">
         <div class="absolute inset-0 bg-gradient-to-t from-[#09090b] via-[#09090b]/80 to-transparent"></div>
         <div class="max-w-4xl mx-auto px-4 pb-6 pt-10 relative pointer-events-auto">
-            
             <div class="relative flex items-end gap-2 glass-input rounded-2xl p-2 focus-within:ring-1 focus-within:ring-accent-500/50 transition-all shadow-xl border border-dark-border">
-                
-                <div class="flex-none p-2 text-dark-muted hover:text-white cursor-pointer transition-colors" title="Joindre un fichier (Simulation)">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                </div>
-                
-                <textarea id="userInput" rows="1" class="w-full max-h-[200px] bg-transparent text-white placeholder-dark-muted border-none outline-none resize-none py-2.5 px-1 font-normal leading-relaxed" placeholder="Envoyer un message à CcxGPT..."></textarea>
-                
-                <button id="sendBtn" class="flex-none p-2 rounded-xl bg-white text-black hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:hover:bg-white disabled:cursor-not-allowed mb-0.5 mr-0.5 flex items-center justify-center">
+                <textarea id="userInput" rows="1" class="w-full max-h-[200px] bg-transparent text-white placeholder-dark-muted border-none outline-none resize-none py-2.5 px-3 font-normal leading-relaxed" placeholder="Cliquez sur 'Charger Modèle Local' puis discutez..."></textarea>
+                <button id="sendBtn" disabled class="flex-none p-2 rounded-xl bg-white text-black hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:hover:bg-white disabled:cursor-not-allowed mb-0.5 mr-0.5 flex items-center justify-center">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
                 </button>
             </div>
-            <div class="text-center mt-2 text-[10px] text-dark-muted">
-                L'IA peut faire des erreurs. Considérez vérifier les informations importantes.
-            </div>
-        </div>
-    </div>
-
-    <div id="settingsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-dark-surface border border-dark-border rounded-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-all duration-300 shadow-2xl" id="settingsContent">
-            <div class="p-5 border-b border-dark-border flex justify-between items-center bg-dark-bg/50">
-                <h3 class="font-semibold text-lg text-white">Paramètres du Modèle</h3>
-                <button id="closeSettingsBtn" class="text-dark-muted hover:text-white transition-colors">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
-            <div class="p-6 space-y-5">
-                <div>
-                    <label class="block text-sm font-medium text-dark-muted mb-2">Instructions Système (Prompt)</label>
-                    <textarea id="systemPromptInput" rows="4" class="w-full bg-dark-bg border border-dark-border rounded-xl p-3 text-sm text-white outline-none focus:border-accent-500 transition-colors resize-none"></textarea>
-                    <p class="text-xs text-dark-muted mt-2">Définit le comportement global de l'IA (personnalité, formatage).</p>
-                </div>
-            </div>
-            <div class="p-5 border-t border-dark-border bg-dark-bg/50 flex justify-end">
-                <button id="saveSettingsBtn" class="bg-white text-black font-medium text-sm py-2 px-6 rounded-lg hover:bg-gray-200 transition-colors">
-                    Enregistrer
-                </button>
+            <div id="loadingStatusText" class="text-center mt-2 text-[11px] text-dark-muted">
+                Appuyez sur "Charger Modèle Local" pour initialiser l'IA dans le navigateur.
             </div>
         </div>
     </div>
@@ -306,23 +206,17 @@
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
         const clearChatBtn = document.getElementById('clearChatBtn');
-        const settingsBtn = document.getElementById('settingsBtn');
-        const settingsModal = document.getElementById('settingsModal');
-        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-        const settingsContent = document.getElementById('settingsContent');
-        const systemPromptInput = document.getElementById('systemPromptInput');
-        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        const loadModelBtn = document.getElementById('loadModelBtn');
         const welcomeScreen = document.getElementById('welcomeScreen');
+        const modelStatusBadge = document.getElementById('modelStatusBadge');
+        const statusPulse = document.getElementById('statusPulse');
+        const statusDot = document.getElementById('statusDot');
+        const loadingStatusText = document.getElementById('loadingStatusText');
         
+        let localGenerator = null;
+        let isModelLoaded = false;
         let chatHistory = [];
-        let currentModel = 'gemini-1.5-pro'; // Modèle par défaut (plus intelligent)
-        
-        // Initialisation du prompt système
-        const defaultSystemPrompt = "Tu es CcxGPT, une IA de pointe développée pour être extrêmement utile, directe et précise. Tu réponds en Markdown. Ton ton est professionnel mais accessible. Si on te demande du code, fournis des explications claires.";
-        let currentSystemPrompt = localStorage.getItem('ccxgpt_v3_prompt') || defaultSystemPrompt;
-        systemPromptInput.value = currentSystemPrompt;
 
-        // Configuration de Marked.js avec Highlight.js
         marked.setOptions({
             highlight: function(code, lang) {
                 const language = hljs.getLanguage(lang) ? lang : 'plaintext';
@@ -333,12 +227,15 @@
             gfm: true
         });
 
-        // Fonction de copie du code
         window.copyCode = function(button) {
             const codeBlock = button.closest('.code-wrapper').querySelector('code');
             const code = codeBlock.innerText;
-            
-            navigator.clipboard.writeText(code).then(() => {
+            const textarea = document.createElement('textarea');
+            textarea.value = code;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
                 const originalHtml = button.innerHTML;
                 button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copié';
                 button.classList.add('text-emerald-400');
@@ -346,18 +243,17 @@
                     button.innerHTML = originalHtml;
                     button.classList.remove('text-emerald-400');
                 }, 2000);
-            }).catch(err => {
-                console.error('Erreur de copie:', err);
-            });
+            } catch (err) {
+                console.error('Erreur', err);
+            }
+            document.body.removeChild(textarea);
         };
 
-        // Rendu personnalisé pour les blocs de code
         const renderer = new marked.Renderer();
         const originalCodeRenderer = renderer.code.bind(renderer);
         renderer.code = function(code, language, isEscaped) {
             const defaultOutput = originalCodeRenderer(code, language, isEscaped);
             const langName = (language || 'TEXTE').toUpperCase();
-            
             return `
             <div class="code-wrapper relative my-4 rounded-xl overflow-hidden border border-dark-border bg-[#0d0d0f]">
                 <div class="code-header">
@@ -377,93 +273,80 @@
         };
         marked.use({ renderer });
 
-        // Redimensionnement automatique du textarea
         userInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 200) + 'px';
-            sendBtn.disabled = this.value.trim() === '';
+            sendBtn.disabled = !isModelLoaded || this.value.trim() === '';
         });
 
-        // Gestion du sélecteur de modèle
-        window.selectModel = function(modelId) {
-            currentModel = modelId;
-            const proBtn = document.getElementById('modelProBtn');
-            const flashBtn = document.getElementById('modelFlashBtn');
+        async function loadLocalModel() {
+            if (isModelLoaded) return;
+            loadModelBtn.disabled = true;
+            loadModelBtn.innerText = "Téléchargement (Xenova/Qwen1.5-0.5B-Chat)...";
+            loadingStatusText.innerText = "Téléchargement des poids du modèle local dans le cache du navigateur (environ 350 Mo)...";
             
-            if (modelId === 'gemini-1.5-pro') {
-                proBtn.className = "px-3 py-1 text-xs font-medium rounded-md bg-dark-border text-white transition-colors";
-                flashBtn.className = "px-3 py-1 text-xs font-medium rounded-md text-dark-muted hover:text-white transition-colors";
-                addSystemMessage("Basculé sur le moteur : Gemini 1.5 Pro (Haute Qualité)");
-            } else {
-                flashBtn.className = "px-3 py-1 text-xs font-medium rounded-md bg-dark-border text-white transition-colors";
-                proBtn.className = "px-3 py-1 text-xs font-medium rounded-md text-dark-muted hover:text-white transition-colors";
-                addSystemMessage("Basculé sur le moteur : Gemini 3.0 Flash (Haute Vitesse)");
+            try {
+                if (!window.transformersPipeline) {
+                    throw new Error("La librairie Transformers.js n'a pas pu être chargée.");
+                }
+                
+                // Utilisation d'un modèle compact ultra rapide supporté directement dans le navigateur
+                localGenerator = await window.transformersPipeline('text-generation', 'Xenova/Qwen1.5-0.5B-Chat', {
+                    progress_callback: (data) => {
+                        if (data.status === 'progress') {
+                            const percent = Math.round(data.progress || 0);
+                            loadingStatusText.innerText = `Téléchargement du modèle... ${percent}% (${Math.round((data.loaded || 0) / 1024 / 1024)} Mo)`;
+                        }
+                    }
+                });
+
+                isModelLoaded = true;
+                modelStatusBadge.className = "text-xs px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full font-mono";
+                modelStatusBadge.innerText = "Modèle Local Actif";
+                statusPulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75";
+                statusDot.className = "relative inline-flex rounded-full h-2 w-2 bg-emerald-500";
+                loadModelBtn.innerText = "Modèle Actif";
+                loadModelBtn.classList.remove('bg-purple-600/20', 'border-purple-500/40', 'text-purple-300');
+                loadModelBtn.classList.add('bg-emerald-600/20', 'border-emerald-500/40', 'text-emerald-300');
+                loadingStatusText.innerText = "Modèle local prêt. Vous pouvez discuter directement.";
+                userInput.placeholder = "Discutez avec votre modèle local...";
+                sendBtn.disabled = userInput.value.trim() === '';
+            } catch (err) {
+                console.error("Erreur chargement modèle:", err);
+                loadModelBtn.disabled = false;
+                loadModelBtn.innerText = "Réessayer";
+                loadingStatusText.innerText = "Erreur de chargement du modèle. Vérifiez votre connexion pour le premier téléchargement.";
+                modelStatusBadge.innerText = "Erreur de Chargement";
             }
-        };
+        }
 
-        // Gestion de la modale des paramètres
-        const openSettings = () => {
-            settingsModal.classList.remove('hidden');
-            settingsModal.classList.add('flex');
-            void settingsModal.offsetWidth;
-            settingsModal.classList.remove('opacity-0');
-            settingsContent.classList.remove('scale-95');
-        };
-
-        const closeSettings = () => {
-            settingsModal.classList.add('opacity-0');
-            settingsContent.classList.add('scale-95');
-            setTimeout(() => {
-                settingsModal.classList.add('hidden');
-                settingsModal.classList.remove('flex');
-            }, 300);
-        };
-
-        settingsBtn.addEventListener('click', openSettings);
-        closeSettingsBtn.addEventListener('click', closeSettings);
-        settingsModal.addEventListener('click', (e) => {
-            if (e.target === settingsModal) closeSettings();
-        });
-
-        saveSettingsBtn.addEventListener('click', () => {
-            currentSystemPrompt = systemPromptInput.value;
-            localStorage.setItem('ccxgpt_v3_prompt', currentSystemPrompt);
-            closeSettings();
-            addSystemMessage("Comportement système mis à jour.");
-        });
+        loadModelBtn.addEventListener('click', loadLocalModel);
 
         clearChatBtn.addEventListener('click', () => {
             chatHistory = [];
-            const msgs = document.querySelectorAll('.chat-msg, .system-msg');
-            msgs.forEach(m => m.remove());
+            document.querySelectorAll('.chat-msg').forEach(m => m.remove());
             if(welcomeScreen) welcomeScreen.style.display = 'flex';
             userInput.focus();
         });
 
-        // Clique sur les suggestions
         document.querySelectorAll('.suggestion-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                userInput.value = btn.querySelector('span:first-child').innerText;
-                userInput.dispatchEvent(new Event('input'));
-                handleSend();
+                if (!isModelLoaded) {
+                    loadLocalModel().then(() => {
+                        userInput.value = btn.querySelector('span:first-child').innerText;
+                        userInput.dispatchEvent(new Event('input'));
+                        handleSend();
+                    });
+                } else {
+                    userInput.value = btn.querySelector('span:first-child').innerText;
+                    userInput.dispatchEvent(new Event('input'));
+                    handleSend();
+                }
             });
         });
 
-        function addSystemMessage(text) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'system-msg flex w-full justify-center msg-enter my-2';
-            wrapper.innerHTML = `<div class="text-xs font-medium text-dark-muted bg-dark-surface border border-dark-border px-4 py-1.5 rounded-full">${text}</div>`;
-            chatContainer.appendChild(wrapper);
-            scrollToBottom();
-        }
-
         function scrollToBottom() {
-            setTimeout(() => {
-                window.scrollTo({
-                    top: document.body.scrollHeight,
-                    behavior: 'smooth'
-                });
-            }, 50);
+            setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 50);
         }
 
         function createTypingIndicator() {
@@ -472,7 +355,7 @@
             wrapper.className = 'chat-msg flex w-full justify-start msg-enter mb-6';
             wrapper.innerHTML = `
                 <div class="flex gap-4 max-w-[85%] md:max-w-[80%]">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center mt-1">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex-shrink-0 flex items-center justify-center mt-1">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 12 2.1 7.1"/><path d="M12 12l9.9 4.9"/></svg>
                     </div>
                     <div class="bg-dark-surface border border-dark-border rounded-2xl p-4 flex items-center">
@@ -501,7 +384,7 @@
                 const parsedContent = marked.parse(content);
                 wrapper.innerHTML = `
                     <div class="flex gap-3 md:gap-4 max-w-[100%] md:max-w-[85%]">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center mt-1 shadow-md shadow-purple-500/20">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex-shrink-0 flex items-center justify-center mt-1 shadow-md shadow-purple-500/20">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 12 2.1 7.1"/><path d="M12 12l9.9 4.9"/></svg>
                         </div>
                         <div class="flex-1 min-w-0 prose prose-invert max-w-none pt-1 text-sm md:text-base text-gray-200">
@@ -512,22 +395,16 @@
             }
             
             chatContainer.appendChild(wrapper);
-            
-            // Appliquer highlight.js sur les nouveaux blocs
             if (role === 'model') {
-                wrapper.querySelectorAll('pre code').forEach((block) => {
-                    hljs.highlightElement(block);
-                });
+                wrapper.querySelectorAll('pre code').forEach((block) => { hljs.highlightElement(block); });
             }
-            
             scrollToBottom();
         }
 
         async function handleSend() {
             const text = userInput.value.trim();
-            if (!text) return;
+            if (!text || !isModelLoaded) return;
 
-            // Reset UI
             userInput.value = '';
             userInput.style.height = 'auto';
             sendBtn.disabled = true;
@@ -535,69 +412,37 @@
             if (welcomeScreen) welcomeScreen.style.display = 'none';
 
             addMessageToChat('user', text);
-            
             chatHistory.push({ role: "user", content: text });
             
             const typingIndicator = createTypingIndicator();
             
             try {
-                const responseText = await callGeminiAPI(chatHistory);
-                typingIndicator.remove();
-                addMessageToChat('model', responseText);
-                chatHistory.push({ role: "assistant", content: responseText });
-            } catch (error) {
-                console.error("API Error:", error);
-                typingIndicator.remove();
-                addSystemMessage(`Erreur de connexion : ${error.message}`);
-                chatHistory.pop(); // Remove the user message from history on failure
-            }
-        }
-
-        // Appel à l'API (avec logique de fallback pour exponential backoff basique)
-        async function callGeminiAPI(history, retries = 2) {
-            const apiKey = ""; // Canvas fournit automatiquement la clé
-            // Utilisation dynamique du modèle choisi par l'utilisateur
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`;
-
-            const contents = history.map(msg => ({
-                role: msg.role === 'assistant' ? 'model' : 'user',
-                parts: [{ text: msg.content }]
-            }));
-
-            const payload = {
-                contents: contents,
-                systemInstruction: {
-                    parts: [{ text: currentSystemPrompt }]
+                // Construction du prompt au format Chat Qwen
+                let promptFormatted = `<|im_start|>system\nYou are a helpful, respectful and honest assistant.<|im_end|>\n`;
+                for (const turn of chatHistory) {
+                    promptFormatted += `<|im_start|>${turn.role === 'user' ? 'user' : 'assistant'}\n${turn.content}<|im_end|>\n`;
                 }
-            };
+                promptFormatted += `<|im_start|>assistant\n`;
 
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                const output = await localGenerator(promptFormatted, {
+                    max_new_tokens: 300,
+                    temperature: 0.7,
+                    do_sample: true,
+                    return_full_text: false
                 });
 
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
-                }
+                typingIndicator.remove();
                 
-                const result = await response.json();
-                const candidate = result.candidates?.[0];
+                let responseText = output[0].generated_text || "Pas de réponse générée.";
+                // Nettoyage des balises du prompt si présentes
+                responseText = responseText.replace(/<\|im_end\|>/g, '').trim();
 
-                if (candidate && candidate.content?.parts?.[0]?.text) {
-                    return candidate.content.parts[0].text;
-                } else {
-                    throw new Error("Format de réponse non reconnu.");
-                }
-            } catch(e) {
-                if (retries > 0) {
-                    // Exponential backoff
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    return callGeminiAPI(history, retries - 1);
-                } else {
-                    throw e;
-                }
+                addMessageToChat('model', responseText);
+                chatHistory.push({ role: "assistant", content: responseText });
+            } catch (err) {
+                console.error("Erreur génération:", err);
+                typingIndicator.remove();
+                addMessageToChat('model', "Une erreur est survenue lors de l'inférence locale.");
             }
         }
 
@@ -605,13 +450,9 @@
         userInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                if (!sendBtn.disabled) {
-                    handleSend();
-                }
+                if (!sendBtn.disabled) { handleSend(); }
             }
         });
-        
-        sendBtn.disabled = true;
     </script>
 </body>
 </html>
