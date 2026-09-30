@@ -5,13 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>CcxGPT</title>
-    
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link rel="canonical" href="https://hvxsrc.online/ccxgpt">
-
 <meta name="title" content="CcxGPT">
 <meta name="description" content="CcxGPT est une intelligence artificielle en ligne permettant de discuter, poser des questions et obtenir des réponses instantanément depuis votre navigateur.">
 <meta name="keywords" content="CcxGPT, IA, intelligence artificielle, chatbot, assistant IA, GPT, AI, conversation IA, chat en ligne, questions réponses">
@@ -23,7 +17,6 @@
 <meta name="googlebot" content="index, follow">
 <meta name="bingbot" content="index, follow">
 <meta name="rating" content="general">
-<meta name="revisit-after" content="1 day">
 
 <meta name="theme-color" content="#0f172a">
 <meta name="color-scheme" content="dark light">
@@ -39,12 +32,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="CcxGPT - Intelligence Artificielle en Ligne">
 <meta name="twitter:description" content="Discutez avec CcxGPT et obtenez des réponses instantanément.">
-
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CcxGPT">
-
-<meta name="mobile-web-app-capable" content="yes">
 
 <script type="application/ld+json">
 {
@@ -100,7 +90,6 @@
     </script>
 
     <style>
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -553,38 +542,24 @@
 
             // Render user message
             addMessageToChat('user', text);
-            
-            // Show loading
             loadingIndicator.classList.remove('hidden');
             chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
-
-            // Prepare history for API
             chatHistory.push({ role: "user", parts: [{ text: text }] });
-
-            // Call API
             try {
                 const responseText = await callGeminiAPI(chatHistory);
-                
-                // Hide loading
                 loadingIndicator.classList.add('hidden');
-                
-                // Render AI message with Markdown
                 addMessageToChat('model', responseText, true);
-                
-                // Add to history
                 chatHistory.push({ role: "model", parts: [{ text: responseText }] });
                 
             } catch (error) {
                 console.error("API Error:", error);
                 loadingIndicator.classList.add('hidden');
                 addMessageToChat('Système', "Erreur de connexion à l'API. Veuillez vérifier votre clé ou votre connexion internet.", false);
-                // Remove the last user message from history so they can retry
                 chatHistory.pop();
             }
         }
 
         async function callGeminiAPI(history) {
-            // Using standard gemini-3-flash-preview as requested in instructions
             const apiKey = userApiKey || ""; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
             
@@ -614,8 +589,6 @@
                 throw new Error("Format de réponse invalide");
             }
         }
-
-        // Event Listeners for submission
         sendBtn.addEventListener('click', handleSend);
         userInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -625,8 +598,6 @@
                 }
             }
         });
-        
-    
         sendBtn.disabled = true;
 
     </script>
