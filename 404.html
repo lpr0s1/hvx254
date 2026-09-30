@@ -26,12 +26,13 @@
 }
 
 @keyframes s{
-    from{
-       transform: scale(0px);
+    0%{
        background-position: 100% 0;
     }
-    to{
-        font-size: 95px;
+    50%{
+        filter: blur(3px);
+    }
+    100%{
         background-position: -50% 0;
     }
 }
