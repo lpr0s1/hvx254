@@ -185,7 +185,7 @@
                 <div class="glass-bubble p-6 rounded-2xl border-l-4 border-l-white flex gap-4 items-start">
                     <svg class="flex-shrink-0 mt-1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
                     <p class="text-sm font-bold text-gray-300 leading-relaxed uppercase tracking-wide">
-                        L'API Pollinations.ai est activée. Aucun token requis. Connexion anonyme et instantanée.
+                        Le moteur natif est activé. Connexion ultra-rapide et stable établie. Aucun token externe requis.
                     </p>
                 </div>
             </div>
@@ -373,36 +373,53 @@
             chatHistory.push({ role: "user", content: text });
             
             try {
-                const responseText = await callPublicAPI(chatHistory);
+                const responseText = await callGeminiAPI(chatHistory);
                 loadingIndicator.classList.add('hidden');
                 addMessageToChat('model', responseText, true);
                 chatHistory.push({ role: "assistant", content: responseText });
             } catch (error) {
+                console.error("Erreur détaillée:", error);
                 loadingIndicator.classList.add('hidden');
-                addSystemMessage("ÉCHEC DE LA CONNEXION. RÉESSAYEZ.");
+                addSystemMessage(`ERREUR : ${error.message || "ÉCHEC DE LA CONNEXION"}`);
                 chatHistory.pop();
             }
         }
 
-        async function callPublicAPI(history) {
-            const messages = [
-                { role: "system", content: currentSystemPrompt },
-                ...history
-            ];
+        async function callGeminiAPI(history) {
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
-            const response = await fetch('https://text.pollinations.ai/openai', {
+            // Conversion de l'historique au format attendu par la nouvelle API
+            const contents = history.map(msg => ({
+                role: msg.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text: msg.content }]
+            }));
+
+            const payload = {
+                contents: contents,
+                systemInstruction: {
+                    parts: [{ text: currentSystemPrompt }]
+                }
+            };
+
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    messages: messages,
-                    model: 'openai',
-                    temperature: 0.7
-                })
+                body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error('API Error');
-            const data = await response.json();
-            return data.choices[0].message.content;
+            if (!response.ok) {
+                throw new Error(`Serveur injoignable (Code: ${response.status})`);
+            }
+            
+            const result = await response.json();
+            const candidate = result.candidates?.[0];
+
+            if (candidate && candidate.content?.parts?.[0]?.text) {
+                return candidate.content.parts[0].text;
+            } else {
+                throw new Error("Réponse inattendue de l'IA.");
+            }
         }
 
         sendBtn.addEventListener('click', handleSend);
