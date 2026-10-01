@@ -43,8 +43,9 @@
         </center>
         <br>
 <br>
+    <br>
 <center>
-<p style="font-size: 120px; color:white;">Redirection dans : </p><span class="j" id="time">3</span>
+<p style="font-size: 90px; color:white;">Redirection dans : </p><span class="j" id="time">3</span>
 </center>
 
 <script>
@@ -58,8 +59,8 @@
     if(np <= 0){
       clearInterval(op);
       xj.innerHTML = 0;
-      
-      window.open("https://hvxsrc.online")
+      xj.style.display = none;
+      window.location.href="https://hvxsrc.online";
     }
   }, 1000);
   
@@ -67,7 +68,7 @@
 
 <style>
   .j {
-  font-size: 120px;
+  font-size: 90px;
   color: white;
 }
 </style>
