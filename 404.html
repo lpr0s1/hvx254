@@ -41,5 +41,35 @@
 }
                 </style>
         </center>
+        <br>
+<br>
+<center>
+<p style="font-size: 40px; color:white;">Redirection dans : </p><span class="j" id="time">3</span>
+</center>
+
+<script>
+  let xj = document.getElementById("time");
+  let np = 3;
+  
+  let op = setInterval(function(){
+    np--;
+    xj.innerHTML = np;
+    
+    if(np <= 0){
+      clearInterval(op);
+      xj.innerHTML = 0;
+      
+      window.open("https://hvxsrc.online", "_blank")
+    }
+  }, 1000);
+  
+</script>
+
+<style>
+  .j {
+  font-size: 40px;
+  color: white;
+}
+</style>
     </body>
 </html>
