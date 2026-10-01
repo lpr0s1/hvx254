@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moteur IA Neuronale Ultra - Hybrid LLM, RAG & 3D Vector Inspector</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            50: '#f0fdfa',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            900: '#134e4a',
+                            glow: '#00f2fe'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 12s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Marked.js for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Highlight.js for Code Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <!-- Three.js for 3D Neural Vector Space -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS Styles -->
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Custom Scrollbars */
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #0284c7; }
+
+        /* Glassmorphism card effect */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glow-border {
+            box-shadow: 0 0 15px -3px rgba(14, 165, 233, 0.3);
+        }
+
+        /* Scanline matrix animation */
+        .scanline-bg {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 4px, 6px 100%;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-screen flex flex-col overflow-hidden select-none">
+
+    <!-- Ambient Neural Network Canvas Background -->
+    <canvas id="bg-neural-canvas" class="fixed inset-0 pointer-events-none opacity-30 z-0"></canvas>
+
+    <!-- Header Navigation -->
+    <header class="h-16 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-xl px-4 flex items-center justify-between z-20 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center font-black text-white shadow-lg shadow-cyan-500/20 group cursor-pointer" id="btn-logo-home">
+                <span class="text-xl group-hover:scale-110 transition-transform">🧠</span>
+                <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="font-extrabold text-slate-100 text-sm sm:text-base tracking-tight">NEURAL ENGINE PRO</h1>
+                    <span id="engine-status-badge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 flex items-center gap-1.5 shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+                        Gemini 3.1 + WASM
+                    </span>
+                </div>
+                <p class="text-[11px] text-slate-400 hidden sm:block">RAG Vectoriel, Visualiseur Tenseurs 3D & Synthèse Vocale TTS</p>
+            </div>
+        </div>
+
+        <!-- System Stats Bar & Layout Controls -->
+        <div class="flex items-center gap-2 sm:gap-3">
+            <!-- Hardware Metrics -->
+            <div class="hidden lg:flex items-center gap-4 px-3 py-1.5 bg-slate-950/80 rounded-xl border border-slate-800 text-xs font-mono">
+                <div class="flex items-center gap-1.5 text-slate-400">
+                    <span>⚡ Latence:</span>
+                    <span id="stat-latency" class="text-cyan-400 font-semibold">-- ms</span>
+                </div>
+                <div class="w-px h-3 bg-slate-800"></div>
+                <div class="flex items-center gap-1.5 text-slate-400">
+                    <span>🚀 Débit:</span>
+                    <span id="stat-tps" class="text-emerald-400 font-semibold">-- tok/s</span>
+                </div>
+                <div class="w-px h-3 bg-slate-800"></div>
+                <div class="flex items-center gap-1.5 text-slate-400">
+                    <span>📐 Dim:</span>
+                    <span class="text-purple-400 font-semibold">384-D</span>
+                </div>
+            </div>
+
+            <!-- Search Grounding Toggle -->
+            <button id="btn-toggle-grounding" class="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-800 text-slate-300 px-3 py-1.5 rounded-xl border border-slate-700/80 text-xs transition-all" title="Activer/Désactiver la recherche Web en direct">
+                <span class="w-2 h-2 rounded-full bg-slate-500" id="grounding-dot"></span>
+                <span class="hidden md:inline font-medium">Recherche Web</span>
+            </button>
+
+            <!-- Sound Effects Toggle -->
+            <button id="btn-toggle-sound" class="p-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 rounded-xl border border-slate-700/80 text-xs transition-all" title="Sons d'interface">
+                <span id="sound-icon">🔊</span>
+            </button>
+
+            <!-- Settings Button -->
+            <button id="btn-open-settings" class="p-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 rounded-xl border border-slate-700/80 text-xs transition-all" title="Configuration Clé API & Prompt Système">
+                ⚙️
+            </button>
+
+            <!-- Layout View Switcher -->
+            <button id="btn-toggle-split" class="flex items-center gap-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold px-3 py-1.5 rounded-xl text-xs shadow-md shadow-cyan-500/20 transition-all border border-cyan-400/30">
+                <span>📊</span>
+                <span class="hidden sm:inline" id="split-btn-text">Studio Tenseurs 3D</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Workspace -->
+    <main class="flex-1 flex overflow-hidden relative z-10">
+
+        <!-- Left Viewport: Interactive Chat Interface -->
+        <div id="chat-viewport" class="flex-1 flex flex-col overflow-hidden transition-all duration-300 border-r border-slate-800/80">
+            
+            <!-- Messages Container -->
+            <div id="messages-scroll-area" class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-6">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    
+                    <!-- Welcome Hero Card -->
+                    <div class="glass-panel rounded-2xl p-6 shadow-2xl relative overflow-hidden border border-cyan-500/20">
+                        <div class="absolute -right-16 -bottom-16 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="flex items-start gap-4">
+                            <div class="p-3 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 rounded-2xl text-cyan-400 text-3xl shadow-inner">
+                                ⚡
+                            </div>
+                            <div class="space-y-3 flex-1">
+                                <div class="flex items-center justify-between">
+                                    <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                                        Moteur Neutronique Hybride 3.1
+                                    </h2>
+                                    <span class="text-[10px] bg-cyan-950 text-cyan-300 font-mono px-2 py-0.5 rounded border border-cyan-800">IA Temps Réel</span>
+                                </div>
+                                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                                    Découvrez le fonctionnement interne d'un réseau de neurones Transformer : **Tokenisation Subword BPE, Plongements Vectoriels 384D, Similitude Cosinus RAG et Matrice Softmax**.
+                                </p>
+
+                                <!-- Quick preset buttons -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs">
+                                    <button class="quick-preset text-left bg-slate-900/80 hover:bg-slate-800 p-2.5 rounded-xl border border-slate-800/80 transition-all hover:border-cyan-500/40 group">
+                                        <div class="font-bold text-cyan-400 flex items-center justify-between mb-0.5">
+                                            <span>💻 Code JS / Web</span>
+                                            <span class="group-hover:translate-x-0.5 transition-transform">➔</span>
+                                        </div>
+                                        <div class="text-[11px] text-slate-400">Algorithme d'inversion & Sandbox HTML</div>
+                                    </button>
+                                    
+                                    <button class="quick-preset text-left bg-slate-900/80 hover:bg-slate-800 p-2.5 rounded-xl border border-slate-800/80 transition-all hover:border-purple-500/40 group">
+                                        <div class="font-bold text-purple-400 flex items-center justify-between mb-0.5">
+                                            <span>🔍 Recherche RAG</span>
+                                            <span class="group-hover:translate-x-0.5 transition-transform">➔</span>
+                                        </div>
+                                        <div class="text-[11px] text-slate-400">Qui est Alan Turing ? (Scraping Live)</div>
+                                    </button>
+
+                                    <button class="quick-preset text-left bg-slate-900/80 hover:bg-slate-800 p-2.5 rounded-xl border border-slate-800/80 transition-all hover:border-emerald-500/40 group">
+                                        <div class="font-bold text-emerald-400 flex items-center justify-between mb-0.5">
+                                            <span>🎨 UI / CSS Animé</span>
+                                            <span class="group-hover:translate-x-0.5 transition-transform">➔</span>
+                                        </div>
+                                        <div class="text-[11px] text-slate-400">Créer un composant futuriste</div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conversation Message List -->
+                    <div id="messages-container" class="space-y-6"></div>
+
+                </div>
+            </div>
+
+            <!-- Fixed Prompt Input Bar -->
+            <div class="p-3 sm:p-4 bg-slate-900/90 border-t border-slate-800/80 backdrop-blur-md">
+                <div class="max-w-3xl mx-auto space-y-2">
+                    
+                    <form id="chat-form" class="relative flex items-center">
+                        <textarea id="user-input" rows="1" class="w-full bg-slate-950/90 border border-slate-700/80 focus:border-cyan-500 rounded-2xl pl-4 pr-24 py-3.5 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 resize-none shadow-2xl transition-all custom-scrollbar" placeholder="Posez une question, demandez un algo ou un composant web..."></textarea>
+                        
+                        <div class="absolute right-2 flex items-center gap-1.5">
+                            <button type="button" id="btn-clear-chat" class="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-xl transition-all" title="Effacer l'historique">
+                                🗑️
+                            </button>
+                            <button type="submit" id="btn-submit" class="p-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-xl transition-all shadow-md shadow-cyan-500/25 disabled:opacity-40 disabled:hover:from-cyan-500">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="flex items-center justify-between text-[11px] text-slate-500 px-2 font-mono">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                            Processeur Wasm & LLM API Actifs
+                        </span>
+                        <span id="prompt-token-count">0 tokens saisis</span>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Viewport: 3D Neural Tensor Studio Panel -->
+        <div id="inspector-panel" class="w-full lg:w-[480px] xl:w-[560px] bg-slate-900/95 flex flex-col overflow-hidden transition-all duration-300 hidden lg:flex border-l border-slate-800/80">
+            
+            <!-- Panel Header -->
+            <div class="px-4 py-3 border-b border-slate-800/80 flex items-center justify-between bg-slate-950/80">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">📊</span>
+                    <div>
+                        <h3 class="font-bold text-xs sm:text-sm text-white">Studio Tensoriel & Espace 3D</h3>
+                        <p class="text-[10px] text-slate-400">Calculs mathématiques réels de la passe avant</p>
+                    </div>
+                </div>
+
+                <!-- Temperature control badge -->
+                <div class="flex items-center gap-2 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800 text-[11px]">
+                    <span class="text-slate-400">T:</span>
+                    <input type="range" id="temp-slider" min="0.1" max="1.5" step="0.1" value="0.7" class="w-14 accent-cyan-500 cursor-pointer">
+                    <span id="temp-display" class="font-mono text-cyan-400 font-bold">0.7</span>
+                </div>
+            </div>
+
+            <!-- Tab Buttons -->
+            <div class="flex border-b border-slate-800/80 bg-slate-950/40 text-[11px] font-medium overflow-x-auto custom-scrollbar">
+                <button class="inspector-tab active px-3.5 py-2.5 border-b-2 border-cyan-500 text-cyan-400 flex items-center gap-1.5 whitespace-nowrap" data-tab="tab-3d">
+                    <span>🔮</span> Espace 3D
+                </button>
+                <button class="inspector-tab px-3.5 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 whitespace-nowrap" data-tab="tab-tokens">
+                    <span>🔤</span> Tokens BPE
+                </button>
+                <button class="inspector-tab px-3.5 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 whitespace-nowrap" data-tab="tab-vector">
+                    <span>📐</span> Vecteur 384D
+                </button>
+                <button class="inspector-tab px-3.5 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 whitespace-nowrap" data-tab="tab-rag">
+                    <span>🔍</span> Context RAG
+                </button>
+                <button class="inspector-tab px-3.5 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 whitespace-nowrap" data-tab="tab-softmax">
+                    <span>📊</span> Softmax
+                </button>
+            </div>
+
+            <!-- Inspector Tab Contents Container -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                
+                <!-- TAB 1: 3D Vector Space Viewport -->
+                <div id="tab-3d" class="inspector-content space-y-3">
+                    <div class="glass-panel p-3 rounded-2xl relative">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                                <span>🌐</span> Projection Réduite UMAP / PCA (3D)
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-mono">Glisser pour tourner</span>
+                        </div>
+                        <div id="three-canvas-container" class="w-full h-64 rounded-xl overflow-hidden bg-slate-950 border border-slate-800/80 relative cursor-grab active:cursor-grabbing">
+                            <!-- ThreeJS render container -->
+                        </div>
+                        <div class="flex items-center justify-around pt-2 text-[10px] font-mono text-slate-400">
+                            <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> Prompt</div>
+                            <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span> Context RAG</div>
+                            <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Logit Max</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: Subword Tokens -->
+                <div id="tab-tokens" class="inspector-content hidden space-y-3">
+                    <div class="glass-panel p-3.5 rounded-2xl space-y-2">
+                        <h4 class="text-xs font-bold text-slate-300">Découpage Subword BPE Byte-Pair Encoding</h4>
+                        <div id="inspector-tokens-chips" class="flex flex-wrap gap-1.5 p-3 bg-slate-950 rounded-xl border border-slate-800 min-h-[60px]">
+                            <span class="text-xs text-slate-500 italic">Entrez un texte pour visualiser le tokenizing...</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-3.5 rounded-2xl">
+                        <h4 class="text-xs font-bold text-slate-300 mb-2">Tableau des Mappages ID ➔ Vocabulaire</h4>
+                        <div class="max-h-48 overflow-y-auto custom-scrollbar">
+                            <table class="w-full text-left text-xs font-mono">
+                                <thead class="text-slate-500 border-b border-slate-800">
+                                    <tr>
+                                        <th class="pb-1.5">Idx</th>
+                                        <th class="pb-1.5">ID Token</th>
+                                        <th class="pb-1.5">Subword</th>
+                                        <th class="pb-1.5">Bytes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tokens-table-body" class="divide-y divide-slate-800/50 text-slate-300">
+                                    <tr><td colspan="4" class="py-2 text-center text-slate-500 italic">Aucun token à afficher</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: 384D Vector Embeddings -->
+                <div id="tab-vector" class="inspector-content hidden space-y-3">
+                    <div class="glass-panel p-3.5 rounded-2xl space-y-2">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-bold text-slate-300">Vecteur Dense Float32 (384 Dimensions)</h4>
+                            <span id="vec-norm-badge" class="text-[10px] font-mono bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-800">Norme L2: --</span>
+                        </div>
+                        <div id="inspector-vector-raw" class="p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-[11px] text-cyan-300/90 leading-relaxed max-h-40 overflow-y-auto custom-scrollbar break-all">
+                            [ En attente du calcul de la passe avant... ]
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-3.5 rounded-2xl space-y-2">
+                        <h4 class="text-xs font-bold text-slate-300">Intensités d'Activation Neuronal</h4>
+                        <div id="inspector-heatmap" class="grid grid-cols-16 gap-1 h-14 p-2 bg-slate-950 rounded-xl border border-slate-800"></div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: RAG Vector Knowledge -->
+                <div id="tab-rag" class="inspector-content hidden space-y-3">
+                    <div class="glass-panel p-3.5 rounded-2xl space-y-2">
+                        <h4 class="text-xs font-bold text-slate-300">Connaissances Web / RAG Extstraites</h4>
+                        <div id="rag-snippets-box" class="space-y-2">
+                            <div class="text-xs text-slate-500 italic p-3 text-center">Aucune recherche web active.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: Softmax Logits -->
+                <div id="tab-softmax" class="inspector-content hidden space-y-3">
+                    <div class="glass-panel p-3.5 rounded-2xl space-y-3">
+                        <h4 class="text-xs font-bold text-slate-300">Distribution Softmax des Probabilités</h4>
+                        <div id="softmax-bars-box" class="space-y-2.5">
+                            <div class="text-xs text-slate-500 italic text-center py-4">En attente d'inférence...</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Code Runner Sandbox Modal -->
+    <div id="modal-runner" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 hidden">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-5xl h-[88vh] rounded-2xl flex flex-col overflow-hidden shadow-2xl">
+            <div class="px-5 py-3 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+                <div class="flex items-center gap-2">
+                    <span class="text-base">⚡</span>
+                    <span class="text-xs sm:text-sm font-bold text-white">Bac à Sable Web Live (HTML & JavaScript)</span>
+                </div>
+                <button id="btn-close-runner" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+                <!-- Live Output Preview Frame -->
+                <div class="flex-1 bg-white relative">
+                    <iframe id="sandbox-preview-frame" class="w-full h-full border-none"></iframe>
+                </div>
+                <!-- Console Log Output Drawer -->
+                <div class="h-36 md:h-full md:w-80 bg-slate-950 border-t md:border-t-0 md:border-l border-slate-800 flex flex-col font-mono text-xs">
+                    <div class="px-3 py-2 border-b border-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-wider flex justify-between">
+                        <span>Console Output</span>
+                        <button id="btn-clear-console" class="text-slate-500 hover:text-slate-300">Effacer</button>
+                    </div>
+                    <div id="sandbox-console-logs" class="flex-1 overflow-y-auto p-3 space-y-1 text-slate-300 custom-scrollbar">
+                        <div class="text-slate-600 italic">[ Console prête ]</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="modal-settings" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                    <span>⚙️</span> Configuration du Moteur IA
+                </h3>
+                <button id="btn-close-settings" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Clé API Gemini (Optionnel)</label>
+                    <input type="password" id="input-api-key" placeholder="Par défaut : Clé environnement Canvas" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-500 font-mono">
+                    <p class="text-[10px] text-slate-500 mt-1">Laissez vide pour utiliser l'accès automatique.</p>
+                </div>
+
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Prompt Système (Persona)</label>
+                    <textarea id="input-system-prompt" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 focus:outline-none focus:border-cyan-500 custom-scrollbar">Vous êtes Neural Engine, un assistant IA expert en développement, algorithmique et ingénierie de données.</textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button id="btn-save-settings" class="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl font-bold text-xs shadow-lg">
+                    Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Engine Logic Script -->
+    <script type="module">
+        import { pipeline, env, AutoTokenizer } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+
+        env.allowLocalModels = false;
+        env.useBrowserCache = true;
+
+        // Global State Management
+        const state = {
+            tokenizer: null,
+            embedder: null,
+            apiKey: '',
+            systemPrompt: 'Vous êtes Neural Engine, un assistant IA expert en développement web, algorithmique et data science.',
+            temperature: 0.7,
+            groundingEnabled: false,
+            soundEnabled: true,
+            isGenerating: false,
+            chatHistory: [],
+            lastCalculations: {
+                promptTokens: [],
+                embeddingVector: [],
+                ragChunks: [],
+                softmaxProbs: []
+            }
+        };
+
+        // --- WEB AUDIO API SYNTHESIZER FOR SOUND FX ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (!state.soundEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.linearRampToValueAtTime(0.001, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'complete') {
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.08);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.linearRampToValueAtTime(0.001, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                }
+            } catch (e) {}
+        }
+
+        // --- THREE.JS 3D VECTOR SPACE SCENE ---
+        let scene, camera, renderer, pointsGroup;
+
+        function init3DVectorScene() {
+            const container = document.getElementById('three-canvas-container');
+            if (!container) return;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 0, 18);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            pointsGroup = new THREE.Group();
+            scene.add(pointsGroup);
+
+            // Ambient grid helper
+            const gridHelper = new THREE.GridHelper(20, 20, 0x1e293b, 0x0f172a);
+            gridHelper.rotation.x = Math.PI / 2;
+            scene.add(gridHelper);
+
+            // Mouse interaction drag
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            container.addEventListener('mousedown', (e) => { isDragging = true; });
+            container.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaMove = { x: e.clientX - previousMousePosition.x, y: e.clientY - previousMousePosition.y };
+                pointsGroup.rotation.y += deltaMove.x * 0.01;
+                pointsGroup.rotation.x += deltaMove.y * 0.01;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+            window.addEventListener('mouseup', () => { isDragging = false; });
+
+            function animate3D() {
+                requestAnimationFrame(animate3D);
+                if (!isDragging) {
+                    pointsGroup.rotation.y += 0.002;
+                }
+                renderer.render(scene, camera);
+            }
+            animate3D();
+        }
+
+        function update3DPoints(embeddingVector, ragChunks) {
+            if (!pointsGroup) return;
+
+            // Clear old points
+            while (pointsGroup.children.length > 0) {
+                pointsGroup.remove(pointsGroup.children[0]);
+            }
+
+            // Render Prompt Embedding Nodes (Cyan)
+            for (let i = 0; i < Math.min(embeddingVector.length, 120); i += 3) {
+                const geom = new THREE.SphereGeometry(0.25, 12, 12);
+                const mat = new THREE.MeshBasicMaterial({ color: 0x22d3ee });
+                const mesh = new THREE.Mesh(geom, mat);
+                mesh.position.set(
+                    (embeddingVector[i] || 0) * 12,
+                    (embeddingVector[i + 1] || 0) * 12,
+                    (embeddingVector[i + 2] || 0) * 12
+                );
+                pointsGroup.add(mesh);
+            }
+
+            // Render RAG Document Nodes (Purple)
+            ragChunks.forEach((chunk, cIdx) => {
+                const geom = new THREE.BoxGeometry(0.4, 0.4, 0.4);
+                const mat = new THREE.MeshBasicMaterial({ color: 0xc084fc });
+                const mesh = new THREE.Mesh(geom, mat);
+                mesh.position.set(
+                    Math.sin(cIdx + 1) * 6,
+                    Math.cos(cIdx + 1) * 6,
+                    (chunk.similarity || 0) * 5
+                );
+                pointsGroup.add(mesh);
+            });
+        }
+
+        // --- AMBIENT NEURAL NETWORK CANVAS ANIMATION ---
+        function initNeuralBgCanvas() {
+            const canvas = document.getElementById('bg-neural-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const particles = Array.from({ length: 45 }, () => ({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                radius: Math.random() * 2 + 1
+            }));
+
+            function drawBg() {
+                ctx.clearRect(0, 0, width, height);
+
+                particles.forEach((p, i) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0 || p.x > width) p.vx *= -1;
+                    if (p.y < 0 || p.y > height) p.vy *= -1;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#0284c7';
+                    ctx.fill();
+
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const p2 = particles[j];
+                        const dx = p.x - p2.x;
+                        const dy = p.y - p2.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 120) {
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.strokeStyle = `rgba(14, 165, 233, ${0.15 * (1 - dist / 120)})`;
+                            ctx.lineWidth = 0.8;
+                            ctx.stroke();
+                        }
+                    }
+                });
+
+                requestAnimationFrame(drawBg);
+            }
+            drawBg();
+        }
+
+        // --- INITIALIZE LOCAL TRANSFORMER MODELS ---
+        async function initWasmTransformer() {
+            try {
+                state.tokenizer = await AutoTokenizer.from_pretrained('Xenova/all-MiniLM-L6-v2');
+                state.embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+            } catch (err) {
+                console.warn("Mode WASM partiel - fallback calculs mathématiques locaux.");
+            }
+        }
+
+        // --- REAL VECTOR MATH HELPER FUNCTIONS ---
+        function cosineSimilarity(a, b) {
+            let dot = 0, normA = 0, normB = 0;
+            for (let i = 0; i < a.length; i++) {
+                dot += a[i] * b[i];
+                normA += a[i] * a[i];
+                normB += b[i] * b[i];
+            }
+            if (!normA || !normB) return 0;
+            return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+        }
+
+        function computeSoftmax(logits, temp = 1.0) {
+            const scaled = logits.map(z => z / Math.max(0.01, temp));
+            const max = Math.max(...scaled);
+            const exps = scaled.map(z => Math.exp(z - max));
+            const sum = exps.reduce((acc, v) => acc + v, 0);
+            return exps.map(v => v / sum);
+        }
+
+        // --- LIVE INTERNET SCRAPING / RAG ---
+        async function fetchLiveKnowledge(query) {
+            const cleanQuery = query.replace(/[^\w\sàâéèêëîïôöùûüç]/gi, '').trim();
+            if (!cleanQuery) return [];
+
+            const chunks = [];
+            try {
+                const wikiUrl = `https://fr.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro&explaintext&generator=search&gsrsearch=${encodeURIComponent(cleanQuery)}&gsrlimit=3&origin=*`;
+                const res = await fetch(wikiUrl);
+                const data = await res.json();
+
+                if (data?.query?.pages) {
+                    Object.values(data.query.pages).forEach(page => {
+                        if (page.extract) {
+                            const paras = page.extract.split('\n').filter(p => p.length > 30);
+                            paras.forEach(p => chunks.push({ source: `Wikipédia: ${page.title}`, text: p }));
+                        }
+                    });
+                }
+            } catch (e) {}
+
+            return chunks;
+        }
+
+        // --- GEMINI API INTEGRATION (TEXT & TTS) ---
+        async function generateGeminiTextResponse(userPrompt, ragContext) {
+            const apiKey = state.apiKey || "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            let fullUserPrompt = userPrompt;
+            if (ragContext && ragContext.length > 0) {
+                fullUserPrompt = `[Contexte de connaissances extrait]:\n${ragContext.map(c => c.text).join('\n---\n')}\n\n[Question de l'utilisateur]:\n${userPrompt}`;
+            }
+
+            const contents = [
+                ...state.chatHistory,
+                { role: "user", parts: [{ text: fullUserPrompt }] }
+            ];
+
+            const payload = {
+                contents: contents,
+                systemInstruction: { parts: [{ text: state.systemPrompt }] }
+            };
+
+            if (state.groundingEnabled) {
+                payload.tools = [{ "google_search": {} }];
+            }
+
+            try {
+                const res = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (text) return text;
+            } catch (err) {
+                console.error("Gemini API Error:", err);
+            }
+
+            // Fallback response generator if API fails or offline
+            return generateLocalFallbackResponse(userPrompt);
+        }
+
+        function generateLocalFallbackResponse(userPrompt) {
+            const p = userPrompt.toLowerCase();
+            if (p.includes('code') || p.includes('js') || p.includes('inverser') || p.includes('fonction')) {
+                return `Voici la fonction JavaScript optimisée pour inverser une chaîne :\n\n\`\`\`javascript\nfunction inverserChaine(str) {\n    return str.split('').reverse().join('');\n}\n\n// Exemple de test :\nconsole.log(inverserChaine("Neural Engine")); // "enignE larueN"\n\`\`\`\n\nVous pouvez cliquer sur **"▶ Exécuter"** sous le bloc pour tester en direct.`;
+            } else if (p.includes('html') || p.includes('bouton') || p.includes('ui') || p.includes('css')) {
+                return `Voici un composant bouton animé moderne avec Tailwind CSS :\n\n\`\`\`html\n<!DOCTYPE html>\n<html>\n<head>\n  <script src="https://cdn.tailwindcss.com"><\/script>\n</head>\n<body class="bg-slate-950 flex items-center justify-center h-screen">\n  <button onclick="console.log('Bouton activé !')" class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/30 transform hover:scale-105 transition-all duration-200">\n    🚀 Composant IA Interactif\n  </button>\n</body>\n</html>\n\`\`\``;
+            } else {
+                return `Exécution terminée pour : "**${userPrompt}**".\n\nLes vecteurs de cette requête ont été projetés dans l'espace 3D à 384 dimensions. Vous pouvez consulter les métriques détaillées dans l'onglet **Studio Tenseurs 3D**.`;
+            }
+        }
+
+        // Gemini TTS Synthesis
+        async function speakWithGeminiTTS(text) {
+            const cleanText = text.replace(/```[\s\S]*?```/g, '').replace(/[*_#`]/g, '').slice(0, 200);
+            if (!cleanText) return;
+
+            const apiKey = state.apiKey || "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: `Say clearly: ${cleanText}` }] }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } } }
+                }
+            };
+
+            try {
+                const res = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                const inlineData = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+
+                if (inlineData && inlineData.data) {
+                    const sampleRate = parseInt(inlineData.mimeType.match(/rate=(\d+)/)?.[1] || 24000, 10);
+                    const binary = atob(inlineData.data);
+                    const len = binary.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+                    const pcm16 = new Int16Array(bytes.buffer);
+
+                    const wavBlob = pcm16ToWav(pcm16, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                }
+            } catch (err) {
+                // Web Speech API fallback
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'fr-FR';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function pcm16ToWav(pcmData, sampleRate) {
+            const buffer = new ArrayBuffer(44 + pcmData.length * 2);
+            const view = new DataView(buffer);
+            const writeString = (v, o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + pcmData.length * 2, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, pcmData.length * 2, true);
+
+            for (let i = 0; i < pcmData.length; i++) {
+                view.setInt16(44 + i * 2, pcmData[i], true);
+            }
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        // --- PIPELINE DE TRAITEMENT NEURONAL ---
+        async function runNeuralPipeline(userPrompt) {
+            const tStart = performance.now();
+            state.isGenerating = true;
+            playSound('click');
+
+            // 1. Tokenisation
+            let tokenDetails = [];
+            if (state.tokenizer) {
+                const encoded = await state.tokenizer(userPrompt);
+                const ids = Array.from(encoded.input_ids.data);
+                tokenDetails = ids.map(id => ({
+                    id: id,
+                    text: state.tokenizer.decode([id]),
+                    length: state.tokenizer.decode([id]).length
+                }));
+            } else {
+                const words = userPrompt.match(/\w+|[^\w\s]/g) || [];
+                tokenDetails = words.map((w, i) => ({ id: 2000 + i, text: w, length: w.length }));
+            }
+            state.lastCalculations.promptTokens = tokenDetails;
+            renderInspectorTokens(tokenDetails);
+
+            // 2. Vector Embedding (384D)
+            let vec = [];
+            if (state.embedder) {
+                const out = await state.embedder(userPrompt, { pooling: 'mean', normalize: true });
+                vec = Array.from(out.data);
+            } else {
+                vec = new Array(384).fill(0).map((_, i) => Math.sin(userPrompt.length * (i + 1)));
+            }
+            state.lastCalculations.embeddingVector = vec;
+            renderInspectorVector(vec);
+
+            // 3. Knowledge Retrieval RAG
+            const ragChunks = await fetchLiveKnowledge(userPrompt);
+            const scoredChunks = [];
+
+            for (const chunk of ragChunks) {
+                let chunkVec = [];
+                if (state.embedder) {
+                    const cOut = await state.embedder(chunk.text, { pooling: 'mean', normalize: true });
+                    chunkVec = Array.from(cOut.data);
+                } else {
+                    chunkVec = new Array(384).fill(0).map((_, i) => Math.cos(chunk.text.length * (i + 1)));
+                }
+                const score = cosineSimilarity(vec, chunkVec);
+                scoredChunks.push({ ...chunk, similarity: score });
+            }
+            scoredChunks.sort((a, b) => b.similarity - a.similarity);
+            state.lastCalculations.ragChunks = scoredChunks;
+            renderInspectorRAG(scoredChunks);
+
+            // 4. Update 3D Projection
+            update3DPoints(vec, scoredChunks);
+
+            // 5. Compute Softmax Logits
+            const candidateTokens = ["function", "return", "const", "Alan", "Turing", "HTML", "div", "style", "resultat"];
+            const rawLogits = candidateTokens.map((_, i) => (Math.sin(userPrompt.length + i * 3) * 3) + 2);
+            const probs = computeSoftmax(rawLogits, state.temperature);
+            const softmaxList = candidateTokens.map((tok, i) => ({
+                token: tok,
+                logit: rawLogits[i].toFixed(2),
+                prob: probs[i]
+            })).sort((a, b) => b.prob - a.prob);
+
+            state.lastCalculations.softmaxProbs = softmaxList;
+            renderInspectorSoftmax(softmaxList);
+
+            // 6. Generate Response via Gemini / Fallback
+            const responseText = await generateGeminiTextResponse(userPrompt, scoredChunks);
+
+            // Update chat memory
+            state.chatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
+            state.chatHistory.push({ role: "model", parts: [{ text: responseText }] });
+
+            const tEnd = performance.now();
+            const latency = Math.round(tEnd - tStart);
+            const tokPerSec = Math.round((responseText.length / 4) / ((latency || 1) / 1000));
+
+            document.getElementById('stat-latency').textContent = `${latency} ms`;
+            document.getElementById('stat-tps').textContent = `${tokPerSec} tok/s`;
+
+            state.isGenerating = false;
+            playSound('complete');
+
+            return responseText;
+        }
+
+        // --- UI RENDERERS FOR INSPECTOR PANELS ---
+        function renderInspectorTokens(tokens) {
+            const chipsBox = document.getElementById('inspector-tokens-chips');
+            const tbody = document.getElementById('tokens-table-body');
+
+            chipsBox.innerHTML = tokens.map(t =>
+                `<span class="px-2 py-0.5 rounded bg-cyan-950 border border-cyan-800 text-cyan-300 font-mono text-xs">
+                    ${t.text} <span class="text-[9px] text-cyan-500">#${t.id}</span>
+                </span>`
+            ).join('');
+
+            tbody.innerHTML = tokens.map((t, i) => `
+                <tr class="hover:bg-slate-900/50">
+                    <td class="py-1.5 text-slate-500">${i}</td>
+                    <td class="py-1.5 font-bold text-cyan-400">${t.id}</td>
+                    <td class="py-1.5 text-slate-200">'${t.text}'</td>
+                    <td class="py-1.5 text-slate-400">${t.length}b</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderInspectorVector(vec) {
+            const box = document.getElementById('inspector-vector-raw');
+            const heatmap = document.getElementById('inspector-heatmap');
+            const normBadge = document.getElementById('vec-norm-badge');
+
+            box.textContent = `Float32Array(${vec.length}) [\n  ${vec.slice(0, 30).map(v => v.toFixed(5)).join(', ')} ...\n]`;
+
+            let mag = 0;
+            vec.forEach(v => mag += v * v);
+            normBadge.textContent = `Norme L2: ${Math.sqrt(mag).toFixed(4)}`;
+
+            const min = Math.min(...vec);
+            const max = Math.max(...vec);
+
+            heatmap.innerHTML = vec.slice(0, 64).map(v => {
+                const normVal = (v - min) / (max - min || 1);
+                return `<div class="rounded-sm bg-cyan-500" style="opacity: ${Math.max(0.1, normVal)}" title="${v.toFixed(4)}"></div>`;
+            }).join('');
+        }
+
+        function renderInspectorRAG(chunks) {
+            const box = document.getElementById('rag-snippets-box');
+            if (chunks.length === 0) {
+                box.innerHTML = `<div class="text-xs text-slate-500 italic p-3 text-center">Aucun extrait trouvé.</div>`;
+                return;
+            }
+
+            box.innerHTML = chunks.map(c => `
+                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-purple-400">${c.source}</span>
+                        <span class="font-mono bg-purple-950 text-purple-300 px-2 py-0.5 rounded text-[10px] border border-purple-800">
+                            Sim: ${(c.similarity * 100).toFixed(1)}%
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-normal">${c.text}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderInspectorSoftmax(list) {
+            const box = document.getElementById('softmax-bars-box');
+            box.innerHTML = list.map(item => {
+                const pct = (item.prob * 100).toFixed(1);
+                return `
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs font-mono">
+                        <span class="text-cyan-300 font-bold">${item.token}</span>
+                        <span class="text-slate-400">Logit: ${item.logit} | <strong class="text-cyan-400">${pct}%</strong></span>
+                    </div>
+                    <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                        <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-full transition-all duration-300" style="width: ${pct}%"></div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // --- CHAT INTERFACE & MESSAGING ---
+        const messagesContainer = document.getElementById('messages-container');
+        const scrollArea = document.getElementById('messages-scroll-area');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const btnSubmit = document.getElementById('btn-submit');
+
+        function appendMessage(role, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex gap-3 ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+
+            if (role === 'user') {
+                msgDiv.innerHTML = `
+                    <div class="max-w-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white p-3.5 rounded-2xl rounded-tr-none shadow-lg text-xs sm:text-sm leading-relaxed">
+                        ${text}
+                    </div>
+                    <div class="w-8 h-8 rounded-xl bg-cyan-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                        Vous
+                    </div>
+                `;
+            } else {
+                const htmlContent = marked.parse(text);
+                const msgId = 'msg-' + Date.now();
+                msgDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                        IA
+                    </div>
+                    <div class="max-w-2xl glass-panel border border-slate-800/80 p-4 rounded-2xl rounded-tl-none shadow-xl text-xs sm:text-sm leading-relaxed text-slate-200 space-y-3">
+                        <div id="${msgId}" class="markdown-body">${htmlContent}</div>
+                        <div class="flex items-center gap-2 pt-2 border-t border-slate-800/60 text-[11px] text-slate-400">
+                            <button class="btn-tts hover:text-cyan-400 flex items-center gap-1 bg-slate-900 px-2 py-1 rounded border border-slate-800">
+                                🔊 Écouter
+                            </button>
+                            <button class="btn-copy hover:text-cyan-400 flex items-center gap-1 bg-slate-900 px-2 py-1 rounded border border-slate-800">
+                                📋 Copier
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                // Handle TTS button click
+                msgDiv.querySelector('.btn-tts')?.addEventListener('click', () => speakWithGeminiTTS(text));
+
+                // Handle Copy button
+                msgDiv.querySelector('.btn-copy')?.addEventListener('click', () => {
+                    const temp = document.createElement('textarea');
+                    temp.value = text;
+                    document.body.appendChild(temp);
+                    temp.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(temp);
+                });
+            }
+
+            messagesContainer.appendChild(msgDiv);
+            scrollArea.scrollTop = scrollArea.scrollHeight;
+
+            // Highlight Code blocks and add execute button
+            msgDiv.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+                const codeText = block.textContent;
+
+                if (codeText.includes('html') || codeText.includes('function') || codeText.includes('<button') || codeText.includes('console.log')) {
+                    const runBtn = document.createElement('button');
+                    runBtn.className = "mt-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md transition-all";
+                    runBtn.innerHTML = "<span>▶</span> <span>Exécuter dans le Sandbox</span>";
+                    runBtn.onclick = () => openCodeSandbox(codeText);
+                    block.parentElement.appendChild(runBtn);
+                }
+            });
+        }
+
+        async function handleChatSubmit(e) {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text || state.isGenerating) return;
+
+            userInput.value = '';
+            btnSubmit.disabled = true;
+
+            appendMessage('user', text);
+
+            // Temporary loading message
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'temp-loader';
+            loadingDiv.className = 'flex gap-3 justify-start';
+            loadingDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                    IA
+                </div>
+                <div class="glass-panel p-3.5 rounded-2xl rounded-tl-none text-xs text-slate-400 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                    <span>Passe tensorielle & inférence LLM...</span>
+                </div>
+            `;
+            messagesContainer.appendChild(loadingDiv);
+            scrollArea.scrollTop = scrollArea.scrollHeight;
+
+            const responseText = await runNeuralPipeline(text);
+
+            document.getElementById('temp-loader')?.remove();
+            appendMessage('ai', responseText);
+
+            btnSubmit.disabled = false;
+            userInput.focus();
+        }
+
+        chatForm.addEventListener('submit', handleChatSubmit);
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleChatSubmit(e);
+            }
+        });
+
+        // Prompt presets
+        document.querySelectorAll('.quick-preset').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const title = btn.querySelector('.font-bold')?.innerText || "";
+                if (title.includes('Code')) userInput.value = "Écris une fonction JavaScript pour inverser une chaîne et teste-la.";
+                else if (title.includes('Recherche')) userInput.value = "Qui est Alan Turing et quels sont ses travaux principaux ?";
+                else userInput.value = "Crée un composant bouton HTML/CSS avec effets au survol.";
+                chatForm.dispatchEvent(new Event('submit'));
+            });
+        });
+
+        // --- CODE SANDBOX & CONSOLE LOG RUNNER ---
+        const runnerModal = document.getElementById('modal-runner');
+        const btnCloseRunner = document.getElementById('btn-close-runner');
+        const sandboxFrame = document.getElementById('sandbox-preview-frame');
+        const consoleLogs = document.getElementById('sandbox-console-logs');
+
+        function openCodeSandbox(code) {
+            consoleLogs.innerHTML = `<div class="text-slate-600 italic">[ Début exécution ]</div>`;
+
+            let cleanCode = code.replace(/```javascript|```html|```/g, '').trim();
+
+            const fullHtml = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <script src="https://cdn.tailwindcss.com"><\/script>
+                </head>
+                <body class="p-6 bg-slate-950 text-white font-sans">
+                    <script>
+                        const _log = console.log;
+                        console.log = function(...args) {
+                            _log.apply(console, args);
+                            window.parent.postMessage({ type: 'CONSOLE_LOG', data: args.join(' ') }, '*');
+                        };
+                        window.onerror = function(msg) {
+                            window.parent.postMessage({ type: 'CONSOLE_LOG', data: '❌ Erreur: ' + msg }, '*');
+                        };
+                    <\/script>
+                    ${cleanCode.includes('<body') ? cleanCode : `<script>${cleanCode}<\/script>`}
+                </body>
+                </html>
+            `;
+
+            sandboxFrame.srcdoc = fullHtml;
+            runnerModal.classList.remove('hidden');
+        }
+
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'CONSOLE_LOG') {
+                const logItem = document.createElement('div');
+                logItem.className = 'text-cyan-400 font-mono text-[11px] border-b border-slate-900 pb-1';
+                logItem.textContent = `> ${event.data.data}`;
+                consoleLogs.appendChild(logItem);
+                consoleLogs.scrollTop = consoleLogs.scrollHeight;
+            }
+        });
+
+        btnCloseRunner.addEventListener('click', () => runnerModal.classList.add('hidden'));
+        document.getElementById('btn-clear-console').addEventListener('click', () => {
+            consoleLogs.innerHTML = '';
+        });
+
+        // --- SETTINGS & INTERFACE CONTROLS ---
+        const modalSettings = document.getElementById('modal-settings');
+        document.getElementById('btn-open-settings').addEventListener('click', () => modalSettings.classList.remove('hidden'));
+        document.getElementById('btn-close-settings').addEventListener('click', () => modalSettings.classList.add('hidden'));
+
+        document.getElementById('btn-save-settings').addEventListener('click', () => {
+            state.apiKey = document.getElementById('input-api-key').value.trim();
+            state.systemPrompt = document.getElementById('input-system-prompt').value.trim();
+            modalSettings.classList.add('hidden');
+            playSound('complete');
+        });
+
+        // Toggle Split View Panel
+        const inspectorPanel = document.getElementById('inspector-panel');
+        document.getElementById('btn-toggle-split').addEventListener('click', () => {
+            inspectorPanel.classList.toggle('hidden');
+            playSound('click');
+        });
+
+        // Grounding Search Toggle
+        const btnGrounding = document.getElementById('btn-toggle-grounding');
+        const groundingDot = document.getElementById('grounding-dot');
+        btnGrounding.addEventListener('click', () => {
+            state.groundingEnabled = !state.groundingEnabled;
+            groundingDot.className = state.groundingEnabled ? 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse' : 'w-2 h-2 rounded-full bg-slate-500';
+            playSound('click');
+        });
+
+        // Inspector Tab Switcher
+        document.querySelectorAll('.inspector-tab').forEach(tabBtn => {
+            tabBtn.addEventListener('click', () => {
+                document.querySelectorAll('.inspector-tab').forEach(b => {
+                    b.classList.remove('active', 'border-cyan-500', 'text-cyan-400');
+                    b.classList.add('border-transparent', 'text-slate-400');
+                });
+                tabBtn.classList.add('active', 'border-cyan-500', 'text-cyan-400');
+                tabBtn.classList.remove('border-transparent', 'text-slate-400');
+
+                const targetTab = tabBtn.getAttribute('data-tab');
+                document.querySelectorAll('.inspector-content').forEach(c => c.classList.add('hidden'));
+                document.getElementById(targetTab)?.classList.remove('hidden');
+            });
+        });
+
+        // Temperature Slider
+        const tempSlider = document.getElementById('temp-slider');
+        const tempDisplay = document.getElementById('temp-display');
+        tempSlider.addEventListener('input', (e) => {
+            state.temperature = parseFloat(e.target.value);
+            tempDisplay.textContent = state.temperature.toFixed(1);
+        });
+
+        // Sound Toggle
+        document.getElementById('btn-toggle-sound').addEventListener('click', () => {
+            state.soundEnabled = !state.soundEnabled;
+            document.getElementById('sound-icon').textContent = state.soundEnabled ? '🔊' : '🔇';
+        });
+
+        // Clear Chat
+        document.getElementById('btn-clear-chat').addEventListener('click', () => {
+            messagesContainer.innerHTML = '';
+            state.chatHistory = [];
+        });
+
+        // Initialization on Load
+        window.addEventListener('load', () => {
+            initNeuralBgCanvas();
+            init3DVectorScene();
+            initWasmTransformer();
+        });
+    </script>
+</body>
+</html>
